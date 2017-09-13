@@ -62,8 +62,8 @@ namespace C_diff_Records_Test_App
                 Bin b = new Bin("Global", data);
                 List<Bin> bins = new List<Bin>();
                 
-                b = StratificationAnalysis.FilterByTestType(b, TestType.Surveillance_Test);
-                Bin[] unitBins = StratificationAnalysis.StratifyOnUnits(b);
+                b = DataFilter.FilterByTestType(b, TestType.Surveillance_Test);
+                Bin[] unitBins = DataFilter.StratifyOnUnits(b);
                 bins.Add(b);
                 bins.AddRange(unitBins);
 
@@ -106,16 +106,16 @@ namespace C_diff_Records_Test_App
             }
         }
 
-        private List<DataPointAdmission> GetAdmissionsFromBins(Bin[] bins)
+        private List<Admission> GetAdmissionsFromBins(Bin[] bins)
         {
 
-            List<DataPointAdmission> dpa = new List<DataPointAdmission>();
+            List<Admission> dpa = new List<Admission>();
 
             foreach(Bin b in bins)
             {
                 foreach(string key in b.DataByPatientAdmissionTable.Keys)
                 {
-                    foreach(DataPointAdmission dp in b.DataByPatientAdmissionTable[key])
+                    foreach(Admission dp in b.DataByPatientAdmissionTable[key])
                     {
                         dpa.Add(dp);
                     }
@@ -133,33 +133,33 @@ namespace C_diff_Records_Test_App
             }
             
         }
-        private int CountPositiveOnAdmissions(List<DataPointAdmission> dpa, int window)
+        private int CountPositiveOnAdmissions(List<Admission> dpa, int window)
         {
             int ct = 0;
 
             for (int i = 0; i < dpa.Count; i++)
             {
-                if (dpa[i].points[0].CdiffResult ==TestResult.Positive && (dpa[i].points[0].SampleDate - dpa[i].admissionDate).Days <= window)
+                if (dpa[i].Points[0].CdiffResult ==TestResult.Positive && (dpa[i].Points[0].SampleDate - dpa[i].AdmissionDate).Days <= window)
                     ct++;
             }
             return ct;
         }
 
-        private int CountPositiveWithNoAdmissionSample(List<DataPointAdmission> dpa, int window)
+        private int CountPositiveWithNoAdmissionSample(List<Admission> dpa, int window)
         {
             int ct = 0;
 
-            foreach (DataPointAdmission dp in dpa)
+            foreach (Admission dp in dpa)
             {
-                if (dp.points[0].CdiffResult == TestResult.Positive && (dp.points[0].SampleDate - dp.admissionDate).Days > window)
+                if (dp.Points[0].CdiffResult == TestResult.Positive && (dp.Points[0].SampleDate - dp.AdmissionDate).Days > window)
                     ct++;
                 else
                 {
-                    if(dp.points.Count > 1 && (dp.points[0].SampleDate - dp.admissionDate).Days > window)
+                    if(dp.Points.Count > 1 && (dp.Points[0].SampleDate - dp.AdmissionDate).Days > window)
                     {
-                        for(int i =1; i < dp.points.Count; i++)
+                        for(int i =1; i < dp.Points.Count; i++)
                         {
-                            if (dp.points[i].CdiffResult ==TestResult.Positive)
+                            if (dp.Points[i].CdiffResult ==TestResult.Positive)
                                 ct++;
                         }
                     }

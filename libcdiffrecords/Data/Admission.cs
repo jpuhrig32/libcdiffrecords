@@ -6,21 +6,30 @@ using System.Threading.Tasks;
 
 namespace libcdiffrecords.Data
 {
-    public class DataPointAdmission
+    public class Admission
     {
-        public int admissionWindow = 3;
-        public DateTime admissionDate;
-        public string MRN;
-        public List<DataPoint> points = new List<DataPoint>();
+        public int AdmissionWindow { get; set; }
+        public DateTime AdmissionDate { get; set; }
+        private string mrn;
+        public string MRN { get => mrn; set => mrn.PadLeft(8, '0'); }
+        public List<DataPoint> Points { get; set; }
 
+
+        public Admission()
+        {
+            AdmissionWindow = 3;
+            AdmissionDate = DateTime.MaxValue;
+            MRN = "00000000";
+            Points = new List<DataPoint>();
+        }
         public AdmissionStatus AdmissionStatus
         {
             get
             {
-                if(points.Count > 0)
+                if(Points.Count > 0)
                 {
-                    bool admitSamplePresent = ((points[0].SampleDate - admissionDate).Days <= admissionWindow);
-                    if (points[0].CdiffResult == TestResult.Positive)
+                    bool admitSamplePresent = ((Points[0].SampleDate - AdmissionDate).Days <= AdmissionWindow);
+                    if (Points[0].CdiffResult == TestResult.Positive)
                     {
                         if (admitSamplePresent)
                             return AdmissionStatus.PositiveOnAdmission;
@@ -30,9 +39,9 @@ namespace libcdiffrecords.Data
                     else
                     {
                         
-                        for(int i = 0; i < points.Count; i++)
+                        for(int i = 0; i < Points.Count; i++)
                         {
-                            if(points[i].CdiffResult == TestResult.Positive)
+                            if(Points[i].CdiffResult == TestResult.Positive)
                             {
                                 if (admitSamplePresent)
                                     return AdmissionStatus.NegativeOnAdmission_TurnedPositive;
@@ -57,32 +66,32 @@ namespace libcdiffrecords.Data
 
         public void SortData()
         {
-            points.Sort((x, y) => x.SampleDate.CompareTo(y.SampleDate));
+            Points.Sort((x, y) => x.SampleDate.CompareTo(y.SampleDate));
         }
 
-        public static DataPointAdmission MergeAdmissions(DataPointAdmission[] dpas)
+        public static Admission MergeAdmissions(Admission[] dpas)
         {
-            DataPointAdmission ret = new DataPointAdmission();
-            List<DataPointAdmission> data = new List<DataPointAdmission>();
+            Admission ret = new Admission();
+            List<Admission> data = new List<Admission>();
             data.AddRange(dpas);
 
-            data.Sort((x, y) => x.admissionDate.CompareTo(y.admissionDate));
+            data.Sort((x, y) => x.AdmissionDate.CompareTo(y.AdmissionDate));
             dpas = data.ToArray();
 
             for (int i = 0; i < dpas.Length; i++)
             {
-                for (int j = 0; j < dpas[i].points.Count; j++)
+                for (int j = 0; j < dpas[i].Points.Count; j++)
                 {
                     DataPoint temp = new DataPoint();
-                    temp = dpas[i].points[j];
-                    temp.AdmissionDate = dpas[0].admissionDate;
-                    temp.Unit = dpas[0].points[0].Unit;
+                    temp = dpas[i].Points[j];
+                    temp.AdmissionDate = dpas[0].AdmissionDate;
+                    temp.Unit = dpas[0].Points[0].Unit;
 
-                    ret.points.Add(temp);
+                    ret.Points.Add(temp);
                 }
             }
             ret.MRN = dpas[0].MRN;
-            ret.admissionDate = dpas[0].admissionDate;
+            ret.AdmissionDate = dpas[0].AdmissionDate;
             ret.unit = dpas[0].unit;
             ret.SortData();
 

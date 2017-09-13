@@ -19,9 +19,9 @@ namespace libcdiffrecords
 
           
 
-            Bin[] negOnAdm = StratificationAnalysis.StratifyOnUnitsAndAdmissionType(surv, AdmissionStatus.NegativeOnAdmission);
-            Bin[] posOnAdm = StratificationAnalysis.StratifyOnUnitsAndAdmissionType(surv, AdmissionStatus.PositiveAdmission);
-            Bin[] indAdm = StratificationAnalysis.StratifyOnUnitsAndAdmissionType(surv, AdmissionStatus.IndeterminateAdmission);
+            Bin[] negOnAdm = DataFilter.StratifyOnUnitsAndAdmissionType(surv, AdmissionStatus.NegativeOnAdmission);
+            Bin[] posOnAdm = DataFilter.StratifyOnUnitsAndAdmissionType(surv, AdmissionStatus.PositiveAdmission);
+            Bin[] indAdm = DataFilter.StratifyOnUnitsAndAdmissionType(surv, AdmissionStatus.IndeterminateAdmission);
 
 
             Dictionary<string, NAATAnalysisUnitReport> reportsByUnit = new Dictionary<string, NAATAnalysisUnitReport>();
@@ -46,11 +46,11 @@ namespace libcdiffrecords
                     
                     if(naatTable.ContainsKey(key)) //We don't care if the patient isn't even in the NAAT table
                     {
-                        foreach (DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+                        foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                         {
                             foreach(DataPoint dp in naatTable[key])
                             {
-                                if((dpa.admissionDate <= dp.SampleDate) && (dp.SampleDate - dpa.admissionDate).Days <= naatDistance) //We've found a matching NAAT nearby
+                                if((dpa.AdmissionDate <= dp.SampleDate) && (dp.SampleDate - dpa.AdmissionDate).Days <= naatDistance) //We've found a matching NAAT nearby
                                 {
                                     if(dp.CdiffResult == TestResult.Positive)
                                     {
@@ -108,11 +108,11 @@ namespace libcdiffrecords
                 {
                     if (naatTable.ContainsKey(key)) //We don't care if the patient isn't even in the NAAT table
                     {
-                        foreach (DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+                        foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                         {
                             foreach (DataPoint dp in naatTable[key])
                             {
-                                if ((dpa.admissionDate <= dp.SampleDate) && (dp.SampleDate - dpa.admissionDate).Days <= naatDistance) //We've found a matching NAAT nearby
+                                if ((dpa.AdmissionDate <= dp.SampleDate) && (dp.SampleDate - dpa.AdmissionDate).Days <= naatDistance) //We've found a matching NAAT nearby
                                 {
                                     if (dp.CdiffResult == TestResult.Positive)
                                     {
@@ -170,11 +170,11 @@ namespace libcdiffrecords
                 {
                     if (naatTable.ContainsKey(key)) //We don't care if the patient isn't even in the NAAT table
                     {
-                        foreach (DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+                        foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                         {
                             foreach (DataPoint dp in naatTable[key])
                             {
-                                if ((dpa.admissionDate <= dp.SampleDate) && (dp.SampleDate - dpa.admissionDate).Days <= naatDistance) //We've found a matching NAAT nearby
+                                if ((dpa.AdmissionDate <= dp.SampleDate) && (dp.SampleDate - dpa.AdmissionDate).Days <= naatDistance) //We've found a matching NAAT nearby
                                 {
                                     if (dp.CdiffResult == TestResult.Positive)
                                     {

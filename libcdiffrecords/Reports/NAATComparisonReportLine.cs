@@ -134,24 +134,24 @@ namespace libcdiffrecords.Reports
                 if (!ignoreIndeterminates)
                 {
                     splitBins = new Bin[3];
-                    splitBins[2] = StratificationAnalysis.FilterByAdmissionType(unitSurvBin, AdmissionStatus.IndeterminateAdmission);
+                    splitBins[2] = DataFilter.FilterByAdmissionType(unitSurvBin, AdmissionStatus.IndeterminateAdmission);
                 }
                 else
                 {
                     splitBins = new Bin[2];
                 }
 
-                splitBins[0] = StratificationAnalysis.FilterByAdmissionType(unitSurvBin, AdmissionStatus.NegativeOnAdmission);
-                splitBins[1] = StratificationAnalysis.FilterByAdmissionType(unitSurvBin, AdmissionStatus.PositiveOnAdmission);
+                splitBins[0] = DataFilter.FilterByAdmissionType(unitSurvBin, AdmissionStatus.NegativeOnAdmission);
+                splitBins[1] = DataFilter.FilterByAdmissionType(unitSurvBin, AdmissionStatus.PositiveOnAdmission);
             }
             if(compType == ComparisonType.ByEndResult)
             {
                 splitBins = new Bin[5];
-                splitBins[0] = StratificationAnalysis.FilterByAdmissionType(unitSurvBin, AdmissionStatus.NegativeAdmission);
-                splitBins[1] = StratificationAnalysis.FilterByAdmissionType(unitSurvBin, AdmissionStatus.PositiveAdmission);
-                splitBins[2] = StratificationAnalysis.FilterByAdmissionType(unitSurvBin, AdmissionStatus.PositiveOnAdmission);
-                splitBins[3] = StratificationAnalysis.FilterByAdmissionType(unitSurvBin, AdmissionStatus.NegativeOnAdmission_TurnedPositive);
-                splitBins[4] = StratificationAnalysis.FilterByAdmissionType(unitSurvBin, AdmissionStatus.PositiveNoAdmitSample);
+                splitBins[0] = DataFilter.FilterByAdmissionType(unitSurvBin, AdmissionStatus.NegativeAdmission);
+                splitBins[1] = DataFilter.FilterByAdmissionType(unitSurvBin, AdmissionStatus.PositiveAdmission);
+                splitBins[2] = DataFilter.FilterByAdmissionType(unitSurvBin, AdmissionStatus.PositiveOnAdmission);
+                splitBins[3] = DataFilter.FilterByAdmissionType(unitSurvBin, AdmissionStatus.NegativeOnAdmission_TurnedPositive);
+                splitBins[4] = DataFilter.FilterByAdmissionType(unitSurvBin, AdmissionStatus.PositiveNoAdmitSample);
             }
            
 
@@ -177,7 +177,7 @@ namespace libcdiffrecords.Reports
             }
 
             
-               Bin b = AnalyzeNAATPerSample(StratificationAnalysis.RemoveUnsavedSamples(ReportBin), "./9NTPatientSurvSamples.csv");
+               Bin b = AnalyzeNAATPerSample(DataFilter.RemoveUnsavedSamples(ReportBin), "./9NTPatientSurvSamples.csv");
                  
 
                 TabDelimWriter.WriteBinData("./" + ReportBin.Label + "Samples.txt", b);
@@ -199,24 +199,24 @@ namespace libcdiffrecords.Reports
                 if (naatTable.ContainsKey(key))
                 {
 
-                    foreach (DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+                    foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                     {
 
                         foreach (DataPoint dp in naatTable[key])
                         {
-                            if ((dpa.admissionDate < dp.SampleDate) && (((dp.SampleDate - dpa.admissionDate).Days < naatWindow) || naatWindow <= 0))
+                            if ((dpa.AdmissionDate < dp.SampleDate) && (((dp.SampleDate - dpa.AdmissionDate).Days < naatWindow) || naatWindow <= 0))
                             {
                                 
                                 if (dp.CdiffResult == TestResult.Positive)
                                 {
-                                    if(!ntTable.ContainsKey(dpa.MRN + dpa.admissionDate.ToShortDateString()))
+                                    if(!ntTable.ContainsKey(dpa.MRN + dpa.AdmissionDate.ToShortDateString()))
                                     {
                                         //DataTap.data.Add(dp);
-                                        DataPoint dp2 = dpa.points[0];
+                                        DataPoint dp2 = dpa.Points[0];
                                         dp2.Notes = dpa.AdmissionStatus.ToString() +  " Result:" + dp.CdiffResult.ToString() + " / " + dp.ToxinResult.ToString();
                                          DataTap.data.Add(dp2);
                                         DataTap.data.Add(dp);
-                                        ntTable.Add(dpa.MRN + dpa.admissionDate.ToShortDateString(), 1);
+                                        ntTable.Add(dpa.MRN + dpa.AdmissionDate.ToShortDateString(), 1);
                                     }
                                     
                                     switch (dp.ToxinResult)
@@ -262,9 +262,9 @@ namespace libcdiffrecords.Reports
                 {
                     foreach (string key in b.DataByPatientAdmissionTable.Keys)
                     {
-                        foreach (DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+                        foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                         {
-                            foreach (DataPoint dp in dpa.points)
+                            foreach (DataPoint dp in dpa.Points)
                             {
                                 if(IsNAATInRange(dp, np, naatWindow))
                                 {
@@ -323,9 +323,9 @@ namespace libcdiffrecords.Reports
                 if (naatTable.ContainsKey(np.MRN) && bin.DataByPatientAdmissionTable.ContainsKey(np.MRN))
                 {
                    
-                        foreach (DataPointAdmission dpa in bin.DataByPatientAdmissionTable[np.MRN])
+                        foreach (Admission dpa in bin.DataByPatientAdmissionTable[np.MRN])
                         {
-                            foreach (DataPoint dp in dpa.points)
+                            foreach (DataPoint dp in dpa.Points)
                             {
                                 if ((dp.SampleDate < np.SampleDate) && ((dp.SampleDate - np.SampleDate).Days <= naatWindow))
                                 {

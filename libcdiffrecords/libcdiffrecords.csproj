@@ -82,11 +82,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AntibioticCourse.cs" />
-    <Compile Include="AntibioticManager.cs" />
-    <Compile Include="Antibiotics.cs" />
     <Compile Include="Data\AdmissionTypeSummary.cs" />
-    <Compile Include="Data\Bins.cs" />
+    <Compile Include="Data\Bin.cs" />
     <Compile Include="Data\BoxLocation.cs" />
     <Compile Include="Data\DatabaseConversion.cs" />
     <Compile Include="Data\DatabaseFileReader.cs" />
@@ -94,7 +91,7 @@
     <Compile Include="Data\DataPoint.cs" />
     <Compile Include="DataReconciliation\BoxLocation.cs" />
     <Compile Include="DataReconciliation\SampleID.cs" />
-    <Compile Include="Data\DataPointAdmission.cs" />
+    <Compile Include="Data\Admission.cs" />
     <Compile Include="Data\DataTap.cs" />
     <Compile Include="Data\Sex.cs" />
     <Compile Include="Data\SQLiteInterface.cs" />
@@ -120,7 +117,7 @@
     <Compile Include="Storage\SampleDatabase.cs" />
     <Compile Include="Storage\StorageBox.cs" />
     <Compile Include="Storage\Tube.cs" />
-    <Compile Include="Data\StratificationAnalysis.cs" />
+    <Compile Include="Data\DataFilter.cs" />
     <Compile Include="SurveillanceReportLine.cs" />
     <Compile Include="TabLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

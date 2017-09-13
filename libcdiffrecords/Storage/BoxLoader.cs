@@ -67,6 +67,7 @@ namespace libcdiffrecords.Storage
                         case "Long6":
                             box = LoadLong6BoxFile(sr, box);
                             break;
+                    case "Box_Accession":
                         default:
                             return null;
                     }
@@ -98,6 +99,7 @@ namespace libcdiffrecords.Storage
         private static StorageBox LoadShort3BoxFile(StreamReader sr, StorageBox box)
         {
             DateTime glyDate = new DateTime(2017, 6, 28);
+            string boxAcc = box.Name.Substring(4, 5);
             char[] separator = new char[1];
             separator[0] = ',';
             int lineCount = 1;
@@ -136,8 +138,11 @@ namespace libcdiffrecords.Storage
 
                                 box.SampleTubes[ind].LegacyID = td[x].id;
                                 box.SampleTubes[ind].SampleDate = td[x].date;
+                                box.SampleTubes[ind].TubeAccession = "CDIF_" + boxAcc + "_" + ind;
+                                box.SampleTubes[ind].TubeLabel = td[x].id + " " + td[x].date.ToShortDateString();
+
                                 if (i < 2 && (td[x].date >= glyDate))
-                                    box.SampleTubes[ind].Additives = TubeAdditive.Glycerol;
+                                    box.SampleTubes[ind].Additives = "Glycerol";
 
                             }
                         }
@@ -154,7 +159,8 @@ namespace libcdiffrecords.Storage
         {
     
                 DateTime glyDate = new DateTime(2017, 6, 28);
-                char[] separator = new char[1];
+               string boxAcc = box.Name.Substring(4, 5);
+              char[] separator = new char[1];
                 separator[0] = ',';
                 int lineCount = 1;
                 string line = "";
@@ -200,8 +206,10 @@ namespace libcdiffrecords.Storage
                                 }
                                 box.SampleTubes[ind].LegacyID = td[x].id;
                                 box.SampleTubes[ind].SampleDate = td[x].date;
+                                box.SampleTubes[ind].TubeAccession = "CDIF_" + boxAcc + "_" + ind.ToString();
+                                box.SampleTubes[ind].TubeLabel = td[x].id + " " + td[x].date.ToShortDateString();
                                 if (i < 2 && (td[x].date) >= glyDate)
-                                    box.SampleTubes[ind].Additives = TubeAdditive.Glycerol;
+                                    box.SampleTubes[ind].Additives = "Glycerol";
                             }
                         }
                     }
@@ -216,8 +224,9 @@ namespace libcdiffrecords.Storage
         private static StorageBox LoadLong6BoxFile(StreamReader sr, StorageBox box)
         {
             DateTime glyDate = new DateTime(2017, 6, 28);
-            char[] separator = new char[1];
-            separator[0] = ',';
+            string boxAcc = box.Name.Substring(4, 5);
+            char[] separator = new char[1] { ',' };
+            
             int lineCount = 1;
             string line = "";
             while ((line = sr.ReadLine()) != null && lineCount <= 15)
@@ -254,8 +263,10 @@ namespace libcdiffrecords.Storage
                         {
                             box.SampleTubes[indices[i]].LegacyID = id;
                             box.SampleTubes[indices[i]].SampleDate = dt;
+                            box.SampleTubes[indices[i]].TubeAccession = "CDIF_" + boxAcc + "_" + indices[i].ToString();
+                            box.SampleTubes[indices[i]].TubeLabel = id + " " + dt.ToShortDateString() + " " + i.ToString();
                             if (i < 2 && (dt >= glyDate))
-                                box.SampleTubes[indices[i]].Additives = TubeAdditive.Glycerol;
+                                box.SampleTubes[indices[i]].Additives = "Glycerol";
 
                         }
                     }
@@ -264,6 +275,79 @@ namespace libcdiffrecords.Storage
             }
                 return box;
         }
+
+        private static StorageBox LoadBoxAccessionFormat(StreamReader sr, StorageBox box)
+        {
+            char[] separator = new char[1] { ',' };
+
+            int lineCount = 1;
+            string line = "";
+
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                if (lineCount >= 2)
+                {
+                    string[] parts = line.Split(separator);
+                    string accession = parts[1].Trim();
+                    string label = parts[2].Trim();
+                    string sampleID = parts[3].Trim();
+                    string additives = parts[4].Trim();
+
+                    if (!sampleID.Equals(""))
+                    {
+                        Tube temp = new Tube();
+                        temp.TubeAccession = accession;
+                        temp.TubeLabel = label;
+                        temp.SampleID = sampleID;
+                        temp.Additives = additives;
+                        int col = (lineCount - 2) % box.Width;
+                        int row = ((lineCount - 2) - col) / box.Width;
+                        BoxLocation loc = new BoxLocation(accession, row, col);
+                        temp.TubeLocation = loc;
+                        box.SampleTubes[lineCount - 2] = temp;
+
+                    }
+                }
+                lineCount++;
+            }
+
+
+                return box;
+        }
+
+        public static void WriteBoxDataToBoxAccessionFiles(StorageBox[] boxes, string directory)
+        {
+            for(int i= 0; i < boxes.Length; i++)
+            {
+                string filename = directory + boxes[i].Name + ".csv";
+
+                StreamWriter sw = new StreamWriter(filename);
+                sw.WriteLine("Box Name:," + boxes[i].Name + ",Format,Box_Accession");
+                sw.WriteLine("Position,Accession,Tube Label,Sample_ID,Additives");
+
+                for(int j = 0; j < boxes[i].SampleTubes.Length; j++)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append((j + 1).ToString());
+                    sb.Append(",");
+                    sb.Append(boxes[i].SampleTubes[i].TubeAccession);
+                    sb.Append(",");
+                    sb.Append(boxes[i].SampleTubes[i].TubeLabel);
+                    sb.Append(",");
+                    sb.Append(boxes[i].SampleTubes[i].SampleID);
+                    sb.Append(",");
+                    sb.Append(boxes[i].SampleTubes[i].Additives);
+                    sb.Append(",");
+
+                    sw.WriteLine(sb.ToString());
+                }
+
+                sw.Close();
+            }
+
+        }
+
 
         private static string PadIdentifier(string id)
         {

@@ -51,9 +51,9 @@ namespace libcdiffrecords
 
                     foreach (string key in b.DataByPatientAdmissionTable.Keys)
                     {
-                        foreach (DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+                        foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                         {
-                            foreach (DataPoint dp in dpa.points)
+                            foreach (DataPoint dp in dpa.Points)
                             {
                                 sw.WriteLine(ProduceDataPointRow(dp));
                             }
@@ -97,9 +97,9 @@ namespace libcdiffrecords
 
                     foreach (string key in b.DataByPatientAdmissionTable.Keys)
                     {
-                        foreach (DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+                        foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                         {                           
-                                sw.WriteLine(ProduceAdmissionDataRow(dpa.points[0]));
+                                sw.WriteLine(ProduceAdmissionDataRow(dpa.Points[0]));
                         }
                     }
                 }

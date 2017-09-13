@@ -12,7 +12,7 @@ namespace libcdiffrecords.Data
         string label;
         List<DataPoint> data;
         Dictionary<string, List<DataPoint>> patients;
-        Dictionary<string, List<DataPointAdmission>> admissionsByPatient;
+        Dictionary<string, List<Admission>> admissionsByPatient;
         public int ItemsInBin
         {
             get { return data.Count; }
@@ -98,7 +98,7 @@ namespace libcdiffrecords.Data
                 {
                     if (DataByPatientAdmissionTable[key].Count > 0)
                     {
-                        ages.Add(DataByPatientAdmissionTable[key][0].points[0].Age);
+                        ages.Add(DataByPatientAdmissionTable[key][0].Points[0].Age);
                     }
                 }
 
@@ -113,9 +113,9 @@ namespace libcdiffrecords.Data
                 List<DataPoint> dps = new List<DataPoint>();
                 foreach (string key in DataByPatientAdmissionTable.Keys)
                 {
-                    foreach (DataPointAdmission dpa in DataByPatientAdmissionTable[key])
+                    foreach (Admission dpa in DataByPatientAdmissionTable[key])
                     {
-                        dps.AddRange(dpa.points);
+                        dps.AddRange(dpa.Points);
                     }
                 }
                 return dps;
@@ -127,21 +127,21 @@ namespace libcdiffrecords.Data
             get { return patients; }
         }
 
-        public Dictionary<string, List<DataPointAdmission>> DataByPatientAdmissionTable
+        public Dictionary<string, List<Admission>> DataByPatientAdmissionTable
         {
             get { return admissionsByPatient; }
             set { admissionsByPatient = value; }
 
         }
 
-        public List<DataPointAdmission> PatientAdmissions
+        public List<Admission> PatientAdmissions
         {
             get
             {
-                List<DataPointAdmission> dpa = new List<DataPointAdmission>();
+                List<Admission> dpa = new List<Admission>();
                 foreach (string key in admissionsByPatient.Keys)
                 {
-                    foreach (DataPointAdmission dp in admissionsByPatient[key])
+                    foreach (Admission dp in admissionsByPatient[key])
                         dpa.Add(dp);
                 }
                 return dpa;
@@ -158,7 +158,7 @@ namespace libcdiffrecords.Data
                 {
                     if (DataByPatientAdmissionTable[key].Count > 0)
                     {
-                        if (DataByPatientAdmissionTable[key][0].points[0].PatientSex == Sex.Female)
+                        if (DataByPatientAdmissionTable[key][0].Points[0].PatientSex == Sex.Female)
                             fCount++;
                     }
                 }
@@ -193,7 +193,7 @@ namespace libcdiffrecords.Data
         {
             data = new List<DataPoint>();
             patients = new Dictionary<string, List<DataPoint>>();
-            admissionsByPatient = new Dictionary<string, List<DataPointAdmission>>();
+            admissionsByPatient = new Dictionary<string, List<Admission>>();
             label = binLabel;
         }
 
@@ -201,7 +201,7 @@ namespace libcdiffrecords.Data
         {
             data = new List<DataPoint>();
             patients = new Dictionary<string, List<DataPoint>>();
-            admissionsByPatient = new Dictionary<string, List<DataPointAdmission>>();
+            admissionsByPatient = new Dictionary<string, List<Admission>>();
             label = binLabel;
 
             for (int i = 0; i < initalPoints.Length; i++)
@@ -222,13 +222,13 @@ namespace libcdiffrecords.Data
 
             if (!admissionsByPatient.ContainsKey(point.MRN))
             {
-                admissionsByPatient.Add(point.MRN, new List<DataPointAdmission>());
+                admissionsByPatient.Add(point.MRN, new List<Admission>());
 
-                DataPointAdmission dpa = new DataPointAdmission();
-                dpa.admissionDate = point.AdmissionDate;
+                Admission dpa = new Admission();
+                dpa.AdmissionDate = point.AdmissionDate;
                 dpa.MRN = point.MRN;
                 dpa.unit = point.Unit.Trim();
-                dpa.points.Add(point);
+                dpa.Points.Add(point);
 
                 admissionsByPatient[point.MRN].Add(dpa);
 
@@ -239,31 +239,31 @@ namespace libcdiffrecords.Data
                 bool found = false;
                 for (int i = 0; i < admissionsByPatient[point.MRN].Count; i++)
                 {
-                    if (admissionsByPatient[point.MRN][i].admissionDate == point.AdmissionDate && admissionsByPatient[point.MRN][i].unit == point.Unit)
+                    if (admissionsByPatient[point.MRN][i].AdmissionDate == point.AdmissionDate && admissionsByPatient[point.MRN][i].unit == point.Unit)
                     {
                         found = true;
-                        admissionsByPatient[point.MRN][i].points.Add(point);
+                        admissionsByPatient[point.MRN][i].Points.Add(point);
                     }
 
                 }
                 if (!found)
                 {
-                    DataPointAdmission dpa = new DataPointAdmission();
-                    dpa.admissionDate = point.AdmissionDate;
+                    Admission dpa = new Admission();
+                    dpa.AdmissionDate = point.AdmissionDate;
                     dpa.MRN = point.MRN;
                     dpa.unit = point.Unit.Trim();
-                    dpa.points.Add(point);
+                    dpa.Points.Add(point);
                     admissionsByPatient[point.MRN].Add(dpa);
                 }
             }
 
         }
 
-        public void Add(DataPointAdmission dpa)
+        public void Add(Admission dpa)
         {
-            for (int i = 0; i < dpa.points.Count; i++)
+            for (int i = 0; i < dpa.Points.Count; i++)
             {
-                Add(dpa.points[i]);
+                Add(dpa.Points[i]);
             }
         }
 
@@ -277,7 +277,7 @@ namespace libcdiffrecords.Data
 
             foreach (string key in admissionsByPatient.Keys)
             {
-                admissionsByPatient[key].Sort((x, y) => x.admissionDate.CompareTo(y.admissionDate));
+                admissionsByPatient[key].Sort((x, y) => x.AdmissionDate.CompareTo(y.AdmissionDate));
 
                 for (int i = 0; i < admissionsByPatient[key].Count; i++)
                 {
@@ -287,13 +287,13 @@ namespace libcdiffrecords.Data
             }
         }
 
-        public bool TryGetDataPointAdmission(DataPoint dp, out DataPointAdmission result)
+        public bool TryGetDataPointAdmission(DataPoint dp, out Admission result)
         {
             if (admissionsByPatient.ContainsKey(dp.MRN))
             {
-                foreach (DataPointAdmission dpa in admissionsByPatient[dp.MRN])
+                foreach (Admission dpa in admissionsByPatient[dp.MRN])
                 {
-                    if (dpa.admissionDate == dp.AdmissionDate && dpa.unit == dp.Unit)
+                    if (dpa.AdmissionDate == dp.AdmissionDate && dpa.unit == dp.Unit)
                     {
                         result = dpa;
                         return true;
@@ -310,9 +310,9 @@ namespace libcdiffrecords.Data
             BinSummaryStatistics ats = new BinSummaryStatistics();
             foreach (string key in DataByPatientAdmissionTable.Keys)
             {
-                foreach (DataPointAdmission dpa in DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in DataByPatientAdmissionTable[key])
                 {
-                    if (dpa.points.Count > 1)
+                    if (dpa.Points.Count > 1)
                         ats.AdmissionsWithTwoOrMoreSamples++;
 
                     switch (dpa.AdmissionStatus)
@@ -352,29 +352,29 @@ namespace libcdiffrecords.Data
             int admCt = FindMaxAdmissionID();
             foreach (string key in DataByPatientAdmissionTable.Keys)
             {
-                foreach (DataPointAdmission dpa in DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in DataByPatientAdmissionTable[key])
                 {
                     string toAssign = "ADM_" + admCt.ToString().PadLeft(6, '0');
                     if (AdmissionIDAssigned(dpa, out int loc))
                     {
-                        toAssign = dpa.points[loc].AdmissionID;
+                        toAssign = dpa.Points[loc].AdmissionID;
                     }
                     else { admCt++; }
-                    for (int i = 0; i < dpa.points.Count; i++)
+                    for (int i = 0; i < dpa.Points.Count; i++)
                     {
-                        DataPoint temp = dpa.points[i];
+                        DataPoint temp = dpa.Points[i];
                         temp.AdmissionID = toAssign;
-                        dpa.points[i] = temp;
+                        dpa.Points[i] = temp;
                     }
 
                 }
             }
         }
-        private bool AdmissionIDAssigned(DataPointAdmission dpa, out int location)
+        private bool AdmissionIDAssigned(Admission dpa, out int location)
         {
-            for (int i = 0; i < dpa.points.Count; i++)
+            for (int i = 0; i < dpa.Points.Count; i++)
             {
-                if (dpa.points[i].AdmissionID != "")
+                if (dpa.Points[i].AdmissionID != "")
                 {
                     location = i;
                     return true;
@@ -391,11 +391,11 @@ namespace libcdiffrecords.Data
             int max = 1;
             foreach (string key in DataByPatientAdmissionTable.Keys)
             {
-                foreach (DataPointAdmission dpa in DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in DataByPatientAdmissionTable[key])
                 {
-                    if (AdmissionIDAssigned(dpa, out int loc) && dpa.points[loc].AdmissionID != null)
+                    if (AdmissionIDAssigned(dpa, out int loc) && dpa.Points[loc].AdmissionID != null)
                     {
-                        int temp = int.Parse(dpa.points[loc].AdmissionID.Substring(4));
+                        int temp = int.Parse(dpa.Points[loc].AdmissionID.Substring(4));
                         if (temp > max)
                             max = temp;
                     }

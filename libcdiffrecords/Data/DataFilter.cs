@@ -17,7 +17,7 @@ namespace libcdiffrecords.Data
         IndeterminateAdmission,
     };
 
-    public class StratificationAnalysis
+    public class DataFilter
     {
       
 
@@ -37,9 +37,9 @@ namespace libcdiffrecords.Data
 
             foreach (string key in bin.DataByPatientAdmissionTable.Keys)
             {
-                foreach(DataPointAdmission dpa in bin.DataByPatientAdmissionTable[key])
+                foreach(Admission dpa in bin.DataByPatientAdmissionTable[key])
                 {
-                   int age =  dpa.points[0].Age;
+                   int age =  dpa.Points[0].Age;
                     int binIndex = age / yearsPerBin;
 
                     for(int i = ageBins.Count; i <= binIndex; i++)
@@ -78,14 +78,14 @@ namespace libcdiffrecords.Data
 
             foreach (string key in bin.DataByPatientAdmissionTable.Keys)
             {
-                foreach (DataPointAdmission dpa in bin.DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in bin.DataByPatientAdmissionTable[key])
                 {
                     if (!bins.ContainsKey(dpa.unit))
                     {
                         bins.Add(dpa.unit, new Bin(dpa.unit));
                     }
 
-                    foreach (DataPoint dp in dpa.points)
+                    foreach (DataPoint dp in dpa.Points)
                         bins[dpa.unit].Add(dp);
 
                 }
@@ -106,9 +106,9 @@ namespace libcdiffrecords.Data
             Bin retBin = new Bin(b.Label);
             foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+                foreach(Admission dpa in b.DataByPatientAdmissionTable[key])
                 {
-                    if(dpa.points.Count > 1)
+                    if(dpa.Points.Count > 1)
                     {
                         retBin.Add(dpa);
                     }
@@ -130,7 +130,7 @@ namespace libcdiffrecords.Data
 
             foreach (string patient in bin.DataByPatientAdmissionTable.Keys)
             {
-                foreach (DataPointAdmission dpa in bin.DataByPatientAdmissionTable[patient])
+                foreach (Admission dpa in bin.DataByPatientAdmissionTable[patient])
                 {
                     if(dpa.AdmissionStatus != AdmissionStatus.NegativeNoAdmissionSample && dpa.AdmissionStatus != AdmissionStatus.PositiveNoAdmitSample)
                     {
@@ -185,7 +185,7 @@ namespace libcdiffrecords.Data
 
             foreach(string key in b.DataByPatientAdmissionTable.Keys)
             {
-                DataPointAdmission index = PickIndexAdmission(b.DataByPatientAdmissionTable[key]);
+                Admission index = PickIndexAdmission(b.DataByPatientAdmissionTable[key]);
                 if(index != null)
                      retBin.Add(index);
             }
@@ -194,7 +194,7 @@ namespace libcdiffrecords.Data
         }
 
 
-        private static DataPointAdmission PickIndexAdmission(List<DataPointAdmission> dpa)
+        private static Admission PickIndexAdmission(List<Admission> dpa)
         {
 
 
@@ -209,7 +209,7 @@ namespace libcdiffrecords.Data
                     }
                     dpa.RemoveAt(0);
                 }
-                AdmissionStatus status = DataPointAdmission.MergeAdmissions(dpa.ToArray()).AdmissionStatus;
+                AdmissionStatus status = Admission.MergeAdmissions(dpa.ToArray()).AdmissionStatus;
 
                 if (status == AdmissionStatus.PositiveOnAdmission || status == AdmissionStatus.NegativeOnAdmission_RemainedNegative || status == AdmissionStatus.NegativeNoAdmissionSample)
                     return dpa[0];
@@ -261,9 +261,9 @@ namespace libcdiffrecords.Data
             Bin retBin = new Bin(b.Label);
             foreach(string key in b.DataByPatientAdmissionTable.Keys)
             {
-               foreach(DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+               foreach(Admission dpa in b.DataByPatientAdmissionTable[key])
                 {
-                    if (dpa.points[0].DateOfBirth != new DateTime(1901, 1, 1))
+                    if (dpa.Points[0].DateOfBirth != new DateTime(1901, 1, 1))
                         retBin.Add(dpa);
                 }
             }
@@ -311,13 +311,13 @@ namespace libcdiffrecords.Data
             b.SortBinData();
             if(ignoreIndeterminateStartAdmissions)
             {
-                b = StratificationAnalysis.RemoveAdmissionsWithNoAdmissionSample(b, admWindow);
+                b = DataFilter.RemoveAdmissionsWithNoAdmissionSample(b, admWindow);
             }
             foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
                 if(b.DataByPatientAdmissionTable[key].Count > 0)
                 {
-                    DateTime adm = b.DataByPatientAdmissionTable[key][0].admissionDate;
+                    DateTime adm = b.DataByPatientAdmissionTable[key][0].AdmissionDate;
                     string unit = b.DataByPatientAdmissionTable[key][0].unit;
 
                     foreach (DataPoint dp in b.DataByPatient[key])
@@ -345,13 +345,13 @@ namespace libcdiffrecords.Data
 
             foreach (string key in bin.DataByPatientAdmissionTable.Keys)
             {
-                foreach (DataPointAdmission dpa in bin.DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in bin.DataByPatientAdmissionTable[key])
                 {
                    
                     switch(status)
                     {
                         case AdmissionStatus.EmptyAdmit:
-                            if (dpa.points.Count == 0)
+                            if (dpa.Points.Count == 0)
                                 ret.Add(dpa);
                             break;
                         case AdmissionStatus.NegativeOnAdmission:
@@ -512,7 +512,7 @@ namespace libcdiffrecords.Data
                 {
                     if(bin.DataByPatientAdmissionTable[key][0].AdmissionStatus != AdmissionStatus.PositiveOnAdmission && bin.DataByPatientAdmissionTable[key][0].AdmissionStatus != AdmissionStatus.PositiveNoAdmitSample)
                     {
-                        foreach (DataPointAdmission dpa in bin.DataByPatientAdmissionTable[key])
+                        foreach (Admission dpa in bin.DataByPatientAdmissionTable[key])
                             retBin.Add(dpa);
                     }
                 }
@@ -541,9 +541,9 @@ namespace libcdiffrecords.Data
 
             foreach(string key in bin.DataByPatientAdmissionTable.Keys)
             {
-                foreach(DataPointAdmission dpa in bin.DataByPatientAdmissionTable[key])
+                foreach(Admission dpa in bin.DataByPatientAdmissionTable[key])
                 {
-                    if (dpa.points.Count > 0)
+                    if (dpa.Points.Count > 0)
                         pc++;
                 }
             }
@@ -556,9 +556,9 @@ namespace libcdiffrecords.Data
 
             foreach(string key in bin.DataByPatientAdmissionTable.Keys)
             {
-                foreach(DataPointAdmission dpa in bin.DataByPatientAdmissionTable[key])
+                foreach(Admission dpa in bin.DataByPatientAdmissionTable[key])
                 {
-                    if (dpa.points.Count >= 1 && (dpa.points[0].SampleDate - dpa.admissionDate).Days <= admWindow)
+                    if (dpa.Points.Count >= 1 && (dpa.Points[0].SampleDate - dpa.AdmissionDate).Days <= admWindow)
                         ct++;
                 }
             }
@@ -576,11 +576,11 @@ namespace libcdiffrecords.Data
             return dp.MRN + dp.AdmissionDate.ToShortDateString() + dp.Unit + dp.SampleDate.ToShortDateString();
         }
 
-        private static bool IsPositiveAdmission(DataPointAdmission dpa)
+        private static bool IsPositiveAdmission(Admission dpa)
         {
-            for(int i =0; i < dpa.points.Count; i++)
+            for(int i =0; i < dpa.Points.Count; i++)
             {
-                if (dpa.points[i].CdiffResult == TestResult.Positive)
+                if (dpa.Points[i].CdiffResult == TestResult.Positive)
                     return true;
             }
 
@@ -637,12 +637,12 @@ namespace libcdiffrecords.Data
 
             foreach(string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+                foreach(Admission dpa in b.DataByPatientAdmissionTable[key])
                 {
-                    for(int i =0; i < dpa.points.Count; i++)
+                    for(int i =0; i < dpa.Points.Count; i++)
                     {
-                        if (dpa.points[i].Test != TestType.Clinical_Outpatient_Culture && dpa.points[i].Test != TestType.Clinical_Outpatient_NAAT)
-                            retBin.Add(dpa.points[i]);
+                        if (dpa.Points[i].Test != TestType.Clinical_Outpatient_Culture && dpa.Points[i].Test != TestType.Clinical_Outpatient_NAAT)
+                            retBin.Add(dpa.Points[i]);
                     }
                 }
             }
@@ -657,15 +657,15 @@ namespace libcdiffrecords.Data
 
             foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach (DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                 {
-                    for (int i = 0; i < dpa.points.Count; i++)
+                    for (int i = 0; i < dpa.Points.Count; i++)
                     {
                         for(int j = 0; j < test.Length; j++)
                         {
-                            if(dpa.points[i].Test == test[j])
+                            if(dpa.Points[i].Test == test[j])
                             {
-                                retBin.Add(dpa.points[i]);
+                                retBin.Add(dpa.Points[i]);
                                 break;
                             }
                         }
@@ -690,11 +690,11 @@ namespace libcdiffrecords.Data
 
             foreach(string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(DataPointAdmission dpa in b.DataByPatientAdmissionTable[key])
+                foreach(Admission dpa in b.DataByPatientAdmissionTable[key])
                 {
-                    for(int i = 0; i < dpa.points.Count; i++)
+                    for(int i = 0; i < dpa.Points.Count; i++)
                     {
-                        if(dpa.points[i].SampleDate >= start && dpa.points[i].SampleDate <= end)
+                        if(dpa.Points[i].SampleDate >= start && dpa.Points[i].SampleDate <= end)
                         {
                             retBin.Add(dpa);
                             break;

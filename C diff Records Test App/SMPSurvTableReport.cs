@@ -21,16 +21,16 @@ namespace C_diff_Records_Test_App
         {
             outputPath = outputPath + "\\";
             Bin main = new Bin( "Surv", survData);
-            main = StratificationAnalysis.RemovePatientsWithUnknownDOB(main);
+            main = DataFilter.RemovePatientsWithUnknownDOB(main);
 
             main.AssignAdmissionIDsToBin();
        
            
            CreateAndWriteReport(main, null, ReportType.Master, false, 0, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "Table 1 - Summary Statistics.csv");
-            Bin indetsRmvd = StratificationAnalysis.RemoveAdmissionsWithNoAdmissionSample(main, 3);
+            Bin indetsRmvd = DataFilter.RemoveAdmissionsWithNoAdmissionSample(main, 3);
             DatabaseFileIO.WriteDataToFile(indetsRmvd, outputPath + "indeterminates_Removed.csv", ',');
 
-            Bin indexAdmissions = StratificationAnalysis.FilterIndexAdmissions(main);
+            Bin indexAdmissions = DataFilter.FilterIndexAdmissions(main);
              DatabaseFileIO.WriteDataToFile(indexAdmissions, outputPath + "Index admits.csv", ',');
 
             Bin main2 = main.Clone();
@@ -43,7 +43,7 @@ namespace C_diff_Records_Test_App
 
             main2 = AddNAATs(main2, naats);
             main2.AssignAdmissionIDsToBin();
-            Bin indexAdmissions2 = StratificationAnalysis.FilterIndexAdmissions(main2);
+            Bin indexAdmissions2 = DataFilter.FilterIndexAdmissions(main2);
             DatabaseFileIO.WriteDataToFile(indexAdmissions2, outputPath + "Index admits with NAATs.csv", ',');
 
 
@@ -58,15 +58,15 @@ namespace C_diff_Records_Test_App
             TabDelimWriter.WriteBinData(outputPath + "NAAT Analysis Bin - Clin NAATs In Indexing.txt", DataTap.data);
 
             //Filtering by Test Type
-            Bin cultureOnlyToxPosOnly = StratificationAnalysis.FilterByTestType(main2, TestType.Surveillance_Culture_Test);
-            cultureOnlyToxPosOnly = StratificationAnalysis.FilterPositivesByToxinResult(cultureOnlyToxPosOnly, TestResult.Positive);
+            Bin cultureOnlyToxPosOnly = DataFilter.FilterByTestType(main2, TestType.Surveillance_Culture_Test);
+            cultureOnlyToxPosOnly = DataFilter.FilterPositivesByToxinResult(cultureOnlyToxPosOnly, TestResult.Positive);
 
 
             cultureOnlyToxPosOnly = AddNAATs(cultureOnlyToxPosOnly, naats);
-            cultureOnlyToxPosOnly = StratificationAnalysis.FilterIndexAdmissions(cultureOnlyToxPosOnly);
-            Bin survNAATOnly = StratificationAnalysis.FilterByTestType(main2, TestType.Surveillance_NAAT_Test);
+            cultureOnlyToxPosOnly = DataFilter.FilterIndexAdmissions(cultureOnlyToxPosOnly);
+            Bin survNAATOnly = DataFilter.FilterByTestType(main2, TestType.Surveillance_NAAT_Test);
             survNAATOnly = AddNAATs(survNAATOnly, naats);
-            survNAATOnly = StratificationAnalysis.FilterIndexAdmissions(survNAATOnly);
+            survNAATOnly = DataFilter.FilterIndexAdmissions(survNAATOnly);
 
             CreateAndWriteReport(cultureOnlyToxPosOnly, null, ReportType.Master, false, 0, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "Summary Stats Indexes Culture Surv Tox Neg Excluded.csv");
             DataTap.data = new Bin("NAAT Analysis");
@@ -100,7 +100,7 @@ namespace C_diff_Records_Test_App
         }
         private void CreateAndWriteReport(Bin report, DataPoint[] naat, ReportType type, bool ignoreIndeterminates, int naatWindow, ComparisonType ct, NAATCountingType nt, string outputFile)
         {
-            Bin[] unitBins = StratificationAnalysis.StratifyOnCommonUnits(report);
+            Bin[] unitBins = DataFilter.StratifyOnCommonUnits(report);
 
             List<Bin> bins = new List<Bin>();
             report.Label = "Global";

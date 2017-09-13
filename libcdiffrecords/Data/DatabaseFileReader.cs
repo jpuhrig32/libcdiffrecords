@@ -124,19 +124,19 @@ namespace libcdiffrecords.Data
             int admCt = 1;
             foreach(string key in global.DataByPatientAdmissionTable.Keys)
             {
-                foreach(DataPointAdmission dpa in global.DataByPatientAdmissionTable[key])
+                foreach(Admission dpa in global.DataByPatientAdmissionTable[key])
                 {
                     string toAssign = "ADM_" + admCt.ToString().PadLeft(6, '0');
                     if(AdmissionIDAssigned(dpa, out int loc))
                     {
-                        toAssign = dpa.points[loc].AdmissionID;                    
+                        toAssign = dpa.Points[loc].AdmissionID;                    
                     }
                     else { admCt++; }
-                    for(int i = 0; i < dpa.points.Count; i++)
+                    for(int i = 0; i < dpa.Points.Count; i++)
                     {
-                        DataPoint temp = dpa.points[i];
+                        DataPoint temp = dpa.Points[i];
                         temp.AdmissionID = toAssign;
-                        dpa.points[i] = temp;
+                        dpa.Points[i] = temp;
                     }
                    
                 }
@@ -285,11 +285,11 @@ namespace libcdiffrecords.Data
             return fields;
         }
 
-        private static bool AdmissionIDAssigned(DataPointAdmission dpa, out int location)
+        private static bool AdmissionIDAssigned(Admission dpa, out int location)
         {
-            for(int i =0; i < dpa.points.Count; i++)
+            for(int i =0; i < dpa.Points.Count; i++)
             {
-                if(dpa.points[i].AdmissionID != "")
+                if(dpa.Points[i].AdmissionID != "")
                 {
                     location = i;
                     return true;

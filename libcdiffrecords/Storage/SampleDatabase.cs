@@ -338,16 +338,16 @@ namespace libcdiffrecords.Storage
         {
             Bin bin = new Bin("", dps);
 
-            List<DataPointAdmission> dpa = bin.PatientAdmissions;
+            List<Admission> dpa = bin.PatientAdmissions;
 
-            dpa.Sort((x, y) => x.admissionDate.CompareTo(y.admissionDate));
+            dpa.Sort((x, y) => x.AdmissionDate.CompareTo(y.AdmissionDate));
 
             string admissionPrefix = "ADM";
             List<DataPoint> dataPoints = new List<DataPoint>();
 
             for (int i =0; i < dpa.Count; i++)
             {
-                foreach (DataPoint dp in dpa[i].points)
+                foreach (DataPoint dp in dpa[i].Points)
                 {
                     DataPoint add = dp;
                     add.AdmissionID = (admissionPrefix + i.ToString().PadLeft(6, '0'));
