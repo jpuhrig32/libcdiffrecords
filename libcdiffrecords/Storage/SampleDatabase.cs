@@ -157,7 +157,7 @@ namespace libcdiffrecords.Storage
             sheet.Cells[x, 8] = dp.DateOfBirth.ToShortDateString();
             sheet.Cells[x, 9] = dp.AdmissionDate.ToShortDateString();
             sheet.Cells[x, 10] = dp.SampleDate.ToShortDateString();
-            sheet.Cells[x, 11] = GetTestString(dp);
+            sheet.Cells[x, 11] = Utilities.TestTypeToString(dp.Test);
             sheet.Cells[x, 12] = Utilities.TestResultToString(dp.CdiffResult);
             sheet.Cells[x, 13] = Utilities.TestResultToString(dp.ToxinResult);
             sheet.Cells[x, 14] = dp.Unit;
@@ -168,7 +168,7 @@ namespace libcdiffrecords.Storage
                 sheet.Cells[x, 16] = "Saved";
                 sheet.Cells[x, 17] = t.TubeLocation.Box;
                 sheet.Cells[x, 18] = t.TubeLocation.LocationInBox;
-                sheet.Cells[x, 19] = GetAdditiveString(t.Additives);
+                sheet.Cells[x, 19] = t.Additives;
                 sheet.Cells[x, 24] = t.Comments;
 
             }
@@ -214,22 +214,7 @@ namespace libcdiffrecords.Storage
         }
 
        
-        private string GetAdditiveString(TubeAdditive add)
-        {
-            switch(add)
-            {
-                case TubeAdditive.Glycerol:
-                    return "Glycerol";
-                case TubeAdditive.PBS:
-                    return "PBS";
-                case TubeAdditive.RNAProtect:
-                    return "RNAProtect";
-                case TubeAdditive.None:
-                    return "None";
-                default:
-                    return "";
-            }
-        }
+    
 
 
 

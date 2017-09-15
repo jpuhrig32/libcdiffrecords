@@ -18,6 +18,7 @@ namespace libcdiffrecords.Data
         Surveillance_Test,
         Surveillance_Culture_Test,
         Surveillance_NAAT_Test,
+        Stool,
         No_Test,
     };
 }

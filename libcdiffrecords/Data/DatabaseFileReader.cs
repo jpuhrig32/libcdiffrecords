@@ -88,9 +88,9 @@ namespace libcdiffrecords.Data
             point.PatientName = line[headerTable["Patient_Name"]];
             point.MRN = line[headerTable["MRN"]];
             point.PatientSex = Utilities.ParseSexFromString(line[headerTable["Sex"]]);
-            point.DateOfBirth = Utilities.ParseDate(line[headerTable["DOB"]]);
-            point.AdmissionDate = Utilities.ParseDate(line[headerTable["Adm_Date"]]);
-            point.SampleDate = Utilities.ParseDate(line[headerTable["Sample_Date"]]);
+            point.DateOfBirth =DateTime.Parse(line[headerTable["DOB"]]);
+            point.AdmissionDate = DateTime.Parse(line[headerTable["Adm_Date"]]);
+            point.SampleDate = DateTime.Parse(line[headerTable["Sample_Date"]]);
             point.CdiffResult = Utilities.ParseTestResult(line[headerTable["C_diff_Test_Result"]]);
             point.ToxinResult = Utilities.ParseTestResult(line[headerTable["Toxin_Result"]]);
             point.Test = Utilities.ParseTestTypeFromString(line[headerTable["Test_Type"]]);

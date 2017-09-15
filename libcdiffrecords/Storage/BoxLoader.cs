@@ -67,9 +67,18 @@ namespace libcdiffrecords.Storage
                         case "Long6":
                             box = LoadLong6BoxFile(sr, box);
                             break;
+                    case "SwabBag30":
+                        box = LoadSwabBag30(sr, box);
+                        break;
+                   
                     case "Box_Accession":
-                        default:
-                            return null;
+                        box = LoadBoxAccessionFormat(sr, box);
+                        break;
+                    case "SwabBag_Accession":
+                        box = LoadSwabBagAccessionFormat(sr, box);
+                        break;
+                    default:
+                        return null;
                     }
                     box.AttachBoxLocationDataToTubes();
                     sr.Close();
@@ -119,7 +128,7 @@ namespace libcdiffrecords.Storage
                         if (!lineParts[ind].Equals(""))
                         {
                             td[i].id = PadIdentifier(lineParts[ind].Trim());
-                            td[i].date = Utilities.ParseDate(lineParts[ind + 1].Trim());
+                            td[i].date =DateTime.Parse(lineParts[ind + 1].Trim());
                             if (!int.TryParse(lineParts[ind + 2].Trim(), out td[i].count))
                                 td[i].count = 3;
                             td[i].use = true;
@@ -179,7 +188,7 @@ namespace libcdiffrecords.Storage
                         if (!lineParts[ind].Equals(""))
                         {
                             td[i].id = PadIdentifier(lineParts[ind].Trim());
-                            td[i].date = Utilities.ParseDate(lineParts[ind + 1].Trim());
+                            td[i].date =DateTime.Parse(lineParts[ind + 1].Trim());
                             if (!int.TryParse(lineParts[ind + 2].Trim(), out td[i].count))
                                 td[i].count = 4;
                             td[i].use = true;
@@ -237,7 +246,7 @@ namespace libcdiffrecords.Storage
                     if(!parts[1].Equals(""))
                     {
                         string id = PadIdentifier(parts[1].Trim());
-                        DateTime dt = Utilities.ParseDate(parts[2].Trim());
+                        DateTime dt = DateTime.Parse(parts[2].Trim());
                         int count;
                         if(!int.TryParse(parts[3].Trim(), out count))
                         {
@@ -316,36 +325,177 @@ namespace libcdiffrecords.Storage
                 return box;
         }
 
-        public static void WriteBoxDataToBoxAccessionFiles(StorageBox[] boxes, string directory)
+        private static StorageBox LoadSwabBagAccessionFormat(StreamReader sr, StorageBox box)
+        {
+            char[] separator = new char[1] { ',' };
+
+            int lineCount = 1;
+            string line = "";
+
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                if (lineCount >= 2)
+                {
+                    string[] parts = line.Split(separator);
+                    string accession = parts[1].Trim();
+                    string label = parts[2].Trim();
+                    string sampleID = parts[3].Trim();
+                    
+
+                    if (!sampleID.Equals(""))
+                    {
+                        Tube temp = new Tube();
+                        temp.TubeAccession = accession;
+                        temp.TubeLabel = label;
+                        temp.SampleID = sampleID;
+                        temp.Additives = "";
+                        box.SampleTubes[lineCount - 2] = temp;
+
+                    }
+                }
+                lineCount++;
+            }
+
+
+            return box;
+        }
+
+        private static StorageBox LoadSwabBag30(StreamReader sr, StorageBox box)
+        {
+            char[] separator = new char[1] { ',' };
+
+            int lineCount = 1;
+            string line = "";
+
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                if (lineCount >= 2)
+                {
+                    string[] parts = line.Split(separator);
+                    string legacyID = parts[1].Trim();
+                    DateTime date = DateTime.Parse(parts[2].Trim());
+               
+
+
+                    if (!legacyID.Equals(""))
+                    {
+                        Tube temp = new Tube();
+                        temp.TubeAccession = "SWAB_"+ box.Name.Substring(4)+"_"+ (lineCount-1).ToString().PadLeft(2, '0');
+                        temp.TubeLabel = legacyID + " " + date.ToShortDateString();
+                        temp.SampleID = "";
+                        temp.Additives = "";
+                        box.SampleTubes[lineCount - 2] = temp;
+
+                    }
+                }
+                lineCount++;
+            }
+
+
+            return box;
+        }
+
+        public static void WriteBoxDataToBoxAccessionFiles(StorageBox[] boxes, string directory, char delim)
         {
             for(int i= 0; i < boxes.Length; i++)
             {
                 string filename = directory + boxes[i].Name + ".csv";
 
                 StreamWriter sw = new StreamWriter(filename);
-                sw.WriteLine("Box Name:," + boxes[i].Name + ",Format,Box_Accession");
-                sw.WriteLine("Position,Accession,Tube Label,Sample_ID,Additives");
+                sw.WriteLine("Box Name:"+ delim +  boxes[i].Name +  delim + "Format" + delim + "Box_Accession");
+                List<string> head = CreateHeaderForSampleBox();
+               
+
+                StringBuilder sbhead = new StringBuilder();
+               for(int k = 1; k < head.Count; k++)
+                {
+                    sbhead.Append(head[i]);
+                    sbhead.Append(delim);
+                }
+                sw.WriteLine(sbhead.ToString());
 
                 for(int j = 0; j < boxes[i].SampleTubes.Length; j++)
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.Append((j + 1).ToString());
-                    sb.Append(",");
-                    sb.Append(boxes[i].SampleTubes[i].TubeAccession);
-                    sb.Append(",");
-                    sb.Append(boxes[i].SampleTubes[i].TubeLabel);
-                    sb.Append(",");
-                    sb.Append(boxes[i].SampleTubes[i].SampleID);
-                    sb.Append(",");
-                    sb.Append(boxes[i].SampleTubes[i].Additives);
-                    sb.Append(",");
 
+                    List<string> line = CreateTubeDataLine(boxes[i].SampleTubes[i], boxes[i].Name, j + 1);
+
+                    for(int x = 1; x < line.Count; x++)
+                    {
+                        sb.Append(line[x]);
+                        sb.Append(delim);
+                    }
                     sw.WriteLine(sb.ToString());
                 }
 
                 sw.Close();
             }
 
+        }
+
+        private static List<string> CreateTubeDataLine(Tube t, String boxName, int count)
+        {
+            List<string> line = new List<string>();
+            line.Add(boxName);
+            line.Add(count.ToString());
+            line.Add(t.TubeAccession);
+            line.Add(t.TubeLabel);
+            line.Add(t.SampleID);
+            line.Add(t.Additives);
+
+            return line;
+
+        }
+
+        public static List<string> CreateHeaderForSampleBox()
+        {
+            List<string> head = new List<string>();
+            head.Add("Box Name");
+            head.Add("Count");
+            head.Add("Position");
+            head.Add("Accession");
+            head.Add("Label");
+            head.Add("Additives");
+
+
+            return head;
+        }
+        public static void WriteBoxesToSingleFile(StorageBox[] boxes, string filename, char delim)
+        {
+            StreamWriter sw = new StreamWriter(filename);
+            sw.WriteLine("Box Dataset:" + delim + "ALL" + delim + "Format" + delim + "Box_Database");
+
+            List<string> head = CreateHeaderForSampleBox();
+            StringBuilder headSB = new StringBuilder();
+            for(int i = 0; i < head.Count; i++)
+            {
+                headSB.Append(head[i]);
+                headSB.Append(delim);
+            }
+
+            sw.WriteLine(headSB.ToString());
+
+            for(int i = 0; i < boxes.Length; i++)
+            {
+                for(int j = 0; j < boxes[i].SampleTubes.Length; j++)
+                {
+                    List<string> line = CreateTubeDataLine(boxes[i].SampleTubes[j], boxes[i].Name, j + 1);
+
+                    StringBuilder lineSB = new StringBuilder();
+
+                    for(int k = 0; k < line.Count; k++)
+                    {
+                        lineSB.Append(line[i]);
+                        lineSB.Append(delim);
+                    }
+                    sw.WriteLine(lineSB.ToString());
+                }
+            }
+            
+
+            sw.Close();
         }
 
 

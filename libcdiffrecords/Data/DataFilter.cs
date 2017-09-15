@@ -706,6 +706,26 @@ namespace libcdiffrecords.Data
             return retBin;
 
         }
+
+        public static Bin FilterPatientsWithGivenNumberOfSamples(Bin b, int count)
+        {
+            Bin retBin = new Bin(b.Label);
+
+            foreach(string key in b.DataByPatient.Keys)
+            {
+                if(b.DataByPatient[key].Count >= count)
+                {
+                    for(int i =0; i < b.DataByPatient[key].Count; i++)
+                    {
+                        retBin.Add(b.DataByPatient[key][i]);
+                    }
+                }
+            }
+
+            return retBin;
+        }
+
+      
         public static Bin FilterPositivesByToxinResult(Bin b, TestResult toxResult)
         {
             Bin retBin = new Bin(b.Label);
@@ -725,21 +745,43 @@ namespace libcdiffrecords.Data
         }
         public static Bin FilterByTestType(Bin b, TestType test)
         {
+            return FilterByTestType(b, ExpandTestTypes(test));
+        }
+
+        private static TestType[] ExpandTestTypes(TestType[] complex)
+        {
+            List<TestType> tts = new List<TestType>();
+
+            for(int i =0; i < complex.Length; i++)
+            {
+                tts.AddRange(ExpandTestTypes(complex[i]));
+            }
+
+            return tts.ToArray();
+
+        }
+
+        private static TestType[] ExpandTestTypes(TestType tt)
+        {
             TestType[] tests;
-            tests = new TestType[1] { test };
-            if (test == TestType.Surveillance_Test)
+            tests = new TestType[1] { tt };
+            if (tt == TestType.Surveillance_Test)
             {
                 tests = new TestType[4] { TestType.Surveillance_Stool_Culture, TestType.Surveillance_Stool_NAAT, TestType.Surveillance_Swab_Culture, TestType.Surveillance_Swab_NAAT };
             }
-            if (test == TestType.Surveillance_Culture_Test)
+            if (tt == TestType.Surveillance_Culture_Test)
             {
-                tests = new TestType[2] { TestType.Surveillance_Stool_Culture, TestType.Surveillance_Swab_Culture};
+                tests = new TestType[2] { TestType.Surveillance_Stool_Culture, TestType.Surveillance_Swab_Culture };
             }
-            if(test == TestType.Surveillance_NAAT_Test)
+            if (tt == TestType.Surveillance_NAAT_Test)
             {
                 tests = new TestType[2] { TestType.Surveillance_Stool_NAAT, TestType.Surveillance_Swab_NAAT };
             }
-            return FilterByTestType(b, tests);
+            if (tt == TestType.Stool)
+            {
+                tests = new TestType[3] { TestType.Surveillance_Stool_Culture, TestType.Surveillance_Stool_NAAT, TestType.Clinical_Inpatient_NAAT };
+            }
+            return tests;
         }
 
 

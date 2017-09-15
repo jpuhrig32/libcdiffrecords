@@ -26,7 +26,7 @@ namespace libcdiffrecords.Data
         string unit;
         string bed;
         Dictionary<string, object> fields = new Dictionary<string, object>();
-        List<AntibioticCourse> drugs = new List<AntibioticCourse>();
+   
 
         public void ParseDataLineFromOctFormat(string dataline, string[] header, int abxFieldsStart)
         {
@@ -44,9 +44,9 @@ namespace libcdiffrecords.Data
                 patientName = parts[1];
                 mrn = parts[2].PadLeft(8, '0');
                 patientSex = Utilities.ParseSexFromString(parts[3]);
-                dob = Utilities.DateFromString(parts[4]);
-                admDate = Utilities.DateFromString(parts[5]);
-                sampleDate = Utilities.DateFromString(parts[6]);
+                dob = DateTime.Parse(parts[4]);
+                admDate = DateTime.Parse(parts[5]);
+                sampleDate =DateTime.Parse(parts[6]);
                 cdStatus = Utilities.ParseTestResult(parts[7]);
                 toxResult = Utilities.ParseTestResult(parts[8]);
                 strain = parts[9];

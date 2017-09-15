@@ -106,9 +106,9 @@ namespace libcdiffrecords
                 point.PatientName = parts[1].Trim();
                 point.MRN = parts[2].Trim().PadLeft(8, '0');
                 point.PatientSex = Utilities.ParseSexFromString(parts[3].Trim());
-                point.DateOfBirth = Utilities.ParseDate(parts[4].Trim());
-                point.AdmissionDate = Utilities.ParseDate(parts[5].Trim());
-                point.SampleDate = Utilities.ParseDate(parts[6].Trim());
+                point.DateOfBirth = DateTime.Parse(parts[4].Trim());
+                point.AdmissionDate = DateTime.Parse(parts[5].Trim());
+                point.SampleDate = DateTime.Parse(parts[6].Trim());
                 point.CdiffResult = Utilities.ParseTestResult(parts[7].Trim());
                 point.ToxinResult = Utilities.ParseTestResult(parts[8].Trim());
                 point.Unit = parts[10].Trim();
@@ -131,23 +131,6 @@ namespace libcdiffrecords
 
        
 
-        private AntibioticCourse[] ParseABXSeptFormat(string toParse)
-        {
-            char[] sep = new char[] { ',' };
-            string[] parts = toParse.Split(sep);
-            AntibioticCourse[] drugs = new AntibioticCourse[parts.Length];
-
-            for(int i =0; i < parts.Length; i++)
-            {
-                drugs[i] = new AntibioticCourse();
-                drugs[i].Drug = AntibioticManager.GetAntibiotic(parts[i].Trim().ToUpper());
-            }
-
-
-            return drugs;
-
-        }
-       
       
 
         public DataPoint[] LoadNAATResults(string path)
@@ -210,10 +193,10 @@ namespace libcdiffrecords
             if (parts.Length >= 7)
             {
                 point.PatientName = parts[0].Trim();
-                point.DateOfBirth = Utilities.ParseDate(parts[1].Trim());
+                point.DateOfBirth = DateTime.Parse(parts[1].Trim());
                 point.MRN = parts[2].Trim().PadLeft(8, '0');
                 point.Unit = parts[4].Trim();
-                point.SampleDate = Utilities.ParseDateTime(parts[5].Trim());
+                point.SampleDate = DateTime.Parse(parts[5].Trim());
                 point.CdiffResult = Utilities.ParseTestResult(parts[6].Trim());
                 point.ToxinResult = Utilities.ParseTestResult(parts[7].Trim());
                 point.Update();
@@ -263,8 +246,8 @@ namespace libcdiffrecords
             if(!parts[0].Equals(""))
             {
                 dp.Unit = parts[2].Trim();
-                dp.SampleDate = Utilities.ParseDateTime(parts[3].Trim());
-                dp.AdmissionDate = Utilities.ParseDateTime(parts[4].Trim());
+                dp.SampleDate = DateTime.Parse(parts[3].Trim());
+                dp.AdmissionDate = DateTime.Parse(parts[4].Trim());
                 dp.MRN = parts[6].Trim().PadLeft(8, '0');
                 dp.PatientName = parts[7].Trim();
                 dp.CdiffResult = Utilities.ParseTestResult(parts[10].Trim());
