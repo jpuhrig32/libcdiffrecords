@@ -76,7 +76,15 @@ namespace libcdiffrecords.Data
 
         }
 
+        public static bool operator ==(DataPoint d1, DataPoint d2)
+        {
+            return (d1.SampleID.Equals(d2.SampleID)) && (d1.AdmissionDate.Equals(d2.AdmissionDate)) && (d1.Unit.Equals(d2.Unit)) && (d1.MRN.Equals(d2.MRN)) && (d1.SampleDate.Equals(d2.SampleDate)) && (d1.CdiffResult.Equals(d2.CdiffResult)) && (d1.ToxinResult.Equals(d2.ToxinResult));
+        }
 
+        public static bool operator !=(DataPoint d1, DataPoint d2)
+        {
+            return !(d1 == d2);
+        }
 
         
 

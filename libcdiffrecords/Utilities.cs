@@ -8,7 +8,7 @@ using libcdiffrecords.Data;
 
 namespace libcdiffrecords
 {
-    class Utilities
+   public  class Utilities
     {
    
         /// <summary>
@@ -82,6 +82,20 @@ namespace libcdiffrecords
 
 
             return ret;
+        }
+
+        public static String PatientSexToString(Sex s)
+        {
+               switch (s)
+            {
+                case Sex.Female:
+                    return "F";
+                case Sex.Male:
+                    return "M";
+                default:
+                    return "";
+            }
+
         }
 
         /// <summary>

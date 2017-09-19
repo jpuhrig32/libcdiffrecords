@@ -13,6 +13,21 @@ namespace libcdiffrecords.Data
         List<DataPoint> data;
         Dictionary<string, List<DataPoint>> patients;
         Dictionary<string, List<Admission>> admissionsByPatient;
+        public Dictionary<string, DataPoint> DataBySampleID { get; set; }
+        
+
+        public static Bin operator +(Bin b1, Bin b2)
+        {
+            Bin ret = b1.Clone();
+            for(int i = 0; i < b2.Data.Count; i++)
+            {
+                ret.Add(b2.Data[i]);
+            }
+            return ret;
+        }
+
+
+
         public int ItemsInBin
         {
             get { return data.Count; }
@@ -134,6 +149,7 @@ namespace libcdiffrecords.Data
 
         }
 
+        
         public List<Admission> PatientAdmissions
         {
             get
@@ -195,6 +211,7 @@ namespace libcdiffrecords.Data
             patients = new Dictionary<string, List<DataPoint>>();
             admissionsByPatient = new Dictionary<string, List<Admission>>();
             label = binLabel;
+            
         }
 
         public Bin(string binLabel, DataPoint[] initalPoints)
@@ -203,7 +220,7 @@ namespace libcdiffrecords.Data
             patients = new Dictionary<string, List<DataPoint>>();
             admissionsByPatient = new Dictionary<string, List<Admission>>();
             label = binLabel;
-
+            DataBySampleID = new Dictionary<string, DataPoint>();
             for (int i = 0; i < initalPoints.Length; i++)
             {
                 Add(initalPoints[i]);
@@ -212,6 +229,23 @@ namespace libcdiffrecords.Data
 
         public void Add(DataPoint point)
         {
+            if(DataBySampleID.ContainsKey(point.SampleID)) //New sample shares an existing sample dataset. Duplicate or different samples sharing the same ID?
+            {
+                DataPoint tempSam = DataBySampleID[point.SampleID];
+                if(point != tempSam) //They are in fact, different points.
+                {
+                    string highestSampleID = DataBySampleID.Keys.Max();
+                    int sampleMax = int.Parse(highestSampleID.Substring(4));
+                    sampleMax++;
+                    point.SampleID = "SAM_" + sampleMax.ToString();
+                }
+               else
+                {
+                    return;
+                }
+            }
+
+            DataBySampleID.Add(point.SampleID, point);
             data.Add(point);
 
             if (!patients.ContainsKey(point.MRN))
@@ -259,6 +293,7 @@ namespace libcdiffrecords.Data
 
         }
 
+        
         public void Add(Admission dpa)
         {
             for (int i = 0; i < dpa.Points.Count; i++)
