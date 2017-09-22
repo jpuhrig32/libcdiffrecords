@@ -76,9 +76,9 @@ namespace libcdiffrecords.Storage
 
         private void AppendBoxData(StreamWriter sw, StorageBox b)
         {
-            for(int i = 0; i < b.SampleTubes.Length; i++)
+            for(int i = 0; i < b.SampleTubes.Count; i++)
             {
-                if(b.SampleTubes[i].LegacyID != "X0000")
+                if(b.SampleTubes[i].LegacyID != "")
                     sw.WriteLine(b.Name + "," + b.SampleTubes[i].LegacyID + "," + b.SampleTubes[i].SampleDate.ToShortDateString() + "," + b.SampleTubes[i].TubeLocation.LocationInBox +",");
             }
         }

@@ -124,7 +124,7 @@ namespace libcdiffrecords
                     point.Notes = parts[12].Trim(); 
 
 
-                point.Update();
+              
             }
             return point;
         }
@@ -199,7 +199,7 @@ namespace libcdiffrecords
                 point.SampleDate = DateTime.Parse(parts[5].Trim());
                 point.CdiffResult = Utilities.ParseTestResult(parts[6].Trim());
                 point.ToxinResult = Utilities.ParseTestResult(parts[7].Trim());
-                point.Update();
+
             }
             return point;
         }

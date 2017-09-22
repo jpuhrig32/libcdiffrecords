@@ -796,6 +796,63 @@ namespace libcdiffrecords.Data
             return bin1;
         }
 
+        public static Bin FilterFlaggedData(Bin b, DataFlag[] flags)
+        {
+            Bin retBin = new Bin(b.Label + "_Flagged");
+
+            for(int i =0; i < b.Data.Count; i++)
+            {
+                for(int j = 0; j < flags.Length; j++)
+                {
+                    if (b.Data[i].Flags.Contains(flags[j]))
+                    {
+                        retBin.Add(b.Data[i]);
+                        break;
+                    }
+                }
+            }
+
+            return retBin;
+        }
+
+        public static Bin FilterFlaggedData(Bin b, DataFlag flag)
+        {
+            DataFlag[] flags = new DataFlag[1] { flag };
+            return FilterFlaggedData(b, flags);
+        }
+
+
+        public static Bin RemoveFlaggedData(Bin b, DataFlag[] flags)
+        {
+            Bin retBin = new Bin(b.Label + "_FlaggedRemoved");
+
+            for (int i = 0; i < b.Data.Count; i++)
+            {
+                bool flagged = false;
+                for (int j = 0; j < flags.Length; j++)
+                {
+                    if (b.Data[i].Flags.Contains(flags[j]))
+                    {
+                        flagged = true;
+                        break;
+                    }
+                }
+                if(!flagged)
+                {
+                    retBin.Add(b.Data[i]);
+                }
+            }
+
+            return retBin;
+
+        }
+
+        public static Bin RemoveFlaggedData(Bin b, DataFlag flag)
+        {
+
+            DataFlag[] flags = new DataFlag[1] { flag };
+            return RemoveFlaggedData(b, flags);
+        }
         private static Dictionary<string, bool> CreateCommonUnitTable()
         {
             Dictionary<string, bool> common = new Dictionary<string, bool>();

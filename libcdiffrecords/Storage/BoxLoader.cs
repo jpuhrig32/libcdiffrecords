@@ -8,6 +8,11 @@ using System.IO;
 
 namespace libcdiffrecords.Storage
 {
+    public enum BoxWritingStyle
+    {
+        AllBoxesToOneFile,
+        OneBoxPerFile,
+    };
     struct TubeData
     {
         public int count;
@@ -16,7 +21,7 @@ namespace libcdiffrecords.Storage
         public bool use;
     }
 
-    class BoxLoader
+   public class BoxLoader
     {
         DataPoint[] data;
         Dictionary<string, List<DataPoint>> sampleTable;
@@ -54,8 +59,7 @@ namespace libcdiffrecords.Storage
                 {
                     string[] parts = line.Split(separator);
                     StorageBox box = new StorageBox(parts[1].Trim());
-                    box.SampleTubes = EmptyBoxTubes(81);
-
+                  
                     switch (parts[3].Trim())
                     {
                         case "Short3":
@@ -95,15 +99,7 @@ namespace libcdiffrecords.Storage
 
         }
 
-        private static Tube[] EmptyBoxTubes(int tubeCount)
-        {
-            Tube[] t = new Tube[tubeCount];
-            for(int i =0; i < t.Length; i++)
-            {
-                t[i] = Tube.EmptyTube;
-            }
-            return t;
-        }
+
 
         private static StorageBox LoadShort3BoxFile(StreamReader sr, StorageBox box)
         {
@@ -145,13 +141,13 @@ namespace libcdiffrecords.Storage
                             {
                                 int ind = (lineCount - 2) * width + (x * 3) + i; // Calculating the index - (lineCount -2) is the row, (x*3) is which block of 3 we're in, and i is the position in that block.
 
-                                box.SampleTubes[ind].LegacyID = td[x].id;
-                                box.SampleTubes[ind].SampleDate = td[x].date;
-                                box.SampleTubes[ind].TubeAccession = "CDIF_" + boxAcc + "_" + ind;
-                                box.SampleTubes[ind].TubeLabel = td[x].id + " " + td[x].date.ToShortDateString();
+                                bool useGly = false;
+                                if (i < 2 && (td[x].date) >= glyDate)
+                                    useGly = true;
 
-                                if (i < 2 && (td[x].date >= glyDate))
-                                    box.SampleTubes[ind].Additives = "Glycerol";
+                                box.SampleTubes.Add(BuildTubeFromTubeData(td[x], ind, box.Name, useGly, x, false));
+                             
+                               
 
                             }
                         }
@@ -213,12 +209,11 @@ namespace libcdiffrecords.Storage
                                 {
                                     ind = (((x*4)+i) * width) +8;
                                 }
-                                box.SampleTubes[ind].LegacyID = td[x].id;
-                                box.SampleTubes[ind].SampleDate = td[x].date;
-                                box.SampleTubes[ind].TubeAccession = "CDIF_" + boxAcc + "_" + ind.ToString();
-                                box.SampleTubes[ind].TubeLabel = td[x].id + " " + td[x].date.ToShortDateString();
+                                bool useGly = false;
                                 if (i < 2 && (td[x].date) >= glyDate)
-                                    box.SampleTubes[ind].Additives = "Glycerol";
+                                    useGly = true;
+
+                                box.SampleTubes.Add(BuildTubeFromTubeData(td[x], ind, box.Name, useGly, x, true));
                             }
                         }
                     }
@@ -228,6 +223,24 @@ namespace libcdiffrecords.Storage
                     lineCount++;
                 }
                 return box;
+        }
+
+        private static Tube BuildTubeFromTubeData(TubeData td, int pos, string boxName, bool useGly, int numInSample, bool attachNumInSample)
+        {
+            Tube t = new Tube();
+            t.ParentBox = boxName;
+            t.LegacyID = td.id;
+            t.SampleDate = td.date;
+            t.TubeAccession = "CDIF_" + boxName.Substring(4) + "_" + pos.ToString();
+            string tubeNumForLabel = "";
+            if (attachNumInSample)
+                tubeNumForLabel = " " + numInSample.ToString();
+            t.TubeLabel = td.id + " " + td.date.ToShortDateString() + tubeNumForLabel;
+            if (useGly)
+                t.Additives = "Glycerol";
+            t.BoxPosition = pos;
+
+            return t;
         }
 
         private static StorageBox LoadLong6BoxFile(StreamReader sr, StorageBox box)
@@ -270,12 +283,17 @@ namespace libcdiffrecords.Storage
                         }
                         for(int i =0; i < count; i++)
                         {
-                            box.SampleTubes[indices[i]].LegacyID = id;
-                            box.SampleTubes[indices[i]].SampleDate = dt;
-                            box.SampleTubes[indices[i]].TubeAccession = "CDIF_" + boxAcc + "_" + indices[i].ToString();
-                            box.SampleTubes[indices[i]].TubeLabel = id + " " + dt.ToShortDateString() + " " + i.ToString();
+                            Tube t = new Tube();
+                            t.LegacyID = id;
+                            t.SampleDate = dt;
+                            t.TubeAccession = "CDIF_" + boxAcc + "_" + indices[i].ToString().PadLeft(2, '0');
+                            t.TubeLabel = id + " " + dt.ToShortDateString() + " " + i.ToString();
+                            t.ParentBox = box.Name;
+                            t.BoxPosition = indices[i];
                             if (i < 2 && (dt >= glyDate))
-                                box.SampleTubes[indices[i]].Additives = "Glycerol";
+                                t.Additives = "Glycerol";
+
+                            box.SampleTubes.Add(t);
 
                         }
                     }
@@ -310,11 +328,9 @@ namespace libcdiffrecords.Storage
                         temp.TubeLabel = label;
                         temp.SampleID = sampleID;
                         temp.Additives = additives;
-                        int col = (lineCount - 2) % box.Width;
-                        int row = ((lineCount - 2) - col) / box.Width;
-                        BoxLocation loc = new BoxLocation(accession, row, col);
-                        temp.TubeLocation = loc;
-                        box.SampleTubes[lineCount - 2] = temp;
+                        temp.ParentBox = box.Name;
+                        temp.BoxPosition = lineCount - 2;
+                        box.SampleTubes.Add(temp);
 
                     }
                 }
@@ -327,6 +343,7 @@ namespace libcdiffrecords.Storage
 
         private static StorageBox LoadSwabBagAccessionFormat(StreamReader sr, StorageBox box)
         {
+            
             char[] separator = new char[1] { ',' };
 
             int lineCount = 1;
@@ -350,7 +367,10 @@ namespace libcdiffrecords.Storage
                         temp.TubeLabel = label;
                         temp.SampleID = sampleID;
                         temp.Additives = "";
-                        box.SampleTubes[lineCount - 2] = temp;
+                        temp.ParentBox = box.Name;
+                        temp.BoxPosition = lineCount - 2;
+
+                        box.SampleTubes.Add(temp);
 
                     }
                 }
@@ -374,20 +394,25 @@ namespace libcdiffrecords.Storage
                 if (lineCount >= 2)
                 {
                     string[] parts = line.Split(separator);
-                    string legacyID = parts[1].Trim();
-                    DateTime date = DateTime.Parse(parts[2].Trim());
-               
-
-
-                    if (!legacyID.Equals(""))
+                    if (parts[1].Trim() != "")
                     {
-                        Tube temp = new Tube();
-                        temp.TubeAccession = "SWAB_"+ box.Name.Substring(4)+"_"+ (lineCount-1).ToString().PadLeft(2, '0');
-                        temp.TubeLabel = legacyID + " " + date.ToShortDateString();
-                        temp.SampleID = "";
-                        temp.Additives = "";
-                        box.SampleTubes[lineCount - 2] = temp;
+                        string legacyID = parts[1].Trim();
+                        DateTime date = DateTime.Parse(parts[2].Trim());
 
+
+
+                        if (!legacyID.Equals(""))
+                        {
+                            Tube temp = new Tube();
+                            temp.TubeAccession = "SWAB_" + box.Name.Substring(4) + "_" + (lineCount - 1).ToString().PadLeft(2, '0');
+                            temp.TubeLabel = legacyID + " " + date.ToShortDateString();
+                            temp.SampleID = "";
+                            temp.Additives = "";
+                            temp.ParentBox = box.Name;
+                            temp.BoxPosition = 0;
+                            box.SampleTubes.Add(temp);
+
+                        }
                     }
                 }
                 lineCount++;
@@ -416,11 +441,11 @@ namespace libcdiffrecords.Storage
                 }
                 sw.WriteLine(sbhead.ToString());
 
-                for(int j = 0; j < boxes[i].SampleTubes.Length; j++)
+                for(int j = 0; j < boxes[i].SampleTubes.Count; j++)
                 {
                     StringBuilder sb = new StringBuilder();
 
-                    List<string> line = CreateTubeDataLine(boxes[i].SampleTubes[i], boxes[i].Name, j + 1);
+                    List<string> line = CreateTubeDataLine(boxes[i].SampleTubes[i]);
 
                     for(int x = 1; x < line.Count; x++)
                     {
@@ -435,32 +460,90 @@ namespace libcdiffrecords.Storage
 
         }
 
-        private static List<string> CreateTubeDataLine(Tube t, String boxName, int count)
+        private static List<string> CreateTubeDataLine(Tube t)
         {
             List<string> line = new List<string>();
-            line.Add(boxName);
-            line.Add(count.ToString());
+            line.Add(t.ParentBox);
+            if (t.ParentBox.Contains("Box"))
+                line.Add(PositionToRowColFormat(t.BoxPosition));
+            else
+                line.Add("");
             line.Add(t.TubeAccession);
             line.Add(t.TubeLabel);
             line.Add(t.SampleID);
             line.Add(t.Additives);
+            line.Add(t.Notes);
 
             return line;
 
         }
 
+        private  static string PositionToRowColFormat(int pos)
+        {
+
+            pos -= 1; //Position will be given in a range of 1-81. This brings it to be zero based, to allow both X and Y to be zero based.
+
+            int width = 9;
+            int x = pos / width;
+            int y = pos % width;
+            char row = (char)(x + 65); //65 is 'A'; 
+
+            return row + y.ToString();
+        }
+
         public static List<string> CreateHeaderForSampleBox()
         {
             List<string> head = new List<string>();
-            head.Add("Box Name");
-            head.Add("Count");
+            head.Add("Box Name");   
             head.Add("Position");
             head.Add("Accession");
             head.Add("Label");
+            head.Add("Sample ID");
             head.Add("Additives");
+            head.Add("Notes");
 
 
             return head;
+        }
+
+
+        ///TODO - merge both box writing functions - they reuse practically all of their code.
+        public static void WriteBoxData(StorageBox[] boxes, string directory, char delim, BoxWritingStyle style)
+        {
+
+            for (int i = 0; i < boxes.Length; i++)
+            {
+                string filename = directory + boxes[i].Name + ".csv";
+
+                StreamWriter sw = new StreamWriter(filename);
+                sw.WriteLine("Box Name:" + delim + boxes[i].Name + delim + "Format" + delim + "Box_Accession");
+                List<string> head = CreateHeaderForSampleBox();
+
+
+                StringBuilder sbhead = new StringBuilder();
+                for (int k = 1; k < head.Count; k++)
+                {
+                    sbhead.Append(head[i]);
+                    sbhead.Append(delim);
+                }
+                sw.WriteLine(sbhead.ToString());
+
+                for (int j = 0; j < boxes[i].SampleTubes.Count; j++)
+                {
+                    StringBuilder sb = new StringBuilder();
+
+                    List<string> line = CreateTubeDataLine(boxes[i].SampleTubes[i]);
+
+                    for (int x = 1; x < line.Count; x++)
+                    {
+                        sb.Append(line[x]);
+                        sb.Append(delim);
+                    }
+                    sw.WriteLine(sb.ToString());
+                }
+
+                sw.Close();
+            }
         }
         public static void WriteBoxesToSingleFile(StorageBox[] boxes, string filename, char delim)
         {
@@ -479,15 +562,15 @@ namespace libcdiffrecords.Storage
 
             for(int i = 0; i < boxes.Length; i++)
             {
-                for(int j = 0; j < boxes[i].SampleTubes.Length; j++)
+                for(int j = 0; j < boxes[i].SampleTubes.Count; j++)
                 {
-                    List<string> line = CreateTubeDataLine(boxes[i].SampleTubes[j], boxes[i].Name, j + 1);
+                    List<string> line = CreateTubeDataLine(boxes[i].SampleTubes[j]);
 
                     StringBuilder lineSB = new StringBuilder();
 
                     for(int k = 0; k < line.Count; k++)
                     {
-                        lineSB.Append(line[i]);
+                        lineSB.Append(line[k]);
                         lineSB.Append(delim);
                     }
                     sw.WriteLine(lineSB.ToString());
@@ -501,7 +584,7 @@ namespace libcdiffrecords.Storage
 
         private static string PadIdentifier(string id)
         {
-            if (char.IsLetter(id[0]) && id[0] != 'F')
+            if (char.IsLetter(id[0]))
             {
                 string idnum = id.Substring(1);
                 idnum = idnum.PadLeft(4, '0');

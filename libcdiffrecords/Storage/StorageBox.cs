@@ -30,40 +30,22 @@ namespace libcdiffrecords.Storage
             boxWidth = width;
             boxHeight = height;
             boxName = name;
-            boxSampleCount = boxWidth * boxHeight;
-            sampletubes = new Tube[width * height];
+
+            SampleTubes = new List<Tube>();
         }
 
-        public Tube[] SampleTubes
-        {
-            get { return sampletubes; }
-            set { sampletubes = value; }
-        }
+      public List<Tube> SampleTubes { get; set; }
 
-        public int Width
-        {
-            get { return boxWidth; }
-        }
+        public int SampleCount { get => SampleTubes.Count; }
+   
 
-        public int Height
-        {
-            get { return boxHeight; }
-        }
 
-        public int SampleCount
-        {
-            get { return boxSampleCount; }
-        }
 
-        public string Name
-        {
-            get { return boxName; }
-            set { boxName = value; }
-        }
+       public string Name { get; set; }
 
         public void AttachBoxLocationDataToTubes()
         {
-            for(int i = 0; i < SampleTubes.Length; i++)
+            for(int i = 0; i < SampleTubes.Count; i++)
             {
                 SampleTubes[i].TubeLocation = new BoxLocation(boxName, i / boxWidth, i % boxWidth);
             }

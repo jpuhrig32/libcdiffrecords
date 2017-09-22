@@ -238,6 +238,7 @@ namespace libcdiffrecords.Data
                     int sampleMax = int.Parse(highestSampleID.Substring(4));
                     sampleMax++;
                     point.SampleID = "SAM_" + sampleMax.ToString();
+                    point.Flags.Add(DataFlag.DifferentSamplesAttachedToSampleID);
                 }
                else
                 {
@@ -252,6 +253,7 @@ namespace libcdiffrecords.Data
             {
                 patients.Add(point.MRN, new List<DataPoint>());
             }
+           
             patients[point.MRN].Add(point);
 
             if (!admissionsByPatient.ContainsKey(point.MRN))

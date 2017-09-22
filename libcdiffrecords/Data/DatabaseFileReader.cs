@@ -87,16 +87,61 @@ namespace libcdiffrecords.Data
             point.SampleID = line[headerTable["Sample_ID"]];
             point.PatientName = line[headerTable["Patient_Name"]];
             point.MRN = line[headerTable["MRN"]];
+            if (point.MRN == "" || point.MRN == "00000000")
+                point.Flags.Add(DataFlag.MissingMRN);
+            if (point.MRN.Length > 8)
+                point.Flags.Add(DataFlag.MRNLongerThan8Digits_LikelyNonFMLH);
             point.PatientSex = Utilities.ParseSexFromString(line[headerTable["Sex"]]);
-            point.DateOfBirth =DateTime.Parse(line[headerTable["DOB"]]);
-            point.AdmissionDate = DateTime.Parse(line[headerTable["Adm_Date"]]);
-            point.SampleDate = DateTime.Parse(line[headerTable["Sample_Date"]]);
+
+            DateTime temp;
+            if (TryParseDate(line[headerTable["DOB"]], out temp))
+                point.DateOfBirth = temp;
+            else
+                point.DateOfBirth = new DateTime(1901, 1, 1);
+
+            if (point.DateOfBirth <= new DateTime(1901, 1, 1)) //Not included in the if-else block so that we can also account for "John Doe" patients, whose DOB is 1/1/1901
+                point.Flags.Add(DataFlag.MissingDOB);
+
+
+            if (TryParseDate(line[headerTable["Adm_Date"]], out temp))
+                point.AdmissionDate = temp;
+            else
+            {
+                point.AdmissionDate = DateTime.MaxValue;
+                point.Flags.Add(DataFlag.MissingAdmissionDate);
+            }
+
+
+            if (TryParseDate(line[headerTable["Sample_Date"]], out temp))
+            {
+                point.SampleDate = temp;
+                if (point.AdmissionDate == DateTime.MaxValue) //Indicates a missing AdmissionDate. Practice is to set it to the sample date, and now flag it.
+                    point.AdmissionDate = point.SampleDate;
+            }
+            else
+            {
+                point.SampleDate = DateTime.MaxValue;
+                point.Flags.Add(DataFlag.MissingSampleDate);
+            }
+
+
             point.CdiffResult = Utilities.ParseTestResult(line[headerTable["C_diff_Test_Result"]]);
+            if (point.CdiffResult == TestResult.NotTested)
+                point.Flags.Add(DataFlag.MissingCdiffResult);
             point.ToxinResult = Utilities.ParseTestResult(line[headerTable["Toxin_Result"]]);
             point.Test = Utilities.ParseTestTypeFromString(line[headerTable["Test_Type"]]);
+            if (point.Test == TestType.No_Test)
+                point.Flags.Add(DataFlag.MissingTestType);
             point.Unit = line[headerTable["Unit"]];
+            if (point.Unit == "")
+                point.Flags.Add(DataFlag.MissingUnit);
             point.Room = line[headerTable["Room"]];
             point.LegacyID = line[headerTable["Legacy_ID"]];
+            if (point.LegacyID != "")
+            {
+                string lab = point.LegacyID[0] + point.LegacyID.Substring(1).PadLeft(4, '0');
+                point.LegacyID = lab;
+            }
             point.Notes = line[headerTable["Notes"]];
 
             //Anything that isn't in our normal set of fields goes here. Normal fields listed above |
@@ -299,6 +344,20 @@ namespace libcdiffrecords.Data
             location = 0;
             return false;
            
+        }
+
+        private static bool TryParseDate(string toParse, out DateTime result)
+        {
+            try
+            {
+                result = DateTime.Parse(toParse);
+            }
+            catch(Exception e)
+            {
+                result = DateTime.MinValue;
+                return false;
+            }
+            return true;
         }
     }
 }

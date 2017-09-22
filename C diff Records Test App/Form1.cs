@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using libcdiffrecords;
 using libcdiffrecords.DataReconciliation;
 using libcdiffrecords.Reports;
+using System.IO;
 
 
 using libcdiffrecords.Data;
@@ -58,28 +59,37 @@ namespace C_diff_Records_Test_App
             if(openInputFileDialog.FileNames.Length > 0)
             {
                 DataPoint[] data = DatabaseFileIO.ReadDatabaseFile(openInputFileDialog.FileName);
+                Dictionary<string, string> sampleIDTable = new Dictionary<string, string>();
 
-                Bin b = new Bin("Global", data);
-                List<Bin> bins = new List<Bin>();
-                
-                b = DataFilter.FilterByTestType(b, TestType.Surveillance_Test);
-                Bin[] unitBins = DataFilter.StratifyOnUnits(b);
-                bins.Add(b);
-                bins.AddRange(unitBins);
-
-                IReportLine[] lines = new IReportLine[bins.Count];
-
-                for(int i = 0; i < bins.Count; i++)
+                for(int i = 0; i < data.Length; i++)
                 {
-                    lines[i] = new MasterReportLine(bins[i]);
+                    if(data[i].LegacyID != "")
+                    {
+                        if(!sampleIDTable.ContainsKey(data[i].LegacyID + " " + data[i].SampleDate.ToShortDateString()))
+                             sampleIDTable.Add(data[i].LegacyID + " " + data[i].SampleDate.ToShortDateString(), data[i].SampleID);
+                    }
                 }
 
-                ReportWriter.WriteReport(openInputFileDialog.FileName + "Report.csv", ReportFormat.CSV, lines);
+                StorageBox[] boxes = new StorageBox[openBoxLocFileDialog.FileNames.Length];
 
-                
+                Bin unfound = new Bin("");
+            
+                for(int i =0; i < boxes.Length; i++)
+                {
+                    boxes[i] = BoxLoader.LoadStorageBox(openBoxLocFileDialog.FileNames[i]);
+                    for(int j = 0; j < boxes[i].SampleTubes.Length; j++)
+                    {
+                        if(boxes[i].SampleTubes[j].SampleID != "")
+                        {
 
-
-                
+                            if (sampleIDTable.ContainsKey(boxes[i].SampleTubes[j].LegacyID + " " + boxes[i].SampleTubes[j].SampleDate.ToShortDateString() ))
+                                boxes[i].SampleTubes[j].SampleID = sampleIDTable[boxes[i].SampleTubes[j].LegacyID + " " + boxes[i].SampleTubes[j].SampleDate.ToShortDateString()];
+                           
+                        }
+                    }
+                }
+                BoxLoader.WriteBoxesToSingleFile(boxes, openInputFileDialog.FileName + "_Boxes.csv", ',');
+                TabDelimWriter.WriteBinData(openInputFileDialog.FileName + "_orphan.txt", unfound);
 
                 int z = 0;
                 //TabLoader tl = new TabLoader();

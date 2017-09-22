@@ -49,7 +49,7 @@ namespace libcdiffrecords.Data
 
         public void AddStorageBox(StorageBox storageBox)
         {
-            for(int i =0; i < storageBox.SampleTubes.Length; i++)
+            for(int i =0; i < storageBox.SampleTubes.Count; i++)
             {
                 int sampleIndex = 0;
                 string lkpKey = storageBox.SampleTubes[i].LegacyID + "_" + storageBox.SampleTubes[i].SampleDate.ToShortDateString();

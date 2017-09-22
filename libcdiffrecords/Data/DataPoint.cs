@@ -7,12 +7,10 @@ using libcdiffrecords.Storage;
 
 namespace libcdiffrecords.Data
 {
- 
-
-
     public struct DataPoint
     {
         private string mrn;
+        private TestResult cdresult;
         public string MRN { get => mrn; set => mrn = value.PadLeft(8, '0'); }
         public string PatientName { get; set; }
         public string SampleID { get; set; }
@@ -20,15 +18,14 @@ namespace libcdiffrecords.Data
         public string AdmissionID { get; set; }
         public string Notes { get; set; }
         public List<Tube> Tubes { get; set; }
-    
-
+        public List<DataFlag> Flags { get; set; }
         public TestType Test { get; set; }
         public Sex PatientSex { get; set; }
         public DateTime DateOfBirth { get; set; }
         public int Age { get => (int)((AdmissionDate - DateOfBirth).Days / 365.25); }
         public DateTime AdmissionDate { get; set; }
         public DateTime SampleDate { get; set; }
-        private TestResult cdresult; 
+       
         public TestResult CdiffResult
         {
             get => cdresult;
@@ -51,10 +48,11 @@ namespace libcdiffrecords.Data
             MRN = "00000000";
             PatientName = "John Doe";
             SampleID = "";
-            LegacyID = "X000";
+            LegacyID = "";
             AdmissionID = "";
             Notes = "";
             Tubes = new List<Tube>();
+            Flags = new List<DataFlag>();
 
             Test = TestType.No_Test;
             PatientSex = Sex.Male;
@@ -62,18 +60,10 @@ namespace libcdiffrecords.Data
             AdmissionDate = new DateTime(2000, 1, 1);
             SampleDate = new DateTime(2000, 1, 1);
             CdiffResult = TestResult.Negative;
-            Unit = "FMLH";
+            Unit = "";
             Room = "00";
             Fields = new Dictionary<string, string>();
      
-        }
-
-
-        public void Update()
-        {
-            if (CdiffResult == TestResult.Negative || CdiffResult == TestResult.NotTested)
-                ToxinResult = TestResult.NotTested;
-
         }
 
         public static bool operator ==(DataPoint d1, DataPoint d2)
