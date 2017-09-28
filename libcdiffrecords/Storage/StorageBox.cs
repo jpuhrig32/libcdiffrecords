@@ -10,29 +10,17 @@ namespace libcdiffrecords.Storage
 {
     public class StorageBox
     {
-        int boxWidth = 9;
-        int boxHeight = 9;
-        string boxName = "";
-        int boxSampleCount = 81;
-        Tube[] sampletubes;
+        public int BoxSize { get; set; }
+        
 
         public StorageBox(string name)
         {
-            boxWidth = 9;
-            boxHeight = 9;
-            boxSampleCount = boxWidth * boxHeight;
-
-            boxName = name;
-        }
-
-        public StorageBox(int width, int height, string name)
-        {
-            boxWidth = width;
-            boxHeight = height;
-            boxName = name;
-
+            BoxSize = 81;
             SampleTubes = new List<Tube>();
+            Name = name;
         }
+
+
 
       public List<Tube> SampleTubes { get; set; }
 
@@ -43,12 +31,13 @@ namespace libcdiffrecords.Storage
 
        public string Name { get; set; }
 
-        public void AttachBoxLocationDataToTubes()
+       public int[] GetEmptyTubeSpots()
         {
-            for(int i = 0; i < SampleTubes.Count; i++)
-            {
-                SampleTubes[i].TubeLocation = new BoxLocation(boxName, i / boxWidth, i % boxWidth);
-            }
+            throw new NotImplementedException();
+            List<int> empties = new List<int>();
+
+
+            return empties.ToArray();
         }
     }
 

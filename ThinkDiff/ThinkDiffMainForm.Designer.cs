@@ -42,6 +42,9 @@
             this.statusLabel = new System.Windows.Forms.Label();
             this.thinkDiffProgressBar = new System.Windows.Forms.ProgressBar();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createSurveillanceReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createNAATComparisonReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -54,6 +57,7 @@
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.Size = new System.Drawing.Size(876, 471);
             this.dataGridView1.TabIndex = 0;
+            this.dataGridView1.DataSourceChanged += new System.EventHandler(this.dataGridView1_DataSourceChanged);
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
             // menuStrip1
@@ -109,6 +113,10 @@
             // 
             // toolsToolStripMenuItem
             // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.filterDataToolStripMenuItem,
+            this.createSurveillanceReportToolStripMenuItem,
+            this.createNAATComparisonReportToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -153,6 +161,24 @@
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
+            // filterDataToolStripMenuItem
+            // 
+            this.filterDataToolStripMenuItem.Name = "filterDataToolStripMenuItem";
+            this.filterDataToolStripMenuItem.Size = new System.Drawing.Size(248, 22);
+            this.filterDataToolStripMenuItem.Text = "Filter Data...";
+            // 
+            // createSurveillanceReportToolStripMenuItem
+            // 
+            this.createSurveillanceReportToolStripMenuItem.Name = "createSurveillanceReportToolStripMenuItem";
+            this.createSurveillanceReportToolStripMenuItem.Size = new System.Drawing.Size(248, 22);
+            this.createSurveillanceReportToolStripMenuItem.Text = "Create Surveillance Report";
+            // 
+            // createNAATComparisonReportToolStripMenuItem
+            // 
+            this.createNAATComparisonReportToolStripMenuItem.Name = "createNAATComparisonReportToolStripMenuItem";
+            this.createNAATComparisonReportToolStripMenuItem.Size = new System.Drawing.Size(248, 22);
+            this.createNAATComparisonReportToolStripMenuItem.Text = "Create NAAT Comparison Report";
+            // 
             // ThinkDiffMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -190,6 +216,9 @@
         private System.Windows.Forms.Label statusLabel;
         private System.Windows.Forms.ProgressBar thinkDiffProgressBar;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem filterDataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createSurveillanceReportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createNAATComparisonReportToolStripMenuItem;
     }
 }
 

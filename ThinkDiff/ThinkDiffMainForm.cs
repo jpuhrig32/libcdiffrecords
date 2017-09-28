@@ -40,7 +40,8 @@ namespace ThinkDiff
                 dataGridView1.DataSource = AppData.BuildDatasetFromWorkingBinAsync(this);
                 DisplayBinContents();
                 dataGridView1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToDisplayedHeaders;
-                dataGridView1.Show();
+               if(dataGridView1.DataSource != null)
+                    dataGridView1.Show();
             }
         }
         
@@ -62,7 +63,7 @@ namespace ThinkDiff
 
         private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
-
+            
         }
 
         private void ThinkDiffMainForm_Load(object sender, EventArgs e)
@@ -73,6 +74,12 @@ namespace ThinkDiff
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void dataGridView1_DataSourceChanged(object sender, EventArgs e)
+        {
+            dataGridView1.Hide();
+            dataGridView1.Show();
         }
     }
 }

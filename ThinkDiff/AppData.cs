@@ -248,7 +248,7 @@ namespace ThinkDiff
             return sb.ToString();
         }
 
-        private static Dictionary<string, bool> ProduceStandardFieldTable()
+       public static Dictionary<string, bool> ProduceStandardFieldTable()
         {
             Dictionary<string, bool> fields = new Dictionary<string, bool>();
 
@@ -270,5 +270,6 @@ namespace ThinkDiff
 
             return fields;
         }
+
     }
 }

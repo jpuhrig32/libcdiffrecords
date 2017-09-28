@@ -725,6 +725,26 @@ namespace libcdiffrecords.Data
             return retBin;
         }
 
+        public static Bin RemoveSamplesBasedOnNotes(Bin b, string noteCriteria)
+        {
+            Bin retBin = new Bin(b.Label);
+
+            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                {
+                    for(int i = 0; i < adm.Points.Count; i++)
+                    {
+                        if(!adm.Points[i].Notes.Contains(noteCriteria))
+                        {
+                            retBin.Add(adm.Points[i]);
+                        }
+                    }
+                }
+            }
+            return retBin;
+        }
+
       
         public static Bin FilterPositivesByToxinResult(Bin b, TestResult toxResult)
         {

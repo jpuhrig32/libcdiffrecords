@@ -7,6 +7,8 @@ using System.IO;
 using System.Data.SQLite;
 using System.Data;
 using System.Data.Common;
+using libcdiffrecords.Data;
+using libcdiffrecords;
 
 namespace ThinkDiff
 {
@@ -203,6 +205,53 @@ namespace ThinkDiff
                     settingsResults.Add(key, reader.GetString(1));
             }
             return settingsResults;
+        }
+
+        public async Task<Bin> PullDataFromDatabase(string query)
+        {
+            return await Task.Run(async () =>
+            {
+                Bin retBin = new Bin("NewData");
+                DbDataReader dr = await ExecuteDataReaderQueryAsync(query);
+                Dictionary<string, bool> stdFields = AppData.ProduceStandardFieldTable();
+
+                while (await dr.ReadAsync())
+                {
+                    retBin.Add(PullDataPointFromDataReader(dr));
+
+                }
+
+                return retBin;
+            });
+        }
+
+        private DataPoint PullDataPointFromDataReader(DbDataReader dr)
+        {
+            DataPoint dp = new DataPoint();
+            dp.Initalize();
+            dp.SampleID = dr.GetString(0);
+            dp.AdmissionID = dr.GetString(1);
+            dp.PatientName = dr.GetString(2);
+            dp.MRN = dr.GetString(3);
+            dp.PatientSex = Utilities.ParseSexFromString(dr.GetString(4));
+            dp.DateOfBirth = DateTime.Parse(dr.GetString(5));
+            dp.AdmissionDate = DateTime.Parse(dr.GetString(6));
+            dp.SampleDate = DateTime.Parse(dr.GetString(7));
+            dp.CdiffResult = Utilities.ParseTestResult(dr.GetString(8));
+            dp.ToxinResult = Utilities.ParseTestResult(dr.GetString(9));
+            dp.Test = Utilities.ParseTestTypeFromString(dr.GetString(10));
+            dp.Unit = dr.GetString(11);
+            dp.Room = dr.GetString(12);
+            dp.LegacyID = dr.GetString(13);
+            dp.Notes = dr.GetString(14);
+
+            for(int i = 15; i < dr.FieldCount; i++)
+            {
+                dp.Fields.Add(dr.GetName(i), dr.GetString(i));
+            }
+
+
+            return dp;
         }
     }
 }

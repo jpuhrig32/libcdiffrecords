@@ -59,6 +59,11 @@ namespace C_diff_Records_Test_App
             if(openInputFileDialog.FileNames.Length > 0)
             {
                 DataPoint[] data = DatabaseFileIO.ReadDatabaseFile(openInputFileDialog.FileName);
+                Bin data2 = new Bin("dat", data);
+                data2 = DataFilter.RemoveSamplesBasedOnNotes(data2, "Not Enough");
+                data2 = DataFilter.FilterByAdmissionType(data2, AdmissionStatus.NegativeOnAdmission_TurnedPositive);
+
+                DatabaseFileIO.WriteDataToFile(data2, openInputFileDialog.FileName + "negtoPos saved.csv", ',');
                 Dictionary<string, string> sampleIDTable = new Dictionary<string, string>();
 
                 for(int i = 0; i < data.Length; i++)
@@ -77,7 +82,7 @@ namespace C_diff_Records_Test_App
                 for(int i =0; i < boxes.Length; i++)
                 {
                     boxes[i] = BoxLoader.LoadStorageBox(openBoxLocFileDialog.FileNames[i]);
-                    for(int j = 0; j < boxes[i].SampleTubes.Length; j++)
+                    for(int j = 0; j < boxes[i].SampleTubes.Count; j++)
                     {
                         if(boxes[i].SampleTubes[j].SampleID != "")
                         {
@@ -89,6 +94,7 @@ namespace C_diff_Records_Test_App
                     }
                 }
                 BoxLoader.WriteBoxesToSingleFile(boxes, openInputFileDialog.FileName + "_Boxes.csv", ',');
+                BoxLoader.WriteBoxDataToBoxAccessionFiles(boxes, new FileInfo(openInputFileDialog.FileName).Directory.FullName + '/', ',');
                 TabDelimWriter.WriteBinData(openInputFileDialog.FileName + "_orphan.txt", unfound);
 
                 int z = 0;

@@ -52,8 +52,7 @@ namespace libcdiffrecords.Storage
           
        
                 StreamReader sr = new StreamReader(filename);
-                char[] separator = new char[1];
-                separator[0] = ',';
+                char[] separator = new char[1] { ',' };
                 string line = sr.ReadLine();
                 if(line != null)
                 {
@@ -84,7 +83,7 @@ namespace libcdiffrecords.Storage
                     default:
                         return null;
                     }
-                    box.AttachBoxLocationDataToTubes();
+                   
                     sr.Close();
                     return box;
                 }
@@ -231,7 +230,7 @@ namespace libcdiffrecords.Storage
             t.ParentBox = boxName;
             t.LegacyID = td.id;
             t.SampleDate = td.date;
-            t.TubeAccession = "CDIF_" + boxName.Substring(4) + "_" + pos.ToString();
+            t.TubeAccession = t.TubeAccession = CreateAccessionString(boxName, pos);
             string tubeNumForLabel = "";
             if (attachNumInSample)
                 tubeNumForLabel = " " + numInSample.ToString();
@@ -286,7 +285,8 @@ namespace libcdiffrecords.Storage
                             Tube t = new Tube();
                             t.LegacyID = id;
                             t.SampleDate = dt;
-                            t.TubeAccession = "CDIF_" + boxAcc + "_" + indices[i].ToString().PadLeft(2, '0');
+                            t.TubeAccession = CreateAccessionString(box.Name, indices[i]);
+                           // t.TubeAccession = "CDIF_" + boxAcc + "_" + indices[i].ToString().PadLeft(2, '0');
                             t.TubeLabel = id + " " + dt.ToShortDateString() + " " + i.ToString();
                             t.ParentBox = box.Name;
                             t.BoxPosition = indices[i];
@@ -348,7 +348,7 @@ namespace libcdiffrecords.Storage
 
             int lineCount = 1;
             string line = "";
-
+            box.BoxSize = 30;
 
             while ((line = sr.ReadLine()) != null)
             {
@@ -387,7 +387,7 @@ namespace libcdiffrecords.Storage
 
             int lineCount = 1;
             string line = "";
-
+            box.BoxSize = 30;
 
             while ((line = sr.ReadLine()) != null)
             {
@@ -436,7 +436,7 @@ namespace libcdiffrecords.Storage
                 StringBuilder sbhead = new StringBuilder();
                for(int k = 1; k < head.Count; k++)
                 {
-                    sbhead.Append(head[i]);
+                    sbhead.Append(head[k]);
                     sbhead.Append(delim);
                 }
                 sw.WriteLine(sbhead.ToString());
@@ -445,7 +445,7 @@ namespace libcdiffrecords.Storage
                 {
                     StringBuilder sb = new StringBuilder();
 
-                    List<string> line = CreateTubeDataLine(boxes[i].SampleTubes[i]);
+                   List<string> line = CreateTubeDataLine(boxes[i].SampleTubes[j]);
 
                     for(int x = 1; x < line.Count; x++)
                     {
@@ -480,12 +480,10 @@ namespace libcdiffrecords.Storage
 
         private  static string PositionToRowColFormat(int pos)
         {
-
-            pos -= 1; //Position will be given in a range of 1-81. This brings it to be zero based, to allow both X and Y to be zero based.
-
             int width = 9;
             int x = pos / width;
             int y = pos % width;
+            y++;
             char row = (char)(x + 65); //65 is 'A'; 
 
             return row + y.ToString();
@@ -609,6 +607,11 @@ namespace libcdiffrecords.Storage
             return new DataPoint();
         }
 
+        private static string CreateAccessionString(string boxName, int pos)
+        {
+            pos++;
+            return "CDIF_" + boxName.Substring(4) + "_" + pos.ToString().PadLeft(2, '0');
+        }
 
 
 

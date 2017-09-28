@@ -210,6 +210,7 @@ namespace libcdiffrecords.Data
             data = new List<DataPoint>();
             patients = new Dictionary<string, List<DataPoint>>();
             admissionsByPatient = new Dictionary<string, List<Admission>>();
+            DataBySampleID = new Dictionary<string, DataPoint>();
             label = binLabel;
             
         }
@@ -229,7 +230,7 @@ namespace libcdiffrecords.Data
 
         public void Add(DataPoint point)
         {
-            if(DataBySampleID.ContainsKey(point.SampleID)) //New sample shares an existing sample dataset. Duplicate or different samples sharing the same ID?
+           if(DataBySampleID.ContainsKey(point.SampleID)) //New sample shares an existing sample dataset. Duplicate or different samples sharing the same ID?
             {
                 DataPoint tempSam = DataBySampleID[point.SampleID];
                 if(point != tempSam) //They are in fact, different points.

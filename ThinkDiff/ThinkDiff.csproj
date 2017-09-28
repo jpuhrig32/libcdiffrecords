@@ -61,7 +61,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Dataset.cs" />
+    <Compile Include="AppData.cs" />
+    <Compile Include="Filters\FilterForAdmissionsWithAdmissionSamples.cs" />
+    <Compile Include="Filters\FilterForIndexAdmission.cs" />
+    <Compile Include="Filters\IFilter.cs" />
     <Compile Include="ThinkDiffMainForm.cs">
       <SubType>Form</SubType>
     </Compile>
