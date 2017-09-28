@@ -543,14 +543,15 @@ namespace libcdiffrecords.Storage
                 sw.Close();
             }
         }
-        public static void WriteBoxesToSingleFile(StorageBox[] boxes, string filename, char delim)
+
+        public static void WriteTubeDataToFile(Tube[] tubes, string filename, char delim)
         {
             StreamWriter sw = new StreamWriter(filename);
             sw.WriteLine("Box Dataset:" + delim + "ALL" + delim + "Format" + delim + "Box_Database");
 
             List<string> head = CreateHeaderForSampleBox();
             StringBuilder headSB = new StringBuilder();
-            for(int i = 0; i < head.Count; i++)
+            for (int i = 0; i < head.Count; i++)
             {
                 headSB.Append(head[i]);
                 headSB.Append(delim);
@@ -558,25 +559,30 @@ namespace libcdiffrecords.Storage
 
             sw.WriteLine(headSB.ToString());
 
+            for (int j = 0; j < tubes.Length; j++)
+            {
+                List<string> line = CreateTubeDataLine(tubes[j]);
+
+                StringBuilder lineSB = new StringBuilder();
+
+                for (int k = 0; k < line.Count; k++)
+                {
+                    lineSB.Append(line[k]);
+                    lineSB.Append(delim);
+                }
+                sw.WriteLine(lineSB.ToString());
+            }
+            sw.Close();
+        }
+
+        public static void WriteBoxesToSingleFile(StorageBox[] boxes, string filename, char delim)
+        {
+            List<Tube> tubes = new List<Tube>();
             for(int i = 0; i < boxes.Length; i++)
             {
-                for(int j = 0; j < boxes[i].SampleTubes.Count; j++)
-                {
-                    List<string> line = CreateTubeDataLine(boxes[i].SampleTubes[j]);
-
-                    StringBuilder lineSB = new StringBuilder();
-
-                    for(int k = 0; k < line.Count; k++)
-                    {
-                        lineSB.Append(line[k]);
-                        lineSB.Append(delim);
-                    }
-                    sw.WriteLine(lineSB.ToString());
-                }
+                tubes.AddRange(boxes[i].SampleTubes);
             }
-            
-
-            sw.Close();
+            WriteTubeDataToFile(tubes.ToArray(), filename, delim);
         }
 
 

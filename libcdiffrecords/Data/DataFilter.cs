@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using libcdiffrecords;
+using libcdiffrecords.Storage;
 
 namespace libcdiffrecords.Data
 {
@@ -744,6 +745,29 @@ namespace libcdiffrecords.Data
             }
             return retBin;
         }
+
+        public static Tube[] FilterAllAvailableSampleTubesFromBin(Bin b, StorageData sd)
+        {
+            List<Tube> tubes = new List<Tube>();
+
+            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                {
+                    for(int i =0; i< adm.Points.Count; i++)
+                    {
+                        if (sd.TubesBySampleID.ContainsKey(adm.Points[i].SampleID))
+                            tubes.AddRange(sd.TubesBySampleID[adm.Points[i].SampleID]);
+                    }
+                }
+            }
+
+            return tubes.ToArray();
+        }
+
+
+
+
 
       
         public static Bin FilterPositivesByToxinResult(Bin b, TestResult toxResult)

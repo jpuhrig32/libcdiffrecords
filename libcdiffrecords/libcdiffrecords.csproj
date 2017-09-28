@@ -118,6 +118,7 @@
     <Compile Include="Storage\BoxLoader.cs" />
     <Compile Include="Storage\SampleDatabase.cs" />
     <Compile Include="Storage\StorageBox.cs" />
+    <Compile Include="Storage\StorageDatabase.cs" />
     <Compile Include="Storage\Tube.cs" />
     <Compile Include="Data\DataFilter.cs" />
     <Compile Include="SurveillanceReportLine.cs" />
