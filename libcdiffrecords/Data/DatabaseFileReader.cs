@@ -11,7 +11,7 @@ namespace libcdiffrecords.Data
     /// <summary>
     /// A class for reading CSV formatted data files for the dataset
     /// </summary>
-   public class DatabaseFileIO
+    public class DatabaseFileIO
     {
         /// <summary>
         /// Reads the main dataset file - this will likely in the future be the product of database exports,
@@ -32,11 +32,11 @@ namespace libcdiffrecords.Data
 
             Dictionary<string, bool> standardFields = ProduceStandardFieldTable();
 
-            while(!parser.EndOfData)
+            while (!parser.EndOfData)
             {
                 if (lineCount == 0)
                 {
-                   string[] header = parser.ReadFields();
+                    string[] header = parser.ReadFields();
                     headerTable = CreateHeaderTranslationTable(header);
                 }
 
@@ -50,8 +50,8 @@ namespace libcdiffrecords.Data
             }
 
             parser.Close();
-                return AssignAdmissionIDsToAllSamples(data.ToArray());
-;
+            return AssignAdmissionIDsToAllSamples(data.ToArray());
+            ;
         }
 
         /// <summary>
@@ -145,9 +145,9 @@ namespace libcdiffrecords.Data
             point.Notes = line[headerTable["Notes"]];
 
             //Anything that isn't in our normal set of fields goes here. Normal fields listed above |
-            foreach(string field in headerTable.Keys)
+            foreach (string field in headerTable.Keys)
             {
-                if(!standardFields.ContainsKey(field))
+                if (!standardFields.ContainsKey(field))
                 {
                     point.Fields.Add(field, line[headerTable[field]]);
                 }
@@ -167,23 +167,23 @@ namespace libcdiffrecords.Data
         {
             Bin global = new Bin("global", points);
             int admCt = 1;
-            foreach(string key in global.DataByPatientAdmissionTable.Keys)
+            foreach (string key in global.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission dpa in global.DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in global.DataByPatientAdmissionTable[key])
                 {
                     string toAssign = "ADM_" + admCt.ToString().PadLeft(6, '0');
-                    if(AdmissionIDAssigned(dpa, out int loc))
+                    if (AdmissionIDAssigned(dpa, out int loc))
                     {
-                        toAssign = dpa.Points[loc].AdmissionID;                    
+                        toAssign = dpa.Points[loc].AdmissionID;
                     }
                     else { admCt++; }
-                    for(int i = 0; i < dpa.Points.Count; i++)
+                    for (int i = 0; i < dpa.Points.Count; i++)
                     {
                         DataPoint temp = dpa.Points[i];
                         temp.AdmissionID = toAssign;
                         dpa.Points[i] = temp;
                     }
-                   
+
                 }
             }
 
@@ -199,7 +199,7 @@ namespace libcdiffrecords.Data
                     StreamWriter sw = new StreamWriter(filename);
                     sw.WriteLine(BuildHeaderRow(data[0], delimiter));
 
-                    for(int i = 0; i < data.Length; i++)
+                    for (int i = 0; i < data.Length; i++)
                     {
                         sw.WriteLine(CreateDataRow(data[i], delimiter));
                     }
@@ -208,7 +208,7 @@ namespace libcdiffrecords.Data
                     sw.Close();
                 }
             }
-            
+
         }
 
         public static void WriteDataToFile(Bin b, string filename, char delimiter)
@@ -219,11 +219,117 @@ namespace libcdiffrecords.Data
         public static void WriteDataToFile(Bin[] b, string filename, char delimiter)
         {
             List<DataPoint> binData = new List<DataPoint>();
-            for(int i =0; i < b.Length; i++)
+            for (int i = 0; i < b.Length; i++)
             {
                 binData.AddRange(b[i].Data);
             }
             WriteDataToFile(binData.ToArray(), filename, delimiter);
+        }
+
+        public static void WriteEventBasedDataToFile(Bin b, string filename, char delim)
+        {
+            StreamWriter sw = new StreamWriter(filename);
+            int ptCount = 1;
+            WriteEventBasedHeaderRow(sw, delim);
+
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                {
+                    WriteAdmission(adm, ptCount, sw, delim);
+                }
+
+                ptCount++;
+            }
+
+            sw.Close();
+        }
+
+        private static void WriteAdmission(Admission adm, int id, StreamWriter sw, char delim)
+        {
+            List<string> admit = new List<string>();
+            admit.Add(id.ToString());
+            admit.Add(adm.MRN);
+            admit.Add(adm.AdmissionDate.ToShortDateString());
+            admit.Add(adm.Points[0].Unit);
+            admit.Add(adm.Points[0].Room);
+            admit.Add("1");
+            admit.Add("");
+            admit.Add("");
+            admit.Add("");
+
+            WriteLine(admit, sw, delim);
+
+            for(int i = 0; i < adm.Points.Count; i++)
+            {
+                List<string> data = new List<string>();
+                data.Add(id.ToString());
+                data.Add(adm.MRN);
+                data.Add(adm.Points[i].SampleDate.ToShortDateString());
+                data.Add(adm.Points[0].Unit);
+                data.Add(adm.Points[0].Room);
+                data.Add("");
+                if(IsSurveillanceTest(adm.Points[i].Test))
+                {
+                    if (adm.Points[i].CdiffResult == TestResult.Positive)
+                        data.Add("1");
+                    else
+                        data.Add("0");
+                    data.Add("");
+                    data.Add("");
+                }
+                else
+                {
+                    data.Add("");
+                    if (adm.Points[i].CdiffResult == TestResult.Positive)
+                    {
+                        data.Add("1");
+                        if(adm.Points[i].ToxinResult == TestResult.Positive)
+                        {
+                            data.Add("1");
+                        }
+                        else
+                            data.Add("0");
+                    }
+                    else
+                    {
+                        data.Add("0");
+                        data.Add("0");
+                    }
+                }
+                WriteLine(data, sw, delim);
+            }
+
+          
+           
+        }
+
+        private static void WriteLine(List<string> line, StreamWriter sw, char delim)
+        {
+            StringBuilder sb = new StringBuilder();
+            for(int i = 0; i < line.Count; i++)
+            {
+                sb.Append(line[i]);
+                sb.Append(delim);
+            }
+            sw.WriteLine(sb.ToString());
+        }
+
+        private static void WriteEventBasedHeaderRow(StreamWriter sw, char delim)
+        {
+            List<string> head = new List<string>();
+            head.Add("Patient ID");
+            head.Add("Patient MRN");
+            head.Add("Event Date");
+            head.Add("Unit");
+            head.Add("Room");
+            head.Add("Admission");
+            head.Add("Surveillance");
+            head.Add("NAAT Result");
+            head.Add("EIA Result");
+
+            WriteLine(head, sw, delim);
+
         }
 
         private static string BuildHeaderRow(DataPoint dp, char delim)
@@ -268,7 +374,7 @@ namespace libcdiffrecords.Data
             List<string> fields = new List<string>();
 
             fields.Add(dp.SampleID);
-            fields.Add(dp.PatientName);
+            fields.Add('\"' + dp.PatientName + '\"');
             fields.Add('"' + dp.MRN + '"');
             switch(dp.PatientSex)
             {
@@ -358,6 +464,11 @@ namespace libcdiffrecords.Data
                 return false;
             }
             return true;
+        }
+
+        private static bool IsSurveillanceTest(TestType tt)
+        {
+            return (tt == TestType.Surveillance_Stool_Culture || tt == TestType.Surveillance_Stool_NAAT || tt == TestType.Surveillance_Swab_Culture || tt == TestType.Surveillance_Swab_NAAT);
         }
     }
 }

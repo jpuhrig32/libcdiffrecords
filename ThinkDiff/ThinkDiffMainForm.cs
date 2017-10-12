@@ -8,14 +8,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using libcdiffrecords.Data;
+using System.Data.SQLite;
+using System.Data.Common;
 
 namespace ThinkDiff
 {
     public partial class ThinkDiffMainForm : Form
     {
+
+        private Queue<IFilter> FilterQueue { get; set; }
         public ThinkDiffMainForm()
         {
             Settings.LoadSettings();
+            FilterQueue = new Queue<IFilter>();
             AppData.Initialize();
             InitializeComponent();
             
@@ -32,16 +37,18 @@ namespace ThinkDiff
             {
                 Bin b = new Bin(openDatabaseFileDialog.SafeFileName, DatabaseFileIO.ReadDatabaseFile(openDatabaseFileDialog.FileName));
                 AppData.AddNewData(b);
-                AppData.WriteBinToDatabaseAsync(b); //We're assuming that this data is new, so we'll write it to the database.
-                DisplayBinContents();
+              //  AppData.WriteBinToDatabaseAsync(b); //We're assuming that this data is new, so we'll write it to the database.
+                
                 dataGridView1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
 
                 statusLabel.Text = "Processing data...";
-                dataGridView1.DataSource = AppData.BuildDatasetFromWorkingBinAsync(this);
+                //dataGridView1.DataSource = AppData.BuildDatasetFromWorkingBinAsync(this);
+                FillDataGridViewDefault();
                 DisplayBinContents();
                 dataGridView1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToDisplayedHeaders;
-               if(dataGridView1.DataSource != null)
-                    dataGridView1.Show();
+                dataGridView1.Visible = true;
+              
+
             }
         }
         
@@ -50,13 +57,21 @@ namespace ThinkDiff
            statusLabel.Text = "Patient data loaded - " + AppData.WorkingBin.DataByPatientAdmissionTable.Count + " patients, " + AppData.WorkingBin.Data.Count + " samples in current dataset";
         }
 
+        private void FillDataGridViewDefault()
+        {
+
+           List<DataPoint> pts = AppData.WorkingBin.Data;
+            dataGridView1.DataSource = pts;
+
+        }
+
         private void loadStorageBoxesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if(openBoxFileDialog.ShowDialog() == DialogResult.OK)
             {
                 if(openBoxFileDialog.FileNames.Length >= 1)
                 {
-
+                    AppData.LoadStorageData(openBoxFileDialog.FileName);
                 }
             }
         }
@@ -80,6 +95,62 @@ namespace ThinkDiff
         {
             dataGridView1.Hide();
             dataGridView1.Show();
+        }
+
+        private void indexAdmissionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FilterQueue.Enqueue(new Filters.FilterForIndexAdmission());
+            StartFilterWorker();
+        }
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            lock (AppData.WorkingBin)
+            {
+                int ct = 0;
+                int startFilterCount = FilterQueue.Count;
+                while (FilterQueue.Count > 0)
+                {
+                    IFilter working = FilterQueue.Dequeue();
+                    Bin b = working.FilterData(AppData.WorkingBin);
+                    AppData.WorkingBin = b;
+                    filterBackgroundWorker.ReportProgress(ct / startFilterCount);
+                    ct++;
+                }
+            }
+            
+
+        }
+
+        private void admissionsWithAdmissionSamplesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FilterQueue.Enqueue(new Filters.FilterForAdmissionsWithAdmissionSamples());
+            StartFilterWorker();
+        }
+
+        private void StartFilterWorker()
+        {
+            filterBackgroundWorker.RunWorkerAsync();
+            
+        }
+
+        private void filterBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            FillDataGridViewDefault();
+            DisplayBinContents();
+        }
+
+        private void exportPatientDataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(exportBinDataDialog.ShowDialog()== DialogResult.OK)
+            {
+                DatabaseFileIO.WriteDataToFile(AppData.WorkingBin, exportBinDataDialog.FileName, ',');
+            }
+        }
+
+        private void openDatabaseFileDialog_FileOk(object sender, CancelEventArgs e)
+        {
+
         }
     }
 }

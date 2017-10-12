@@ -6,21 +6,36 @@ using System.Threading.Tasks;
 using libcdiffrecords.Data;
 using System.Data;
 using libcdiffrecords;
+using libcdiffrecords.Storage;
 
 namespace ThinkDiff
 {
    public class AppData
     {
+        private static Bin working;
         public static Stack<Bin> Undo { get; set; }
         public static Stack<Bin> Redo { get; set; }
-        public static Bin WorkingBin { get; set; }
+        
+        public static StorageData BoxData { get; set; }
 
+        public static Bin WorkingBin
+        {
+            get
+            {
+                return working;
+            }
+            set
+            {
+                AddNewData(value);
+            }
+        }
 
         public static void Initialize()
         {
             Undo = new Stack<Bin>();
             Redo = new Stack<Bin>();
             WorkingBin = new Bin("Empty");
+
         }
         public static void AddNewData(Bin newBin)
         {
@@ -29,7 +44,7 @@ namespace ThinkDiff
                 Undo.Push(WorkingBin);
             }
 
-            WorkingBin = newBin;
+            working = newBin;
         }
 
         public static void UndoBinAction()
@@ -177,22 +192,36 @@ namespace ThinkDiff
                 Dictionary<string, string> fieldType = await Settings.DataInterface.GetTableFields("surveillance_data");
                 Dictionary<string, bool> standardFields = ProduceStandardFieldTable();
                 List<string> binDataQueries = new List<string>();
+                StringBuilder queryBuilder = new StringBuilder();
+                queryBuilder.Append("INSERT OR REPLACE INTO surveillance_data VALUES ");
+                string query = "";
+                lock (working)
+                {
+                    if (b.Data.Count > 0)
+                    {
+                        List<string> missingFields = new List<string>();
+                        foreach (string key in fieldType.Keys)
+                            if (!b.Data[0].Fields.ContainsKey(key) && !standardFields.ContainsKey(key))
+                                missingFields.Add(key);
+                        if (missingFields.Count > 0)
+                            AddMissingFieldColumnsToDatabase(missingFields.ToArray(), Settings.FieldCharWidth);
 
-                if(b.Data.Count > 0)
-                {
-                    List<string> missingFields = new List<string>();
-                    foreach(string key in fieldType.Keys)
-                        if (!b.Data[0].Fields.ContainsKey(key) && !standardFields.ContainsKey(key))
-                            missingFields.Add(key);
-                    if(missingFields.Count > 0)
-                        AddMissingFieldColumnsToDatabase(missingFields.ToArray(), Settings.FieldCharWidth);
-                    
+                    }
+                  
+                    for (int i = 0; i < b.Data.Count; i++)
+                    {
+                        queryBuilder.Append(BuildWriteQueryForDataPoint(b.Data[i]));
+                        if (i < b.ItemsInBin - 1)
+                            queryBuilder.Append(", ");
+                        else
+                            queryBuilder.Append(";");
+                    }
+
                 }
-                for(int i = 0; i < b.Data.Count; i++)
-                {
-                    binDataQueries.Add(BuildWriteQueryForDataPoint(b.Data[i]));
-                }
-                await Settings.DataInterface.ExecuteMultipleNonQueriesAsync(binDataQueries.ToArray());
+                    query = queryBuilder.ToString();
+
+                    await Settings.DataInterface.ExecuteNonQueryAsync(query);
+                
                 Settings.DataInterface.CloseConnection();
             });
         }
@@ -213,8 +242,9 @@ namespace ThinkDiff
         private static string BuildWriteQueryForDataPoint(DataPoint dp)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append( "INSERT OR REPLACE INTO surveillance_data VALUES(");
+          
             List<string> fields = new List<string>();
+            sb.Append("(");
             fields.Add(dp.SampleID);
             fields.Add(dp.AdmissionID);
             fields.Add(dp.PatientName);
@@ -244,9 +274,11 @@ namespace ThinkDiff
                 if(i < fields.Count -1)
                     sb.Append(",");
             }
-            sb.Append(");");
+            sb.Append(") ");
             return sb.ToString();
         }
+
+       
 
        public static Dictionary<string, bool> ProduceStandardFieldTable()
         {
@@ -269,6 +301,11 @@ namespace ThinkDiff
             fields.Add("notes", true);
 
             return fields;
+        }
+
+        public static void LoadStorageData(string filename)
+        {
+            BoxData = BoxLoader.LoadStorageData(filename);
         }
 
     }

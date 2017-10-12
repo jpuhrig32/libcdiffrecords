@@ -11,6 +11,7 @@ namespace ThinkDiff.Filters
     {
         public string DatabaseQuery { get; set; }
         public int Priority { get; set; }
+        public const string Name = "Pick Index Admissions"; 
 
         public Bin FilterData(Bin input)
         {

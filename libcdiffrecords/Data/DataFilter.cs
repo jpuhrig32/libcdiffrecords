@@ -228,23 +228,6 @@ namespace libcdiffrecords.Data
 
         }
 
-   
-
-        public static Bin CopyBin(Bin b)
-        {
-            Bin retBin = new Bin("Copy of" + b.Label);
-            
-            for(int i = 0; i < b.Data.Count; i++)
-            {
-                DataPoint temp = new DataPoint();
-                temp = b.Data[i];
-                retBin.Add(temp);
-            }
-
-            return retBin;
-
-        }
-
         private static bool IndeterminateAdmission(AdmissionStatus status)
         {
             return (status == AdmissionStatus.NegativeNoAdmissionSample || status == AdmissionStatus.PositiveNoAdmitSample || status == AdmissionStatus.NegativeFirstSample_TurnedPositive);
@@ -656,6 +639,7 @@ namespace libcdiffrecords.Data
 
             Bin retBin = new Bin(b.Label);
 
+
             foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
                 foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
@@ -700,6 +684,25 @@ namespace libcdiffrecords.Data
                             retBin.Add(dpa);
                             break;
                         }
+                    }
+                }
+            }
+
+            return retBin;
+
+        }
+
+        public static Bin FilterAdmissionsByNumberOfSamples(Bin b, int minSamples)
+        {
+            Bin retBin = new Bin(b.Label);
+
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                {
+                    if(adm.Points.Count >= minSamples)
+                    {
+                        retBin.Add(adm);
                     }
                 }
             }
@@ -763,6 +766,24 @@ namespace libcdiffrecords.Data
             }
 
             return tubes.ToArray();
+        }
+
+        public static Bin FilterAvailableSamples(Bin b, StorageData sd)
+        {
+            Bin retBin = new Bin(b.Label);
+
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                foreach (Admission adm in b.DataByPatientAdmissionTable[key])
+                {
+                    for (int i = 0; i < adm.Points.Count; i++)
+                    {
+                        if (sd.TubesBySampleID.ContainsKey(adm.Points[i].SampleID))
+                            retBin.Add(adm.Points[i]);
+                    }
+                }
+            }
+            return retBin;
         }
 
 
@@ -923,6 +944,23 @@ namespace libcdiffrecords.Data
 
 
             return common;
+        }
+
+        public static Bin[] StratifyOnPatients(Bin b)
+        {
+            List<Bin> retBins = new List<Bin>();
+
+            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                Bin temp = new Bin(key);
+
+                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                {
+                    temp.Add(adm);
+                }
+                retBins.Add(temp);
+            }
+            return retBins.ToArray();
         }
     }
 

@@ -9,8 +9,10 @@ namespace ThinkDiff.Filters
 {
     class FilterForAdmissionsWithAdmissionSamples : IFilter
     {
+       
         public string DatabaseQuery { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public int Priority { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public const string Name = "Filter Encounters with Admission Samples";
 
         public Bin FilterData(Bin input)
         {

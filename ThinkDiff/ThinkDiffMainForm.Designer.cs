@@ -33,18 +33,25 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadDatafileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadStorageBoxesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createSurveillanceReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createNAATComparisonReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openDatabaseFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.openBoxFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.statusLabel = new System.Windows.Forms.Label();
             this.thinkDiffProgressBar = new System.Windows.Forms.ProgressBar();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.filterDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.createSurveillanceReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.createNAATComparisonReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterForToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeFromDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.admissionsWithAdmissionSamplesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.indexAdmissionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterBackgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.exportPatientDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportBinDataDialog = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -79,6 +86,7 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.loadDatafileToolStripMenuItem,
+            this.exportPatientDataToolStripMenuItem,
             this.loadStorageBoxesToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -95,15 +103,25 @@
             // loadStorageBoxesToolStripMenuItem
             // 
             this.loadStorageBoxesToolStripMenuItem.Name = "loadStorageBoxesToolStripMenuItem";
-            this.loadStorageBoxesToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.loadStorageBoxesToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
             this.loadStorageBoxesToolStripMenuItem.Text = "Load Storage Boxes...";
             this.loadStorageBoxesToolStripMenuItem.Click += new System.EventHandler(this.loadStorageBoxesToolStripMenuItem_Click);
             // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            // 
             // editToolStripMenuItem
             // 
+            this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.filterForToolStripMenuItem,
+            this.removeFromDataToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
-            this.editToolStripMenuItem.Text = "Edit";
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.editToolStripMenuItem.Text = "Filter";
             // 
             // viewToolStripMenuItem
             // 
@@ -118,8 +136,26 @@
             this.createSurveillanceReportToolStripMenuItem,
             this.createNAATComparisonReportToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // filterDataToolStripMenuItem
+            // 
+            this.filterDataToolStripMenuItem.Name = "filterDataToolStripMenuItem";
+            this.filterDataToolStripMenuItem.Size = new System.Drawing.Size(249, 22);
+            this.filterDataToolStripMenuItem.Text = "Filter Data...";
+            // 
+            // createSurveillanceReportToolStripMenuItem
+            // 
+            this.createSurveillanceReportToolStripMenuItem.Name = "createSurveillanceReportToolStripMenuItem";
+            this.createSurveillanceReportToolStripMenuItem.Size = new System.Drawing.Size(249, 22);
+            this.createSurveillanceReportToolStripMenuItem.Text = "Create Surveillance Report";
+            // 
+            // createNAATComparisonReportToolStripMenuItem
+            // 
+            this.createNAATComparisonReportToolStripMenuItem.Name = "createNAATComparisonReportToolStripMenuItem";
+            this.createNAATComparisonReportToolStripMenuItem.Size = new System.Drawing.Size(249, 22);
+            this.createNAATComparisonReportToolStripMenuItem.Text = "Create NAAT Comparison Report";
             // 
             // helpToolStripMenuItem
             // 
@@ -129,13 +165,16 @@
             // 
             // openDatabaseFileDialog
             // 
-            this.openDatabaseFileDialog.FileName = "openFileDialog1";
+            this.openDatabaseFileDialog.DefaultExt = "\".csv\"";
+            this.openDatabaseFileDialog.Title = "Select Patient Data File...";
+            this.openDatabaseFileDialog.FileOk += new System.ComponentModel.CancelEventHandler(this.openDatabaseFileDialog_FileOk);
             // 
             // openBoxFileDialog
             // 
+            this.openBoxFileDialog.DefaultExt = "csv";
             this.openBoxFileDialog.FileName = "openBoxFileDialog";
-            this.openBoxFileDialog.Filter = "\"Box Files | *.csv\"";
-            this.openBoxFileDialog.Title = "Select Storage Box Files";
+            this.openBoxFileDialog.Filter = "\"Storage File | *.csv\"";
+            this.openBoxFileDialog.Title = "Select Storage Data File";
             // 
             // statusLabel
             // 
@@ -154,30 +193,56 @@
             this.thinkDiffProgressBar.Size = new System.Drawing.Size(129, 24);
             this.thinkDiffProgressBar.TabIndex = 3;
             // 
-            // exitToolStripMenuItem
+            // filterForToolStripMenuItem
             // 
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.exitToolStripMenuItem.Text = "Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            this.filterForToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.admissionsWithAdmissionSamplesToolStripMenuItem,
+            this.indexAdmissionToolStripMenuItem});
+            this.filterForToolStripMenuItem.Name = "filterForToolStripMenuItem";
+            this.filterForToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.filterForToolStripMenuItem.Text = "Filter For";
             // 
-            // filterDataToolStripMenuItem
+            // removeFromDataToolStripMenuItem
             // 
-            this.filterDataToolStripMenuItem.Name = "filterDataToolStripMenuItem";
-            this.filterDataToolStripMenuItem.Size = new System.Drawing.Size(248, 22);
-            this.filterDataToolStripMenuItem.Text = "Filter Data...";
+            this.removeFromDataToolStripMenuItem.Name = "removeFromDataToolStripMenuItem";
+            this.removeFromDataToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.removeFromDataToolStripMenuItem.Text = "Remove From Data";
             // 
-            // createSurveillanceReportToolStripMenuItem
+            // admissionsWithAdmissionSamplesToolStripMenuItem
             // 
-            this.createSurveillanceReportToolStripMenuItem.Name = "createSurveillanceReportToolStripMenuItem";
-            this.createSurveillanceReportToolStripMenuItem.Size = new System.Drawing.Size(248, 22);
-            this.createSurveillanceReportToolStripMenuItem.Text = "Create Surveillance Report";
+            this.admissionsWithAdmissionSamplesToolStripMenuItem.Name = "admissionsWithAdmissionSamplesToolStripMenuItem";
+            this.admissionsWithAdmissionSamplesToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
+            this.admissionsWithAdmissionSamplesToolStripMenuItem.Text = "Admissions With Admission Samples";
+            this.admissionsWithAdmissionSamplesToolStripMenuItem.Click += new System.EventHandler(this.admissionsWithAdmissionSamplesToolStripMenuItem_Click);
             // 
-            // createNAATComparisonReportToolStripMenuItem
+            // indexAdmissionToolStripMenuItem
             // 
-            this.createNAATComparisonReportToolStripMenuItem.Name = "createNAATComparisonReportToolStripMenuItem";
-            this.createNAATComparisonReportToolStripMenuItem.Size = new System.Drawing.Size(248, 22);
-            this.createNAATComparisonReportToolStripMenuItem.Text = "Create NAAT Comparison Report";
+            this.indexAdmissionToolStripMenuItem.Name = "indexAdmissionToolStripMenuItem";
+            this.indexAdmissionToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
+            this.indexAdmissionToolStripMenuItem.Text = "Index Admission";
+            this.indexAdmissionToolStripMenuItem.Click += new System.EventHandler(this.indexAdmissionToolStripMenuItem_Click);
+            // 
+            // filterBackgroundWorker
+            // 
+            this.filterBackgroundWorker.WorkerReportsProgress = true;
+            this.filterBackgroundWorker.WorkerSupportsCancellation = true;
+            this.filterBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.filterBackgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.filterBackgroundWorker_RunWorkerCompleted);
+            // 
+            // exportPatientDataToolStripMenuItem
+            // 
+            this.exportPatientDataToolStripMenuItem.Name = "exportPatientDataToolStripMenuItem";
+            this.exportPatientDataToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.exportPatientDataToolStripMenuItem.Text = "Export Patient Data...";
+            this.exportPatientDataToolStripMenuItem.Click += new System.EventHandler(this.exportPatientDataToolStripMenuItem_Click);
+            // 
+            // exportBinDataDialog
+            // 
+            this.exportBinDataDialog.DefaultExt = "csv";
+            this.exportBinDataDialog.Filter = "\"Comma Separated Values |*.csv\"";
+            this.exportBinDataDialog.ShowHelp = true;
+            this.exportBinDataDialog.SupportMultiDottedExtensions = true;
+            this.exportBinDataDialog.Title = "Save Patient Data As....";
             // 
             // ThinkDiffMainForm
             // 
@@ -219,6 +284,13 @@
         private System.Windows.Forms.ToolStripMenuItem filterDataToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createSurveillanceReportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createNAATComparisonReportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem filterForToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem admissionsWithAdmissionSamplesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem indexAdmissionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeFromDataToolStripMenuItem;
+        private System.ComponentModel.BackgroundWorker filterBackgroundWorker;
+        private System.Windows.Forms.ToolStripMenuItem exportPatientDataToolStripMenuItem;
+        private System.Windows.Forms.SaveFileDialog exportBinDataDialog;
     }
 }
 

@@ -10,9 +10,10 @@ namespace libcdiffrecords.Data
     {
         public int AdmissionWindow { get; set; }
         public DateTime AdmissionDate { get; set; }
-        private string mrn = "00000000";
-        public string MRN { get => mrn; set => mrn.PadLeft(8, '0'); }
+        private string mrn;
+        public string MRN { get => mrn; set => mrn = value.PadLeft(8, '0'); }
         public List<DataPoint> Points { get; set; }
+        public string PatientName { get; set; }
 
 
         public Admission()
@@ -21,6 +22,7 @@ namespace libcdiffrecords.Data
             AdmissionDate = DateTime.MaxValue;
             MRN = "00000000";
             Points = new List<DataPoint>();
+            PatientName = "John Doe";
         }
         public AdmissionStatus AdmissionStatus
         {

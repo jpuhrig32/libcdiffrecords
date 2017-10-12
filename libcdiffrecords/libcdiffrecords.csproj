@@ -113,6 +113,8 @@
     <Compile Include="Reports\MasterReport.cs" />
     <Compile Include="Reports\MasterReportLine.Cs" />
     <Compile Include="Reports\NAATComparisonReportLine.cs" />
+    <Compile Include="Reports\PatientAdmissionReport.cs" />
+    <Compile Include="Reports\PatientAdmissionReportLine.cs" />
     <Compile Include="Reports\ReportWriter.cs" />
     <Compile Include="Reports\SurveillanceReportLine.cs" />
     <Compile Include="Storage\BoxLoader.cs" />

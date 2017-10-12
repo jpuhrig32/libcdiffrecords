@@ -17,6 +17,7 @@ namespace ThinkDiff
         public static int FieldCharWidth { get; set; }
         public static SQLiteInterface DataInterface { get; set; }
         
+        
 
 
         private static void SetDefaults()

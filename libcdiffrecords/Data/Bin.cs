@@ -265,7 +265,9 @@ namespace libcdiffrecords.Data
                 dpa.AdmissionDate = point.AdmissionDate;
                 dpa.MRN = point.MRN;
                 dpa.unit = point.Unit.Trim();
+                dpa.PatientName = point.PatientName;
                 dpa.Points.Add(point);
+               
 
                 admissionsByPatient[point.MRN].Add(dpa);
 
@@ -290,6 +292,7 @@ namespace libcdiffrecords.Data
                     dpa.MRN = point.MRN;
                     dpa.unit = point.Unit.Trim();
                     dpa.Points.Add(point);
+                    dpa.PatientName = point.PatientName;
                     admissionsByPatient[point.MRN].Add(dpa);
                 }
             }

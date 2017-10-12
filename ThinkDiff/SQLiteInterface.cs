@@ -128,6 +128,17 @@ namespace ThinkDiff
                 });
         }
 
+        public SQLiteDataAdapter ExecuteDataAdapterAsync(string query)
+        {
+
+
+                if (conn.State == ConnectionState.Closed)
+                    conn.OpenAsync();
+
+                return new SQLiteDataAdapter(query, conn);
+            
+        }
+
         public void CloseConnection()
         {
             if (conn.State != ConnectionState.Closed)

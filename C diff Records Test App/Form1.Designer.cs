@@ -121,6 +121,7 @@
             this.boxLocTextBox.ReadOnly = true;
             this.boxLocTextBox.Size = new System.Drawing.Size(276, 20);
             this.boxLocTextBox.TabIndex = 7;
+            this.boxLocTextBox.TextChanged += new System.EventHandler(this.boxLocTextBox_TextChanged);
             // 
             // boxLocBrowseButton
             // 

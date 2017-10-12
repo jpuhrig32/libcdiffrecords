@@ -21,11 +21,11 @@ namespace libcdiffrecords.Storage
         public bool use;
     }
 
-   public class BoxLoader
+    public class BoxLoader
     {
         DataPoint[] data;
         Dictionary<string, List<DataPoint>> sampleTable;
-       const int width = 9;
+        const int width = 9;
 
         public BoxLoader(DataPoint[] dps)
         {
@@ -36,7 +36,7 @@ namespace libcdiffrecords.Storage
         private void PopulateSampleTable()
         {
             sampleTable = new Dictionary<string, List<DataPoint>>();
-            for (int i =0; i < data.Length; i++)
+            for (int i = 0; i < data.Length; i++)
             {
                 if (!sampleTable.ContainsKey(data[i].SampleID))
                     sampleTable.Add(data[i].SampleID, new List<DataPoint>());
@@ -46,7 +46,48 @@ namespace libcdiffrecords.Storage
         }
 
 
+        public static StorageData LoadStorageData(string filename)
+        {
+            StorageData sd = new StorageData();
+            StreamReader sr = new StreamReader(filename);
+            char[] separator = new char[1] { ',' };
+            string line = sr.ReadLine();
 
+            while((line = sr.ReadLine()) != null)
+            {
+                string[] parts = line.Split(separator);
+                Tube t = new Tube();
+                t.ParentBox = parts[0].Trim();
+                t.BoxPosition = ConvertR1C1ToPosition(parts[1].Trim());
+                t.TubeAccession = parts[2].Trim();
+                t.TubeLabel = parts[3].Trim();
+                t.SampleID = parts[4].Trim();
+                t.Additives = parts[5].Trim();
+                sd.Add(t);
+
+                
+            }
+
+            sr.Close();
+
+            return sd;
+        }
+
+        private static int ConvertR1C1ToPosition(string pos)
+        {
+            int row = 0;
+            int col = 0;
+            if(pos.Length > 1)
+            {
+                if(pos[0] >= 65)
+                {
+                    row = pos[0] - 65;
+                }
+                col = pos[1];
+
+            }
+            return row * 9 + col;
+        }
         public static StorageBox LoadStorageBox(string filename)
         {
           
@@ -80,6 +121,7 @@ namespace libcdiffrecords.Storage
                     case "SwabBag_Accession":
                         box = LoadSwabBagAccessionFormat(sr, box);
                         break;
+                        
                     default:
                         return null;
                     }

@@ -58,53 +58,37 @@ namespace C_diff_Records_Test_App
         {
             if(openInputFileDialog.FileNames.Length > 0)
             {
+                Application.DoEvents();
                 DataPoint[] data = DatabaseFileIO.ReadDatabaseFile(openInputFileDialog.FileName);
+                StorageData sd = BoxLoader.LoadStorageData(openBoxLocFileDialog.FileName);
+          
                 Bin data2 = new Bin("dat", data);
-                data2 = DataFilter.RemoveSamplesBasedOnNotes(data2, "Not Enough");
-                data2 = DataFilter.FilterByAdmissionType(data2, AdmissionStatus.NegativeOnAdmission_TurnedPositive);
-
-                DatabaseFileIO.WriteDataToFile(data2, openInputFileDialog.FileName + "negtoPos saved.csv", ',');
-                Dictionary<string, string> sampleIDTable = new Dictionary<string, string>();
-
-                for(int i = 0; i < data.Length; i++)
-                {
-                    if(data[i].LegacyID != "")
-                    {
-                        if(!sampleIDTable.ContainsKey(data[i].LegacyID + " " + data[i].SampleDate.ToShortDateString()))
-                             sampleIDTable.Add(data[i].LegacyID + " " + data[i].SampleDate.ToShortDateString(), data[i].SampleID);
-                    }
-                }
-
-                StorageBox[] boxes = new StorageBox[openBoxLocFileDialog.FileNames.Length];
-
-                Bin unfound = new Bin("");
-            
-                for(int i =0; i < boxes.Length; i++)
-                {
-                    boxes[i] = BoxLoader.LoadStorageBox(openBoxLocFileDialog.FileNames[i]);
-                    for(int j = 0; j < boxes[i].SampleTubes.Count; j++)
-                    {
-                        if(boxes[i].SampleTubes[j].SampleID != "")
-                        {
-
-                            if (sampleIDTable.ContainsKey(boxes[i].SampleTubes[j].LegacyID + " " + boxes[i].SampleTubes[j].SampleDate.ToShortDateString() ))
-                                boxes[i].SampleTubes[j].SampleID = sampleIDTable[boxes[i].SampleTubes[j].LegacyID + " " + boxes[i].SampleTubes[j].SampleDate.ToShortDateString()];
-                           
-                        }
-                    }
-                }
-                BoxLoader.WriteBoxesToSingleFile(boxes, openInputFileDialog.FileName + "_Boxes.csv", ',');
-                BoxLoader.WriteBoxDataToBoxAccessionFiles(boxes, new FileInfo(openInputFileDialog.FileName).Directory.FullName + '/', ',');
-                TabDelimWriter.WriteBinData(openInputFileDialog.FileName + "_orphan.txt", unfound);
-
-                int z = 0;
-                //TabLoader tl = new TabLoader();
-               /// DataPoint[] data = tl.LoadPatientDataToPoints(openInputFileDialog.FileName);
-                
-//                SampleDatabase sd = new SampleDatabase();
-
-                //sd.ConvertDatabase(openInputFileDialog.FileName, openBoxLocFileDialog.FileNames, openInputFileDialog.FileName + "new");
+                Bin data1 = data2.Clone();
+                data2 = DataFilter.FilterByTestType(data2, TestType.Stool);
+                data2 = DataFilter.FilterAvailableSamples(data2, sd);
+                Bin data3 = data2.Clone();
               
+                data1 = DataFilter.RemoveOutpatientTests(data1);
+                data2 = DataFilter.FilterByAdmissionType(data3, AdmissionStatus.NegativeOnAdmission_TurnedPositive);
+            
+                data3 = DataFilter.FilterAdmissionsByNumberOfSamples(data3, 2);
+                data3 = DataFilter.FilterByAdmissionType(data3, AdmissionStatus.NegativeAdmission);
+              
+                DatabaseFileIO.WriteDataToFile(data2, openInputFileDialog.FileName + " sp_aim_1_data.csv", ',');
+              
+                DatabaseFileIO.WriteDataToFile(data3, openInputFileDialog.FileName + " sp_aim_2_data.csv", ',');
+                
+                DatabaseFileIO.WriteEventBasedDataToFile(data1, openInputFileDialog.FileName + " data_for Utah.csv", ',');
+               
+                PatientAdmissionReport par2 = new PatientAdmissionReport(data2);
+                PatientAdmissionReport par3 = new PatientAdmissionReport(data3);
+
+                Application.DoEvents();
+                ReportWriter.WriteReport(openInputFileDialog.FileName + " sp_aim_1_report.csv", ReportFormat.CSV, par2.GenerateReportLines());
+                ReportWriter.WriteReport(openInputFileDialog.FileName + " sp_aim_2_report.csv", ReportFormat.CSV, par3.GenerateReportLines());
+
+
+
 
             }
             else
@@ -201,6 +185,11 @@ namespace C_diff_Records_Test_App
         {
             Form3 form3 = new Form3();
             form3.Show();
+        }
+
+        private void boxLocTextBox_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

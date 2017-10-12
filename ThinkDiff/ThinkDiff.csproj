@@ -64,7 +64,14 @@
     <Compile Include="AppData.cs" />
     <Compile Include="Filters\FilterForAdmissionsWithAdmissionSamples.cs" />
     <Compile Include="Filters\FilterForIndexAdmission.cs" />
+    <Compile Include="Filters\FilterList.cs" />
     <Compile Include="Filters\IFilter.cs" />
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
     <Compile Include="ThinkDiffMainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -76,6 +83,9 @@
     <Compile Include="Settings.cs" />
     <Compile Include="SettingsData.cs" />
     <Compile Include="SQLiteInterface.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ThinkDiffMainForm.resx">
       <DependentUpon>ThinkDiffMainForm.cs</DependentUpon>
     </EmbeddedResource>
