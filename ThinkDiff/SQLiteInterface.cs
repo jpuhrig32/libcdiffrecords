@@ -220,20 +220,20 @@ namespace ThinkDiff
 
         public async Task<Bin> PullDataFromDatabase(string query)
         {
-            return await Task.Run(async () =>
-            {
+
                 Bin retBin = new Bin("NewData");
                 DbDataReader dr = await ExecuteDataReaderQueryAsync(query);
+
                 Dictionary<string, bool> stdFields = AppData.ProduceStandardFieldTable();
 
-                while (await dr.ReadAsync())
+                while (dr.Read())
                 {
                     retBin.Add(PullDataPointFromDataReader(dr));
 
                 }
 
                 return retBin;
-            });
+           
         }
 
         private DataPoint PullDataPointFromDataReader(DbDataReader dr)

@@ -61,6 +61,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdvancedQueryDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AdvancedQueryDialog.Designer.cs">
+      <DependentUpon>AdvancedQueryDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="AppData.cs" />
     <Compile Include="Filters\FilterForAdmissionsWithAdmissionSamples.cs" />
     <Compile Include="Filters\FilterForIndexAdmission.cs" />
@@ -83,6 +89,9 @@
     <Compile Include="Settings.cs" />
     <Compile Include="SettingsData.cs" />
     <Compile Include="SQLiteInterface.cs" />
+    <EmbeddedResource Include="AdvancedQueryDialog.resx">
+      <DependentUpon>AdvancedQueryDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

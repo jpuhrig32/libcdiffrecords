@@ -32,26 +32,29 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadDatafileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportPatientDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadStorageBoxesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterForToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.admissionsWithAdmissionSamplesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.indexAdmissionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeFromDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filterDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createSurveillanceReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createNAATComparisonReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.advancedQueryBuilderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openDatabaseFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.openBoxFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.statusLabel = new System.Windows.Forms.Label();
             this.thinkDiffProgressBar = new System.Windows.Forms.ProgressBar();
-            this.filterForToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.removeFromDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.admissionsWithAdmissionSamplesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.indexAdmissionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filterBackgroundWorker = new System.ComponentModel.BackgroundWorker();
-            this.exportPatientDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportBinDataDialog = new System.Windows.Forms.SaveFileDialog();
+            this.advancedQueryBackgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.saveDataQueryWorker = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -100,6 +103,13 @@
             this.loadDatafileToolStripMenuItem.Text = "Import Patient Data...";
             this.loadDatafileToolStripMenuItem.Click += new System.EventHandler(this.loadDatafileToolStripMenuItem_Click);
             // 
+            // exportPatientDataToolStripMenuItem
+            // 
+            this.exportPatientDataToolStripMenuItem.Name = "exportPatientDataToolStripMenuItem";
+            this.exportPatientDataToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.exportPatientDataToolStripMenuItem.Text = "Export Patient Data...";
+            this.exportPatientDataToolStripMenuItem.Click += new System.EventHandler(this.exportPatientDataToolStripMenuItem_Click);
+            // 
             // loadStorageBoxesToolStripMenuItem
             // 
             this.loadStorageBoxesToolStripMenuItem.Name = "loadStorageBoxesToolStripMenuItem";
@@ -123,6 +133,35 @@
             this.editToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
             this.editToolStripMenuItem.Text = "Filter";
             // 
+            // filterForToolStripMenuItem
+            // 
+            this.filterForToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.admissionsWithAdmissionSamplesToolStripMenuItem,
+            this.indexAdmissionToolStripMenuItem});
+            this.filterForToolStripMenuItem.Name = "filterForToolStripMenuItem";
+            this.filterForToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.filterForToolStripMenuItem.Text = "Filter For";
+            // 
+            // admissionsWithAdmissionSamplesToolStripMenuItem
+            // 
+            this.admissionsWithAdmissionSamplesToolStripMenuItem.Name = "admissionsWithAdmissionSamplesToolStripMenuItem";
+            this.admissionsWithAdmissionSamplesToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
+            this.admissionsWithAdmissionSamplesToolStripMenuItem.Text = "Admissions With Admission Samples";
+            this.admissionsWithAdmissionSamplesToolStripMenuItem.Click += new System.EventHandler(this.admissionsWithAdmissionSamplesToolStripMenuItem_Click);
+            // 
+            // indexAdmissionToolStripMenuItem
+            // 
+            this.indexAdmissionToolStripMenuItem.Name = "indexAdmissionToolStripMenuItem";
+            this.indexAdmissionToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
+            this.indexAdmissionToolStripMenuItem.Text = "Index Admission";
+            this.indexAdmissionToolStripMenuItem.Click += new System.EventHandler(this.indexAdmissionToolStripMenuItem_Click);
+            // 
+            // removeFromDataToolStripMenuItem
+            // 
+            this.removeFromDataToolStripMenuItem.Name = "removeFromDataToolStripMenuItem";
+            this.removeFromDataToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.removeFromDataToolStripMenuItem.Text = "Remove From Data";
+            // 
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
@@ -134,7 +173,8 @@
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.filterDataToolStripMenuItem,
             this.createSurveillanceReportToolStripMenuItem,
-            this.createNAATComparisonReportToolStripMenuItem});
+            this.createNAATComparisonReportToolStripMenuItem,
+            this.advancedQueryBuilderToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -156,6 +196,13 @@
             this.createNAATComparisonReportToolStripMenuItem.Name = "createNAATComparisonReportToolStripMenuItem";
             this.createNAATComparisonReportToolStripMenuItem.Size = new System.Drawing.Size(249, 22);
             this.createNAATComparisonReportToolStripMenuItem.Text = "Create NAAT Comparison Report";
+            // 
+            // advancedQueryBuilderToolStripMenuItem
+            // 
+            this.advancedQueryBuilderToolStripMenuItem.Name = "advancedQueryBuilderToolStripMenuItem";
+            this.advancedQueryBuilderToolStripMenuItem.Size = new System.Drawing.Size(249, 22);
+            this.advancedQueryBuilderToolStripMenuItem.Text = "Advanced Query Builder";
+            this.advancedQueryBuilderToolStripMenuItem.Click += new System.EventHandler(this.advancedQueryBuilderToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -193,48 +240,12 @@
             this.thinkDiffProgressBar.Size = new System.Drawing.Size(129, 24);
             this.thinkDiffProgressBar.TabIndex = 3;
             // 
-            // filterForToolStripMenuItem
-            // 
-            this.filterForToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.admissionsWithAdmissionSamplesToolStripMenuItem,
-            this.indexAdmissionToolStripMenuItem});
-            this.filterForToolStripMenuItem.Name = "filterForToolStripMenuItem";
-            this.filterForToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
-            this.filterForToolStripMenuItem.Text = "Filter For";
-            // 
-            // removeFromDataToolStripMenuItem
-            // 
-            this.removeFromDataToolStripMenuItem.Name = "removeFromDataToolStripMenuItem";
-            this.removeFromDataToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
-            this.removeFromDataToolStripMenuItem.Text = "Remove From Data";
-            // 
-            // admissionsWithAdmissionSamplesToolStripMenuItem
-            // 
-            this.admissionsWithAdmissionSamplesToolStripMenuItem.Name = "admissionsWithAdmissionSamplesToolStripMenuItem";
-            this.admissionsWithAdmissionSamplesToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
-            this.admissionsWithAdmissionSamplesToolStripMenuItem.Text = "Admissions With Admission Samples";
-            this.admissionsWithAdmissionSamplesToolStripMenuItem.Click += new System.EventHandler(this.admissionsWithAdmissionSamplesToolStripMenuItem_Click);
-            // 
-            // indexAdmissionToolStripMenuItem
-            // 
-            this.indexAdmissionToolStripMenuItem.Name = "indexAdmissionToolStripMenuItem";
-            this.indexAdmissionToolStripMenuItem.Size = new System.Drawing.Size(269, 22);
-            this.indexAdmissionToolStripMenuItem.Text = "Index Admission";
-            this.indexAdmissionToolStripMenuItem.Click += new System.EventHandler(this.indexAdmissionToolStripMenuItem_Click);
-            // 
             // filterBackgroundWorker
             // 
             this.filterBackgroundWorker.WorkerReportsProgress = true;
             this.filterBackgroundWorker.WorkerSupportsCancellation = true;
             this.filterBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             this.filterBackgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.filterBackgroundWorker_RunWorkerCompleted);
-            // 
-            // exportPatientDataToolStripMenuItem
-            // 
-            this.exportPatientDataToolStripMenuItem.Name = "exportPatientDataToolStripMenuItem";
-            this.exportPatientDataToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.exportPatientDataToolStripMenuItem.Text = "Export Patient Data...";
-            this.exportPatientDataToolStripMenuItem.Click += new System.EventHandler(this.exportPatientDataToolStripMenuItem_Click);
             // 
             // exportBinDataDialog
             // 
@@ -243,6 +254,15 @@
             this.exportBinDataDialog.ShowHelp = true;
             this.exportBinDataDialog.SupportMultiDottedExtensions = true;
             this.exportBinDataDialog.Title = "Save Patient Data As....";
+            // 
+            // advancedQueryBackgroundWorker
+            // 
+            this.advancedQueryBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.queryBackgroundWorker_DoWork);
+            this.advancedQueryBackgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.advancedQueryBackgroundWorker_RunWorkerCompleted);
+            // 
+            // saveDataQueryWorker
+            // 
+            this.saveDataQueryWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.saveDataQueryWorker_DoWork);
             // 
             // ThinkDiffMainForm
             // 
@@ -291,6 +311,9 @@
         private System.ComponentModel.BackgroundWorker filterBackgroundWorker;
         private System.Windows.Forms.ToolStripMenuItem exportPatientDataToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog exportBinDataDialog;
+        private System.Windows.Forms.ToolStripMenuItem advancedQueryBuilderToolStripMenuItem;
+        private System.ComponentModel.BackgroundWorker advancedQueryBackgroundWorker;
+        private System.ComponentModel.BackgroundWorker saveDataQueryWorker;
     }
 }
 

@@ -17,9 +17,12 @@ namespace ThinkDiff
     {
 
         private Queue<IFilter> FilterQueue { get; set; }
+        private AdvancedQueryDialog aqd;
         public ThinkDiffMainForm()
         {
             Settings.LoadSettings();
+            aqd = new AdvancedQueryDialog();
+            aqd.FormClosed += new FormClosedEventHandler(advancedquery_closed);
             FilterQueue = new Queue<IFilter>();
             AppData.Initialize();
             InitializeComponent();
@@ -37,8 +40,7 @@ namespace ThinkDiff
             {
                 Bin b = new Bin(openDatabaseFileDialog.SafeFileName, DatabaseFileIO.ReadDatabaseFile(openDatabaseFileDialog.FileName));
                 AppData.AddNewData(b);
-              //  AppData.WriteBinToDatabaseAsync(b); //We're assuming that this data is new, so we'll write it to the database.
-                
+                saveDataQueryWorker.RunWorkerAsync();
                 dataGridView1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
 
                 statusLabel.Text = "Processing data...";
@@ -136,8 +138,7 @@ namespace ThinkDiff
 
         private void filterBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            FillDataGridViewDefault();
-            DisplayBinContents();
+            UpdateView();
         }
 
         private void exportPatientDataToolStripMenuItem_Click(object sender, EventArgs e)
@@ -151,6 +152,50 @@ namespace ThinkDiff
         private void openDatabaseFileDialog_FileOk(object sender, CancelEventArgs e)
         {
 
+        }
+
+        private void UpdateView()
+        {
+            FillDataGridViewDefault();
+            DisplayBinContents();
+        }
+
+        void advancedquery_closed(object sender, EventArgs e)
+        {
+            if(aqd.DialogResult == DialogResult.OK)
+            {
+                if(aqd.Query != "")
+                {
+                    advancedQueryBackgroundWorker.RunWorkerAsync();
+                }
+            }
+        }
+
+        private void advancedQueryBuilderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            aqd.Show();
+
+        }
+
+        private async void queryBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            
+            Bin b = await Settings.DataInterface.PullDataFromDatabase(aqd.Query);
+            lock (AppData.WorkingBin)
+            {
+                AppData.WorkingBin = b;
+            }
+
+        }
+
+        private void advancedQueryBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            UpdateView();
+        }
+
+        private void saveDataQueryWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            AppData.WriteBinToDatabaseAsync(AppData.WorkingBin);
         }
     }
 }
