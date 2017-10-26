@@ -711,21 +711,183 @@ namespace libcdiffrecords.Data
 
         }
 
+        /// <summary>
+        /// Equivalent to FilterForSamplesOccuringAfterGivenSet(criteria, filterFrom, -1);
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <param name="filterFrom"></param>
+        /// <returns></returns>
+        public static Bin FilterForSamplesOccuringAfterGivenSet(Bin criteria, Bin filterFrom)
+        {
+            return FilterForSamplesOccuringAfterGivenSet(criteria, filterFrom, -1);
+        }
+
+        /// <summary>
+        /// Finds and returns all samples from each patient that occur after a given sample from that same patient.
+        /// 
+        /// The idea here, is that we create a Bin called criteria, and ideally, this should be a Bin
+        /// with one sample per patient (but can be more). We take that Bin, and look for all samples occuring
+        /// after it, in our second, larger Bin (likely the original Bin of samples) for that same patient.
+        /// 
+        /// Usage - Situations such as - Grabbing all of the samples that happened after a clinical outpatient test.
+        /// Alternatively - grabbing all of the clinical inpatient NAATs that happened after a surveillance test.
+        /// (by setting the Bin filterFrom to a list of clinical inpatient NAATs)
+        /// </summary>
+        /// <param name="criteria">A list of patients with samples (with dates to filter by)</param>
+        /// <param name="filterFrom">A list of patients and samples to pick from</param>
+        /// <param name="maxDaysAway">Furthest away a patient sample can be from the criteria to be considered a match
+        /// Use -1 for no limit</param>
+        /// <returns></returns>
+        public static Bin FilterForSamplesOccuringAfterGivenSet(Bin criteria, Bin filterFrom, int maxDaysAway)
+        {
+            Bin retBin = new Bin(criteria.Label + "_samples_after");
+            foreach (string key in criteria.DataByPatient.Keys)
+            {
+                for (int i = 0; i < criteria.DataByPatient[key].Count; i++)
+                {
+                    DateTime after = criteria.DataByPatient[key][i].SampleDate;
+
+                    if (filterFrom.DataByPatient.ContainsKey(key))
+                    {
+                        for (int k = 0; k < filterFrom.DataByPatient[key].Count; k++)
+                        {
+                            if (filterFrom.DataByPatient[key][k].SampleDate > after)
+                            {
+                                if (maxDaysAway != -1)
+                                {
+                                    DateTime max = after.AddDays(maxDaysAway);
+                                    if(filterFrom.DataByPatient[key][k].SampleDate <= max)
+                                        retBin.Add(filterFrom.DataByPatient[key][k]);
+                                }
+                                else
+                                    retBin.Add(filterFrom.DataByPatient[key][k]);
+                            }
+                           
+                                
+                        }
+                    }
+                }
+            }
+            return retBin;
+        }
+
+        /// <summary>
+        /// Finds and returns all samples from each patient that occur after a given sample from that same patient.
+        /// Equivalent to FilterForsamplesOccuringAfterGivenSet(criteria, filterFrom, -1);
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <param name="filterFrom"></param>
+        /// <returns></returns>
+        public static Bin FilterForSamplesOccuringAfterGivenSet(Dictionary<string, DateTime> criteria, Bin filterFrom)
+        {
+            return FilterForSamplesOccuringAfterGivenSet(criteria, filterFrom, -1);
+        }
+
+        /// <summary>
+        /// Finds and returns all samples from each patient that occur after a given sample from that same patient.
+        /// 
+        /// The idea here, is that we create a dictionary called criteria, of mrns and date times, 
+        /// We take that list, and look for all samples occuring
+        /// after it, in our second, larger Bin (likely the original Bin of samples) for that same patient.
+        /// 
+        /// Usage - Situations such as - Grabbing all of the samples that happened after a clinical outpatient test.
+        /// Alternatively - grabbing all of the clinical inpatient NAATs that happened after a surveillance test.
+        /// (by setting the Bin filterFrom to a list of clinical inpatient NAATs)
+        /// </summary>
+        /// <param name="criteria">A Dictionary of patient MRN values and DateTimes to find samples after</param>
+        /// <param name="filterFrom">A Bin to find samples after a given date</param>
+        /// <param name="maxDaysAway">Maximum days that a given sample can be from the criteria list. Use -1 for no limit</param>
+        /// <returns></returns>
+        public static Bin FilterForSamplesOccuringAfterGivenSet(Dictionary<string, DateTime> criteria, Bin filterFrom, int maxDaysAway)
+        {
+            Bin retBin = new Bin(filterFrom.Label + "_Filtered_By_Date_criteria");
+
+            foreach(string key in criteria.Keys)
+            {
+                if(filterFrom.DataByPatient.ContainsKey(key))
+                {
+                    for(int i = 0; i < filterFrom.DataByPatient[key].Count; i++)
+                    {
+                        if(filterFrom.DataByPatient[key][i].SampleDate > criteria[key])
+                        {
+                            if(maxDaysAway != -1)
+                            {
+                                DateTime max = criteria[key].AddDays(maxDaysAway);
+
+                                if (filterFrom.DataByPatient[key][i].SampleDate <= max)
+                                    retBin.Add(filterFrom.DataByPatient[key][i]);
+                            }
+                            else
+                                retBin.Add(filterFrom.DataByPatient[key][i]);
+                        }
+                    }
+                }
+            }
+
+            return retBin;
+        }
+
+        /// <summary>
+        /// Filters for samples in a given date range
+        /// </summary>
+        /// <param name="b">The bin to filter from</param>
+        /// <param name="start">Earliest sampling date a sample can have (inclusive)</param>
+        /// <param name="end">Latest sampling date a sample can have (inclusive)</param>
+        /// <returns>A bin of samples in that date range</returns>
+        public static Bin FilterForSamplesInDateRange(Bin b, DateTime start, DateTime end)
+        {
+            Bin retBin = new Bin(b.Label + "_in range: " + start.ToShortDateString() + " - " + end.ToShortDateString());
+            for(int i = 0; i < b.Data.Count; i++)
+            {
+                if (b.Data[i].SampleDate >= start && b.Data[i].SampleDate <= end)
+                    retBin.Add(b.Data[i]);
+            }
+
+            return retBin;
+        }
+
         public static Bin FilterPatientsWithGivenNumberOfSamples(Bin b, int count)
         {
             Bin retBin = new Bin(b.Label);
 
+            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                int ct = 0;
+                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                {
+                    ct += adm.Points.Count;
+                }
+                if (ct >= count)
+                {
+                    foreach (Admission adm in b.DataByPatientAdmissionTable[key])
+                    {
+                        retBin.Add(adm);
+                    }
+                }
+            }
+
+            return retBin;
+        }
+
+        public static Bin FilterPatientsWhoOnlyHaveNegativeSamples(Bin b)
+        {
+            Bin retBin = new Bin(b.Label);
             foreach(string key in b.DataByPatient.Keys)
             {
-                if(b.DataByPatient[key].Count >= count)
+                bool onlyNeg = true;
+                for(int i = 0; i < b.DataByPatient[key].Count; i++)
                 {
-                    for(int i =0; i < b.DataByPatient[key].Count; i++)
+                    if (b.DataByPatient[key][i].CdiffResult == TestResult.Positive)
+                        onlyNeg = false;
+                }
+                if(onlyNeg)
+                {
+                    for (int i = 0; i < b.DataByPatient[key].Count; i++)
                     {
                         retBin.Add(b.DataByPatient[key][i]);
                     }
                 }
             }
-
             return retBin;
         }
 
@@ -845,6 +1007,10 @@ namespace libcdiffrecords.Data
             if (tt == TestType.Stool)
             {
                 tests = new TestType[3] { TestType.Surveillance_Stool_Culture, TestType.Surveillance_Stool_NAAT, TestType.Clinical_Inpatient_NAAT };
+            }
+            if(tt == TestType.Inpatient_Test)
+            {
+                tests = new TestType[5] { TestType.Clinical_Inpatient_NAAT, TestType.Surveillance_Stool_Culture, TestType.Surveillance_Stool_NAAT, TestType.Surveillance_Swab_Culture, TestType.Surveillance_Swab_NAAT };
             }
             return tests;
         }

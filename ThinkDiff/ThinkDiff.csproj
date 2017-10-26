@@ -68,6 +68,8 @@
       <DependentUpon>AdvancedQueryDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="AppData.cs" />
+    <Compile Include="Data Operations\IDataOperation.cs" />
+    <Compile Include="Data Operations\ReadFromDatabase.cs" />
     <Compile Include="Filters\FilterForAdmissionsWithAdmissionSamples.cs" />
     <Compile Include="Filters\FilterForIndexAdmission.cs" />
     <Compile Include="Filters\FilterList.cs" />

@@ -159,6 +159,17 @@ namespace ThinkDiff
             });
         }
 
+        public DbDataReader ExecuteDataReaderQuery(string query)
+        {
+            if (conn.State == ConnectionState.Closed)
+                conn.Open();        
+            SQLiteCommand cmd = new SQLiteCommand(query, conn);
+
+            DbDataReader dr =cmd.ExecuteReader();
+
+            return dr;
+        }
+
         /// <summary>
         /// Returns a dictionary of the table column names, as well as their datatypes.
         /// for a given table

@@ -24,6 +24,7 @@ namespace libcdiffrecords.Storage
                 t.LegacyID = "";
                 t.SampleDate = DateTime.MinValue;
                 t.TubeAccession = "";
+                t.SampleType = "UNKNOWN";
 
                 return t;
             }
@@ -41,6 +42,7 @@ namespace libcdiffrecords.Storage
         public string SampleID { get; set; }
         public string Additives { get; set; }
         public string Notes { get; set; }
+        public string SampleType { get; set; }
 
     }
 }

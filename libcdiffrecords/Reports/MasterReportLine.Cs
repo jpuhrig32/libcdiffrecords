@@ -24,12 +24,14 @@ namespace libcdiffrecords.Reports
         public string[] GenerateReportHeaderLine()
         {
             List<string> header = new List<string>();
-            header.Add("Unit");
+            header.Add("Group");
             header.Add("Unique Patients");
             header.Add("Median Age");
             header.Add("Age Range");
+            header.Add("Female Count");
             header.Add("Percent Female");
             header.Add("Patient Admissions");
+            header.Add("Sample Count");
             header.Add("C. difficile positive (regardless of timing)");
             header.Add("");
             header.Add("C. difficile Positive upon admission");
@@ -50,8 +52,10 @@ namespace libcdiffrecords.Reports
             line.Add(repBin.PatientCount.ToString());
             line.Add(repBin.MedianAge.ToString());
             line.Add(repBin.AgeRange);
+            line.Add(repBin.FemaleCount.ToString());
             line.Add(repBin.PercentFemale.ToString());
             line.Add(repBin.PatientAdmissionCount.ToString());
+            line.Add(repBin.ItemsInBin.ToString());
             BinSummaryStatistics ats = repBin.GenerateBinSummaryStatistics();
             line.Add(ats.Positive_RegardlessOfTiming.ToString());
             line.Add(((double)ats.Positive_RegardlessOfTiming / repBin.PatientAdmissionCount * 100.0).ToString());
@@ -73,6 +77,8 @@ namespace libcdiffrecords.Reports
         public string[] GenerateReportSubHeaderLine()
         {
             List<string> header = new List<string>();
+            header.Add("");
+            header.Add("");
             header.Add("");
             header.Add("");
             header.Add("");

@@ -63,6 +63,8 @@ namespace libcdiffrecords.Storage
                 t.TubeLabel = parts[3].Trim();
                 t.SampleID = parts[4].Trim();
                 t.Additives = parts[5].Trim();
+                t.SampleType = parts[6].Trim();
+                t.Notes = parts[7].Trim();
                 sd.Add(t);
 
                 
@@ -83,7 +85,7 @@ namespace libcdiffrecords.Storage
                 {
                     row = pos[0] - 65;
                 }
-                col = pos[1];
+                col = pos[1]-48;
 
             }
             return row * 9 + col;
@@ -362,6 +364,7 @@ namespace libcdiffrecords.Storage
                     string label = parts[2].Trim();
                     string sampleID = parts[3].Trim();
                     string additives = parts[4].Trim();
+           
 
                     if (!sampleID.Equals(""))
                     {
@@ -514,6 +517,7 @@ namespace libcdiffrecords.Storage
             line.Add(t.TubeLabel);
             line.Add(t.SampleID);
             line.Add(t.Additives);
+            line.Add(t.SampleType);
             line.Add(t.Notes);
 
             return line;
@@ -540,6 +544,7 @@ namespace libcdiffrecords.Storage
             head.Add("Label");
             head.Add("Sample ID");
             head.Add("Additives");
+            head.Add("Sample Type");
             head.Add("Notes");
 
 

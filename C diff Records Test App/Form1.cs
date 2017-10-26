@@ -61,33 +61,28 @@ namespace C_diff_Records_Test_App
                 Application.DoEvents();
                 DataPoint[] data = DatabaseFileIO.ReadDatabaseFile(openInputFileDialog.FileName);
                 StorageData sd = BoxLoader.LoadStorageData(openBoxLocFileDialog.FileName);
-          
-                Bin data2 = new Bin("dat", data);
-                Bin data1 = data2.Clone();
-                data2 = DataFilter.FilterByTestType(data2, TestType.Stool);
-                data2 = DataFilter.FilterAvailableSamples(data2, sd);
-                Bin data3 = data2.Clone();
-              
-                data1 = DataFilter.RemoveOutpatientTests(data1);
-                data2 = DataFilter.FilterByAdmissionType(data3, AdmissionStatus.NegativeOnAdmission_TurnedPositive);
-            
-                data3 = DataFilter.FilterAdmissionsByNumberOfSamples(data3, 2);
-                data3 = DataFilter.FilterByAdmissionType(data3, AdmissionStatus.NegativeAdmission);
-              
-                DatabaseFileIO.WriteDataToFile(data2, openInputFileDialog.FileName + " sp_aim_1_data.csv", ',');
-              
-                DatabaseFileIO.WriteDataToFile(data3, openInputFileDialog.FileName + " sp_aim_2_data.csv", ',');
-                
-                DatabaseFileIO.WriteEventBasedDataToFile(data1, openInputFileDialog.FileName + " data_for Utah.csv", ',');
-               
-                PatientAdmissionReport par2 = new PatientAdmissionReport(data2);
-                PatientAdmissionReport par3 = new PatientAdmissionReport(data3);
-
-                Application.DoEvents();
-                ReportWriter.WriteReport(openInputFileDialog.FileName + " sp_aim_1_report.csv", ReportFormat.CSV, par2.GenerateReportLines());
-                ReportWriter.WriteReport(openInputFileDialog.FileName + " sp_aim_2_report.csv", ReportFormat.CSV, par3.GenerateReportLines());
 
 
+                Bin dataBin = new Bin("data", data);
+                //  dataBin = DataFilter.FilterByAdmissionType(dataBin, AdmissionStatus.NegativeOnAdmission_RemainedNegative);
+                Bin clinOutpatient = DataFilter.FilterByTestType(dataBin, TestType.Clinical_Outpatient_Culture);
+
+                Bin otherData = dataBin.Exclude(clinOutpatient);
+                otherData = DataFilter.FilterByTestType(otherData, TestType.Inpatient_Test);
+
+                Bin picks = DataFilter.FilterForSamplesOccuringAfterGivenSet(clinOutpatient, otherData);
+
+                picks = DataFilter.FilterAvailableSamples(picks, sd);
+
+                DatabaseFileIO.WriteDataToFile(picks, openInputFileDialog.FileName + "_inpatients_after_bmt_outpatient.csv", ',');
+                DatabaseFileIO.WriteDataToFile(picks + clinOutpatient, openInputFileDialog.FileName + "_inpatients_ andOutpatients_ after_bmt_outpatient.csv", ',');
+                MasterReportLine[] lines = new MasterReportLine[2];
+                lines[0] = new MasterReportLine(clinOutpatient);
+                lines[1] = new MasterReportLine(picks);
+
+                ReportWriter.WriteReport(openInputFileDialog.FileName + "bmt_outpatients_reports.csv", lines, ',');
+
+             
 
 
             }

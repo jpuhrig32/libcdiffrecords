@@ -8,34 +8,9 @@ using System.IO;
 
 namespace libcdiffrecords.Reports
 {
-    public enum ReportFormat
-    {
-        CSV,
-        TabDelimited,
-    };
-
    public class ReportWriter
     {
-
-        public static void WriteReport(string file, ReportFormat fmt, IReportLine[] lines)
-        {
-            if (lines.Length > 0)
-            {
-                switch(fmt)
-                {
-                    case ReportFormat.CSV:
-                        WriteCharDelimitedFile(file, lines, ',');
-                        break;
-                    case ReportFormat.TabDelimited:
-                        WriteCharDelimitedFile(file, lines, '\t');
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        private static void WriteCharDelimitedFile(string file, IReportLine[] lines, char delim)
+        public static void WriteReport(string file, IReportLine[] lines, char delim)
         {
             StreamWriter sw = new StreamWriter(file);
             sw.WriteLine(BuildLine(lines[0].GenerateReportHeaderLine(), delim));
@@ -43,12 +18,22 @@ namespace libcdiffrecords.Reports
             if (sub.Length > 0)
                 sw.WriteLine(BuildLine(sub, delim));
 
-            for(int i =0; i < lines.Length; i++)
+            for (int i = 0; i < lines.Length; i++)
             {
                 sw.WriteLine(BuildLine(lines[i].GenerateReportLine(), delim));
             }
             sw.Close();
 
+        }
+
+        /// <summary>
+        /// Writes a set of report lines into a CSV file
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="lines"></param>
+        public static void WriteReport(string file, IReportLine[] lines)
+        {
+            WriteReport(file, lines, ',');
         }
 
         private static String BuildLine(string[] lineParts, char delim)

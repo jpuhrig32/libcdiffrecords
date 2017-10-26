@@ -185,6 +185,24 @@ namespace libcdiffrecords.Data
             }
         }
 
+        public int FemaleCount
+        {
+            get
+            {
+               int fCount = 0;
+
+                foreach (string key in DataByPatientAdmissionTable.Keys)
+                {
+                    if (DataByPatientAdmissionTable[key].Count > 0)
+                    {
+                        if (DataByPatientAdmissionTable[key][0].Points[0].PatientSex == Sex.Female)
+                            fCount++;
+                    }
+                }
+
+                return fCount;
+            }
+        }
         /// <summary>
         /// Produces a full copy of this bin, with a new reference attached to it,
         /// Essentially a memberwise clone
@@ -446,6 +464,64 @@ namespace libcdiffrecords.Data
             return max;
         }
 
+
+        /// <summary>
+        /// Returns an intersection of two bins (The values that occur in both bins)
+        /// </summary>
+        /// <param name="toIntersect">The bin to intersect with</param>
+        /// <returns>A bin containing samples common to both bins</returns>
+        public Bin Intersect(Bin toIntersect)
+        {
+            Bin retBin = new Bin(Label + "_intersected_with_" + toIntersect.Label);
+            foreach(string key in DataBySampleID.Keys)
+            {
+                if (toIntersect.DataBySampleID.ContainsKey(key))
+                    retBin.Add(DataBySampleID[key]);
+
+            }
+            return retBin;
+        }
+
+        /// <summary>
+        /// Returns a bin excluding values in the second bin. 
+        /// 
+        /// The idea is basically a way to create a negative of a filter.
+        /// Say, we create a bin of only clinical outpatient culture samples.
+        /// This creates the opposite - a bin that has everything except those samples.
+        /// It's a way of allowing more flexibility when current filters are not quite sufficient
+        /// </summary>
+        /// <param name="toExclude">A bin of values to exclude from this bin</param>
+        /// <returns></returns>
+        /// 
+        public Bin Exclude(Bin toExclude)
+        {
+            Bin retBin = new Bin(Label + "_excluding_" + toExclude.Label);
+
+            foreach(string key in DataBySampleID.Keys)
+            {
+                if (!toExclude.DataBySampleID.ContainsKey(key))
+                    retBin.Add(DataBySampleID[key]);
+            }
+
+            return retBin;
+        }
+
+        /// <summary>
+        /// Returns a bin that contains values that are unique to one bin or the other, while 
+        /// excluding values common to both. This is the opposite  of an intersection
+        /// 
+        /// Creates an intersection of the two bins, and then performs an exclusion
+        /// of that intersection from the sum of the two bins.
+        /// </summary>
+        /// <param name="toComplement">A bin of values to complement</param>
+        /// <returns></returns>
+        public Bin Complement(Bin toComplement)
+        {
+            Bin intersection = Intersect(toComplement);
+            Bin sum = this + toComplement;
+
+            return sum.Exclude(intersection);
+        }
 
 
     }

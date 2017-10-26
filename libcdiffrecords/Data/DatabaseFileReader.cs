@@ -211,9 +211,23 @@ namespace libcdiffrecords.Data
 
         }
 
+        public static void WriteDataToFile(DataPoint[] data, string filename)
+        {
+            WriteDataToFile(data, filename, ',');
+        }
+
+        public static void WriteDataToFile(Bin b, string filename)
+        {
+            WriteDataToFile(b.Data.ToArray(), filename, ',');
+        }
         public static void WriteDataToFile(Bin b, string filename, char delimiter)
         {
             WriteDataToFile(b.Data.ToArray(), filename, delimiter);
+        }
+
+        public static void WriteDataToFile(Bin[] b, string filename)
+        {
+            WriteDataToFile(b, filename, ',');
         }
 
         public static void WriteDataToFile(Bin[] b, string filename, char delimiter)
