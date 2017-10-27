@@ -14,16 +14,16 @@ namespace libcdiffrecords.Data
         Dictionary<string, List<DataPoint>> patients;
         Dictionary<string, List<Admission>> admissionsByPatient;
         public Dictionary<string, DataPoint> DataBySampleID { get; set; }
-        
+
 
         public static Bin operator +(Bin b1, Bin b2)
         {
-            Bin ret = b1.Clone();
-            for(int i = 0; i < b2.Data.Count; i++)
-            {
-                ret.Add(b2.Data[i]);
-            }
-            return ret;
+            return b1.Union(b2);
+        }
+
+        public static Bin operator -(Bin b1, Bin b2)
+        {
+            return b1.Exclude(b2);
         }
 
 
@@ -149,7 +149,7 @@ namespace libcdiffrecords.Data
 
         }
 
-        
+
         public List<Admission> PatientAdmissions
         {
             get
@@ -189,7 +189,7 @@ namespace libcdiffrecords.Data
         {
             get
             {
-               int fCount = 0;
+                int fCount = 0;
 
                 foreach (string key in DataByPatientAdmissionTable.Keys)
                 {
@@ -211,7 +211,7 @@ namespace libcdiffrecords.Data
         public Bin Clone()
         {
             Bin retBin = new Bin("Copy of" + label);
-            for(int i = 0; i < Data.Count; i++)
+            for (int i = 0; i < Data.Count; i++)
             {
                 DataPoint temp = new DataPoint();
                 temp = Data[i];
@@ -230,7 +230,7 @@ namespace libcdiffrecords.Data
             admissionsByPatient = new Dictionary<string, List<Admission>>();
             DataBySampleID = new Dictionary<string, DataPoint>();
             label = binLabel;
-            
+
         }
 
         public Bin(string binLabel, DataPoint[] initalPoints)
@@ -248,10 +248,10 @@ namespace libcdiffrecords.Data
 
         public void Add(DataPoint point)
         {
-           if(DataBySampleID.ContainsKey(point.SampleID)) //New sample shares an existing sample dataset. Duplicate or different samples sharing the same ID?
+            if (DataBySampleID.ContainsKey(point.SampleID)) //New sample shares an existing sample dataset. Duplicate or different samples sharing the same ID?
             {
                 DataPoint tempSam = DataBySampleID[point.SampleID];
-                if(point != tempSam) //They are in fact, different points.
+                if (point != tempSam) //They are in fact, different points.
                 {
                     string highestSampleID = DataBySampleID.Keys.Max();
                     int sampleMax = int.Parse(highestSampleID.Substring(4));
@@ -259,7 +259,7 @@ namespace libcdiffrecords.Data
                     point.SampleID = "SAM_" + sampleMax.ToString();
                     point.Flags.Add(DataFlag.DifferentSamplesAttachedToSampleID);
                 }
-               else
+                else
                 {
                     return;
                 }
@@ -272,7 +272,7 @@ namespace libcdiffrecords.Data
             {
                 patients.Add(point.MRN, new List<DataPoint>());
             }
-           
+
             patients[point.MRN].Add(point);
 
             if (!admissionsByPatient.ContainsKey(point.MRN))
@@ -285,7 +285,7 @@ namespace libcdiffrecords.Data
                 dpa.unit = point.Unit.Trim();
                 dpa.PatientName = point.PatientName;
                 dpa.Points.Add(point);
-               
+
 
                 admissionsByPatient[point.MRN].Add(dpa);
 
@@ -317,7 +317,7 @@ namespace libcdiffrecords.Data
 
         }
 
-        
+
         public void Add(Admission dpa)
         {
             for (int i = 0; i < dpa.Points.Count; i++)
@@ -465,6 +465,16 @@ namespace libcdiffrecords.Data
         }
 
 
+        public Bin Union(Bin toAdd)
+        {
+            Bin retBin = Clone();
+            retBin.Label = Label + "_unioned with_" + toAdd.Label;
+            for(int i =0; i < toAdd.Data.Count; i++)
+            {
+                retBin.Add(toAdd.Data[i]);
+            }
+            return retBin;
+        }
         /// <summary>
         /// Returns an intersection of two bins (The values that occur in both bins)
         /// </summary>
