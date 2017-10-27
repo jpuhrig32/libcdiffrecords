@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using libcdiffrecords.Data;
 
 namespace libcdiffrecords.Storage
 {
@@ -11,6 +12,7 @@ namespace libcdiffrecords.Storage
     {
         public Dictionary<string, List<Tube>> TubesBySampleID { get; set; }
         public Dictionary<string, List<Tube>> TubesByContainer { get; set; }
+        public List<Tube> Tubes { get; set; }
 
       //  public Dictionary<string, List<Tube>> TubesByPatient { get; set; }
 
@@ -19,8 +21,18 @@ namespace libcdiffrecords.Storage
       //      TubesByPatient = new Dictionary<string, List<Tube>>();
             TubesBySampleID = new Dictionary<string, List<Tube>>();
             TubesByContainer = new Dictionary<string, List<Tube>>();
+            Tubes = new List<Tube>();
         }
         
+
+        public StorageData(string storageDataFile)
+        {
+           StorageData sd = BoxLoader.LoadStorageData(storageDataFile);
+            TubesByContainer = sd.TubesByContainer;
+            TubesBySampleID = sd.TubesBySampleID;
+            Tubes = sd.Tubes;
+        }
+
         public void Add(Tube t)
         {
             if(!TubesBySampleID.ContainsKey(t.SampleID))
@@ -30,6 +42,8 @@ namespace libcdiffrecords.Storage
             if (!TubesByContainer.ContainsKey(t.ParentBox))
                 TubesByContainer.Add(t.ParentBox, new List<Tube>());
             TubesByContainer[t.ParentBox].Add(t);
+
+            Tubes.Add(t);
         }
 
         public void Add(StorageBox box)
@@ -71,6 +85,47 @@ namespace libcdiffrecords.Storage
 
             }
             return emptyPos.ToArray();
+        }
+
+        public void AssignSampleIDsToTubes(Bin b)
+        {
+            Dictionary<string, List<Tube>> empties = new Dictionary<string, List<Tube>>();
+            char[] split = new char[1] { ' ' };
+            for(int i = 0; i < Tubes.Count; i++)
+            {
+                if(Tubes[i].SampleID.Equals("") && !Tubes[i].TubeLabel.Equals(""))
+                {
+                    string[] lparts = Tubes[i].TubeLabel.Split(split);
+
+                    Tubes[i].SampleDate = DateTime.Parse(lparts[1].Trim());
+                    lparts[0] = lparts[0].Trim();
+
+                    string code = lparts[0].Substring(1);
+                    code = code.PadLeft(4, '0');
+                    lparts[0] = lparts[0][0] + code;
+
+                    string legacyID = lparts[0];
+
+                    if (!empties.ContainsKey(legacyID))
+                        empties.Add(legacyID, new List<Tube>());
+
+                    empties[legacyID].Add(Tubes[i]);
+                }
+            }
+
+            for (int x = 0; x < b.Data.Count; x++)
+            {
+                if (empties.ContainsKey(b.Data[x].LegacyID))
+                {
+                    for (int z = 0; z < empties[b.Data[x].LegacyID].Count; z++)
+                    {
+                        if(empties[b.Data[x].LegacyID][z].SampleDate == b.Data[x].SampleDate)
+                        {
+                            empties[b.Data[x].LegacyID][z].SampleID = b.Data[x].SampleID;
+                        }
+                    }
+                }
+            }
         }
 
 
@@ -119,6 +174,16 @@ namespace libcdiffrecords.Storage
             }
 
             return empties;
+        }
+
+        public void WriteStorageData(string filename)
+        {
+            WriteStorageData(filename, ',');
+        }
+
+        public void WriteStorageData(string filename, char delim)
+        {
+            BoxLoader.WriteStorageData(this, filename, delim);
         }
     }
 

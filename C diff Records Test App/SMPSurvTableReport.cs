@@ -124,7 +124,7 @@ namespace C_diff_Records_Test_App
 
                 }
             }
-            ReportWriter.WriteReport(outputFile, ReportFormat.CSV, lines);
+            ReportWriter.WriteReport(outputFile, lines);
         }
 
 

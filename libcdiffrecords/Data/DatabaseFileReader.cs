@@ -54,6 +54,11 @@ namespace libcdiffrecords.Data
             ;
         }
 
+
+        public static Bin ReadDatabaseFileToBin(string file)
+        {
+            return new Bin("Database_data", ReadDatabaseFile(file));
+        }
         /// <summary>
         /// Produces a table of header values and their corresponding columns
         /// This is to allow the database file to have columns reordered without having to re-write the 
@@ -210,6 +215,8 @@ namespace libcdiffrecords.Data
             }
 
         }
+
+       
 
         public static void WriteDataToFile(DataPoint[] data, string filename)
         {

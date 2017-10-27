@@ -551,6 +551,36 @@ namespace libcdiffrecords.Storage
             return head;
         }
 
+        public static void WriteStorageData(StorageData sd, string filename, char delim)
+        {
+            StreamWriter sw = new StreamWriter(filename);
+            sw.WriteLine(BuildDelimitedString(CreateHeaderForSampleBox(), delim));
+
+            for(int i = 0; i < sd.Tubes.Count; i++)
+            {
+                sw.WriteLine(BuildDelimitedString(CreateTubeDataLine(sd.Tubes[i]), delim));
+            }
+
+
+            sw.Close();
+        }
+
+        public static void WriteStorageData(StorageData sd, string filename)
+        {
+            WriteStorageData(sd, filename, ',');
+        }
+
+        private static string BuildDelimitedString(List<string> parts, char delim)
+        {
+            StringBuilder sb = new StringBuilder();
+            for(int i =0; i < parts.Count; i++)
+            {
+                sb.Append(parts[i]);
+                sb.Append(delim);
+            }
+            return sb.ToString();
+        }
+
 
         ///TODO - merge both box writing functions - they reuse practically all of their code.
         public static void WriteBoxData(StorageBox[] boxes, string directory, char delim, BoxWritingStyle style)

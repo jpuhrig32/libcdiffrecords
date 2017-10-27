@@ -59,28 +59,13 @@ namespace C_diff_Records_Test_App
             if(openInputFileDialog.FileNames.Length > 0)
             {
                 Application.DoEvents();
-                DataPoint[] data = DatabaseFileIO.ReadDatabaseFile(openInputFileDialog.FileName);
+                Bin data = DatabaseFileIO.ReadDatabaseFileToBin(openInputFileDialog.FileName);
                 StorageData sd = BoxLoader.LoadStorageData(openBoxLocFileDialog.FileName);
 
+                sd.AssignSampleIDsToTubes(data);
+                BoxLoader.WriteStorageData(sd, openBoxLocFileDialog.FileName + "added_stuff.csv");
 
-                Bin dataBin = new Bin("data", data);
-                //  dataBin = DataFilter.FilterByAdmissionType(dataBin, AdmissionStatus.NegativeOnAdmission_RemainedNegative);
-                Bin clinOutpatient = DataFilter.FilterByTestType(dataBin, TestType.Clinical_Outpatient_Culture);
 
-                Bin otherData = dataBin.Exclude(clinOutpatient);
-                otherData = DataFilter.FilterByTestType(otherData, TestType.Inpatient_Test);
-
-                Bin picks = DataFilter.FilterForSamplesOccuringAfterGivenSet(clinOutpatient, otherData);
-
-                picks = DataFilter.FilterAvailableSamples(picks, sd);
-
-                DatabaseFileIO.WriteDataToFile(picks, openInputFileDialog.FileName + "_inpatients_after_bmt_outpatient.csv", ',');
-                DatabaseFileIO.WriteDataToFile(picks + clinOutpatient, openInputFileDialog.FileName + "_inpatients_ andOutpatients_ after_bmt_outpatient.csv", ',');
-                MasterReportLine[] lines = new MasterReportLine[2];
-                lines[0] = new MasterReportLine(clinOutpatient);
-                lines[1] = new MasterReportLine(picks);
-
-                ReportWriter.WriteReport(openInputFileDialog.FileName + "bmt_outpatients_reports.csv", lines, ',');
 
              
 
