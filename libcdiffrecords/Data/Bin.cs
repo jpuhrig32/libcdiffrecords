@@ -62,7 +62,8 @@ namespace libcdiffrecords.Data
             get
             {
                 List<int> ages = PatientAges;
-
+                return Utilities.Range(ages);
+                /*
                 ages.Sort();
                 if (ages.Count < 1)
                     return "";
@@ -80,6 +81,7 @@ namespace libcdiffrecords.Data
                     return min.ToString();
 
                 return min.ToString() + " - " + max.ToString();
+                */
             }
         }
 
@@ -88,19 +90,48 @@ namespace libcdiffrecords.Data
             get
             {
                 List<int> ages = PatientAges;
-                if (ages.Count < 1)
-                    return 0;
-                ages.Sort();
+                return Utilities.Median(ages);
+            }
+        }
 
-                if (ages.Count % 2 == 0)
+        private List<int> SampleCountPerPatient
+        {
+            get
+            {
+                List<int> counts = new List<int>();
+                foreach (string key in DataByPatient.Keys)
                 {
-                    int midpt = (int)Math.Floor((double)ages.Count / 2);
-                    return (ages[midpt] + ages[midpt - 1]) / 2;
+                    counts.Add(DataByPatient[key].Count);
                 }
-                else
-                {
-                    return ages[ages.Count / 2];
-                }
+
+                return counts;
+            }
+        }
+
+        public double MeanSampleCountPerPatient
+        {
+            get
+            {
+                List<int> samcounts = SampleCountPerPatient;
+                return Utilities.Mean(samcounts);
+            }
+        }
+
+        public int MedianSampleCountPerPatient
+        {
+            get
+            {
+                List<int> samcounts = SampleCountPerPatient;
+                return Utilities.Median(samcounts);
+            }
+        }
+
+        public string SampleCountRange
+        {
+            get
+            {
+                List<int> samcounts = SampleCountPerPatient;
+                return Utilities.Range(samcounts);
             }
         }
 
@@ -113,7 +144,10 @@ namespace libcdiffrecords.Data
                 {
                     if (DataByPatientAdmissionTable[key].Count > 0)
                     {
-                        ages.Add(DataByPatientAdmissionTable[key][0].Points[0].Age);
+                        if (DataByPatientAdmissionTable[key][0].Points[0].Age < 116 && DataByPatientAdmissionTable[key][0].Points[0].Age > 0)
+                        {
+                            ages.Add(DataByPatientAdmissionTable[key][0].Points[0].Age);
+                        }
                     }
                 }
 
@@ -257,7 +291,7 @@ namespace libcdiffrecords.Data
                     int sampleMax = int.Parse(highestSampleID.Substring(4));
                     sampleMax++;
                     point.SampleID = "SAM_" + sampleMax.ToString();
-                    point.Flags.Add(DataFlag.DifferentSamplesAttachedToSampleID);
+                    point.Flags.Add("Different sample attached to Sample ID");
                 }
                 else
                 {

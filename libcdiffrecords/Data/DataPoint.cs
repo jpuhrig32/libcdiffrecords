@@ -9,6 +9,7 @@ namespace libcdiffrecords.Data
 {
     public struct DataPoint
     {
+        private DateTime EarliestSample;
         private string mrn;
         private TestResult cdresult;
         public string MRN { get => mrn; set => mrn = value.PadLeft(8, '0'); }
@@ -18,7 +19,7 @@ namespace libcdiffrecords.Data
         public string AdmissionID { get; set; }
         public string Notes { get; set; }
         public List<Tube> Tubes { get; set; }
-        public List<DataFlag> Flags { get; set; }
+        public List<String> Flags { get; set; }
         public TestType Test { get; set; }
         public Sex PatientSex { get; set; }
         public DateTime DateOfBirth { get; set; }
@@ -52,7 +53,7 @@ namespace libcdiffrecords.Data
             AdmissionID = "";
             Notes = "";
             Tubes = new List<Tube>();
-            Flags = new List<DataFlag>();
+            Flags = new List<String>();
 
             Test = TestType.No_Test;
             PatientSex = Sex.Male;
@@ -63,6 +64,7 @@ namespace libcdiffrecords.Data
             Unit = "";
             Room = "00";
             Fields = new Dictionary<string, string>();
+            EarliestSample = new DateTime(2015, 1, 1);
      
         }
 
@@ -74,6 +76,27 @@ namespace libcdiffrecords.Data
         public static bool operator !=(DataPoint d1, DataPoint d2)
         {
             return !(d1 == d2);
+        }
+
+        public void CheckData()
+        {
+            if (mrn.Length == 0 || mrn == "00000000")
+                Flags.Add("Missing MRN");
+            if (SampleDate <= EarliestSample)
+                Flags.Add("Sample Date Before Collection Start");
+            if(AdmissionDate <= EarliestSample)
+                Flags.Add("Admission Date Before Collection Start");
+            if (CdiffResult == TestResult.Indeterminate || CdiffResult == TestResult.NotTested)
+                Flags.Add("No C diff Test Result");
+            if (DateOfBirth == new DateTime(1901, 1, 1))
+                Flags.Add("DOB Missing");
+            if (mrn.Length > 8)
+                Flags.Add("MRN Not FMLH");
+            if (Test == TestType.No_Test)
+                Flags.Add("Test Type Not Set");
+            if (Unit == "")
+                Flags.Add("Unit Missing");
+
         }
 
         

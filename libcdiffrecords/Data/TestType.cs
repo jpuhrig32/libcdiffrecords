@@ -19,6 +19,8 @@ namespace libcdiffrecords.Data
         Surveillance_Culture_Test,
         Surveillance_NAAT_Test,
         Stool,
+        Swab,
+        Surveillance_Stool,
         Inpatient_Test,
         No_Test,
     };

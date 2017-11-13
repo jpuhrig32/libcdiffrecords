@@ -49,7 +49,7 @@ namespace libcdiffrecords.Storage
         public static StorageData LoadStorageData(string filename)
         {
             StorageData sd = new StorageData();
-            StreamReader sr = new StreamReader(filename);
+            StreamReader sr = new StreamReader(filename) ;
             char[] separator = new char[1] { ',' };
             string line = sr.ReadLine();
 

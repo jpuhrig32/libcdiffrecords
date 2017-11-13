@@ -119,6 +119,18 @@ namespace libcdiffrecords.Data
             return retBin;
         }
 
+        public static Bin FilterByCDiffResult(Bin b, TestResult tr)
+        {
+            Bin retBin = new Bin(b.Label + "_Single_cdiff_result");
+
+            for(int i =0; i < b.Data.Count; i++)
+            {
+                if (b.Data[i].CdiffResult == tr)
+                    retBin.Add(b.Data[i]);
+            }
+            return retBin;
+        }
+
         /// <summary>
         /// Removes all admissions lacking a sample taken within the admission window (usually 3 days)
         /// </summary>
@@ -1012,6 +1024,14 @@ namespace libcdiffrecords.Data
             {
                 tests = new TestType[5] { TestType.Clinical_Inpatient_NAAT, TestType.Surveillance_Stool_Culture, TestType.Surveillance_Stool_NAAT, TestType.Surveillance_Swab_Culture, TestType.Surveillance_Swab_NAAT };
             }
+            if(tt == TestType.Surveillance_Stool)
+            {
+                tests = new TestType[2] { TestType.Surveillance_Stool_Culture, TestType.Surveillance_Stool_NAAT };
+            }
+            if (tt == TestType.Swab)
+            {
+                tests = new TestType[2] { TestType.Surveillance_Swab_Culture, TestType.Surveillance_Swab_NAAT };
+            }
             return tests;
         }
 
@@ -1027,7 +1047,7 @@ namespace libcdiffrecords.Data
             return bin1;
         }
 
-        public static Bin FilterFlaggedData(Bin b, DataFlag[] flags)
+        public static Bin FilterFlaggedData(Bin b, string[] flags)
         {
             Bin retBin = new Bin(b.Label + "_Flagged");
 
@@ -1046,14 +1066,14 @@ namespace libcdiffrecords.Data
             return retBin;
         }
 
-        public static Bin FilterFlaggedData(Bin b, DataFlag flag)
+        public static Bin FilterFlaggedData(Bin b, string flag)
         {
-            DataFlag[] flags = new DataFlag[1] { flag };
+            string[] flags = new string[1] { flag };
             return FilterFlaggedData(b, flags);
         }
 
 
-        public static Bin RemoveFlaggedData(Bin b, DataFlag[] flags)
+        public static Bin RemoveFlaggedData(Bin b, string[] flags)
         {
             Bin retBin = new Bin(b.Label + "_FlaggedRemoved");
 
@@ -1078,10 +1098,10 @@ namespace libcdiffrecords.Data
 
         }
 
-        public static Bin RemoveFlaggedData(Bin b, DataFlag flag)
+        public static Bin RemoveFlaggedData(Bin b, string flag)
         {
 
-            DataFlag[] flags = new DataFlag[1] { flag };
+            string[] flags = new string[1] { flag };
             return RemoveFlaggedData(b, flags);
         }
         private static Dictionary<string, bool> CreateCommonUnitTable()

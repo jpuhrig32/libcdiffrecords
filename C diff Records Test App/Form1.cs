@@ -56,19 +56,39 @@ namespace C_diff_Records_Test_App
 
         private void loadFileButton_Click(object sender, EventArgs e)
         {
-            if(openInputFileDialog.FileNames.Length > 0)
+            if (openInputFileDialog.FileNames.Length > 0)
             {
                 Application.DoEvents();
                 Bin data = DatabaseFileIO.ReadDatabaseFileToBin(openInputFileDialog.FileName);
+                data.Label = "Global";
                 StorageData sd = BoxLoader.LoadStorageData(openBoxLocFileDialog.FileName);
 
-                sd.AssignSampleIDsToTubes(data);
-                BoxLoader.WriteStorageData(sd, openBoxLocFileDialog.FileName + "added_stuff.csv");
+                Bin bmtOnly = DataFilter.FilterByTestType(data, TestType.Clinical_Outpatient_Culture);
+                bmtOnly.Label = "All BMT Patients";
+                DatabaseFileIO.WriteDataToFile(bmtOnly, openInputFileDialog.FileName + "_bmt_samples.csv");
 
 
+                Bin bmtNegs = DataFilter.FilterByCDiffResult(bmtOnly, TestResult.Negative);
+                bmtNegs.Label = "Negative BMT Patients";
 
-             
+                Bin subsequentNegs = DataFilter.FilterForSamplesOccuringAfterGivenSet(bmtNegs, data);
+                subsequentNegs.Label = "Subsequent Samples for BMT Neg";
 
+                Bin subsequentAll = DataFilter.FilterForSamplesOccuringAfterGivenSet(bmtOnly, data);
+                subsequentAll.Label = "Subsequent Samples for all BMT";
+
+                Bin subsequentNegsAvail = DataFilter.FilterAvailableSamples(subsequentNegs, sd);
+                subsequentNegsAvail.Label = "Available subsequent samples for BMT Neg";
+
+                Bin subsequentAllAvail = DataFilter.FilterAvailableSamples(subsequentAll, sd);
+                subsequentAllAvail.Label = "Available subsequent samples for all BMT samples";
+
+                Bin[] bmtBins = new Bin[7] { data, bmtOnly, bmtNegs, subsequentNegs, subsequentNegsAvail, subsequentAll, subsequentAllAvail };
+
+                MasterReport mr = new MasterReport(bmtBins);
+
+                mr.WriteReport(openInputFileDialog.FileName + "_BMT_report.csv");
+                
 
             }
             else

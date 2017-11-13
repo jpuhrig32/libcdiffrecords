@@ -20,6 +20,6 @@ namespace libcdiffrecords.Data
         DifferentNamesAttachedToMRN,
         DifferentSamplesAttachedToSampleID,
         TubeDoesNotHaveCorrespondingSampleRecord,
-        
+        SampleDate,
     };
 }

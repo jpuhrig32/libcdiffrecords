@@ -93,9 +93,9 @@ namespace libcdiffrecords.Data
             point.PatientName = line[headerTable["Patient_Name"]];
             point.MRN = line[headerTable["MRN"]];
             if (point.MRN == "" || point.MRN == "00000000")
-                point.Flags.Add(DataFlag.MissingMRN);
+                point.Flags.Add("Missing MRN");
             if (point.MRN.Length > 8)
-                point.Flags.Add(DataFlag.MRNLongerThan8Digits_LikelyNonFMLH);
+                point.Flags.Add("MRN more than 8 digits_Not likely FMLH");
             point.PatientSex = Utilities.ParseSexFromString(line[headerTable["Sex"]]);
 
             DateTime temp;
@@ -105,15 +105,22 @@ namespace libcdiffrecords.Data
                 point.DateOfBirth = new DateTime(1901, 1, 1);
 
             if (point.DateOfBirth <= new DateTime(1901, 1, 1)) //Not included in the if-else block so that we can also account for "John Doe" patients, whose DOB is 1/1/1901
-                point.Flags.Add(DataFlag.MissingDOB);
+                point.Flags.Add("Missing DOB");
 
+        
 
             if (TryParseDate(line[headerTable["Adm_Date"]], out temp))
                 point.AdmissionDate = temp;
             else
             {
                 point.AdmissionDate = DateTime.MaxValue;
-                point.Flags.Add(DataFlag.MissingAdmissionDate);
+                point.Flags.Add("Missing Admission Date");
+            }
+
+            if(point.DateOfBirth >= point.AdmissionDate)
+            {
+                point.DateOfBirth = new DateTime(point.DateOfBirth.Year - 100, point.DateOfBirth.Month, point.DateOfBirth.Day);
+                point.Flags.Add("DOB likely 100 years off");
             }
 
 
@@ -126,20 +133,20 @@ namespace libcdiffrecords.Data
             else
             {
                 point.SampleDate = DateTime.MaxValue;
-                point.Flags.Add(DataFlag.MissingSampleDate);
+                point.Flags.Add("Missing Sample Date");
             }
 
 
             point.CdiffResult = Utilities.ParseTestResult(line[headerTable["C_diff_Test_Result"]]);
             if (point.CdiffResult == TestResult.NotTested)
-                point.Flags.Add(DataFlag.MissingCdiffResult);
+                point.Flags.Add("Missing C diff Result");
             point.ToxinResult = Utilities.ParseTestResult(line[headerTable["Toxin_Result"]]);
             point.Test = Utilities.ParseTestTypeFromString(line[headerTable["Test_Type"]]);
             if (point.Test == TestType.No_Test)
-                point.Flags.Add(DataFlag.MissingTestType);
+                point.Flags.Add("Missing Test Type");
             point.Unit = line[headerTable["Unit"]];
             if (point.Unit == "")
-                point.Flags.Add(DataFlag.MissingUnit);
+                point.Flags.Add("Missing Unit");
             point.Room = line[headerTable["Room"]];
             point.LegacyID = line[headerTable["Legacy_ID"]];
             if (point.LegacyID != "")

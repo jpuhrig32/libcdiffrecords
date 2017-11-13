@@ -213,5 +213,42 @@ namespace libcdiffrecords
 
             return year;
         }
+
+        public static int Median(List<int> meds)
+        {
+            if (meds.Count < 1)
+                return 0;
+
+            meds.Sort();
+
+            if (meds.Count % 2 == 0)
+            {
+                int midpt = (int)Math.Floor((double)meds.Count / 2);
+                return (meds[midpt] + meds[midpt - 1]) / 2;
+            }
+            else
+            {
+                return meds[meds.Count / 2];
+            }
+        }
+
+        public static string Range(List<int> items)
+        {
+            return "'" + items.Min().ToString() + " - " + items.Max().ToString();
+        }
+
+        public static double Mean(List<int> items)
+        {
+            double count = 0;
+            if (items.Count < 1)
+                return 0;
+            for(int i  = 0; i < items.Count; i++)
+            {
+                count += items[i];
+            }
+
+            return count / items.Count;
+           
+        }
     }
 }

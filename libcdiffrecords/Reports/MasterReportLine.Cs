@@ -40,6 +40,9 @@ namespace libcdiffrecords.Reports
             header.Add("");
             header.Add("C. difficile positive with no admission sample");
             header.Add("");
+            header.Add("Mean Patient Samples");
+            header.Add("Median Patient Samples");
+            header.Add("Range of Patient Samples");
             header.Add("Admissions with two or more samples");
             header.Add("Patients with two or more admissions");
             return header.ToArray();
@@ -65,6 +68,9 @@ namespace libcdiffrecords.Reports
             line.Add(((double)ats.Negative_TurnedPositive / repBin.PatientAdmissionCount * 100.0).ToString());
             line.Add(ats.Positive_NoAdmissionSample.ToString());
             line.Add(((double)ats.Positive_NoAdmissionSample/ repBin.PatientAdmissionCount * 100.0).ToString());
+            line.Add(repBin.MeanSampleCountPerPatient.ToString());
+            line.Add(repBin.MedianSampleCountPerPatient.ToString());
+            line.Add(repBin.SampleCountRange);
             line.Add(ats.AdmissionsWithTwoOrMoreSamples.ToString());
             line.Add(ats.PatientsWithTwoOrMoreAdmits.ToString());
 
@@ -93,6 +99,9 @@ namespace libcdiffrecords.Reports
             header.Add("%");
             header.Add("number");
             header.Add("%");
+            header.Add("");
+            header.Add("");
+            header.Add("");
             header.Add("");
             header.Add("");
 
