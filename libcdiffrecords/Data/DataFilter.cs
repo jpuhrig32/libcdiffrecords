@@ -145,7 +145,8 @@ namespace libcdiffrecords.Data
             {
                 foreach (Admission dpa in bin.DataByPatientAdmissionTable[patient])
                 {
-                    if(dpa.AdmissionStatus != AdmissionStatus.NegativeNoAdmissionSample && dpa.AdmissionStatus != AdmissionStatus.PositiveNoAdmitSample)
+                    dpa.AdmissionWindow = admWindow;
+                    if(dpa.AdmissionStatus != AdmissionStatus.NegativeNoAdmissionSample && dpa.AdmissionStatus != AdmissionStatus.PositiveNoAdmitSample && dpa.AdmissionStatus != AdmissionStatus.NegativeFirstSample_TurnedPositive)
                     {
                         retBin.Add(dpa);
                     }

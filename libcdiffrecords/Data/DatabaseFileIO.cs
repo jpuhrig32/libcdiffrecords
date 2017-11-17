@@ -264,7 +264,7 @@ namespace libcdiffrecords.Data
             {
                 foreach(Admission adm in b.DataByPatientAdmissionTable[key])
                 {
-                    WriteAdmission(adm, ptCount, sw, delim);
+                    WriteEventBasedAdmission(adm, ptCount, sw, delim);
                 }
 
                 ptCount++;
@@ -273,7 +273,7 @@ namespace libcdiffrecords.Data
             sw.Close();
         }
 
-        private static void WriteAdmission(Admission adm, int id, StreamWriter sw, char delim)
+        private static void WriteEventBasedAdmission(Admission adm, int id, StreamWriter sw, char delim)
         {
             List<string> admit = new List<string>();
             admit.Add(id.ToString());
@@ -330,6 +330,157 @@ namespace libcdiffrecords.Data
 
           
            
+        }
+
+        public static void WriteDatabaseAdmissions(Bin b, string filename)
+        {
+            WriteDatabaseAdmissions(b, filename, ',');
+        }
+
+        public static void WriteDatabaseAdmissions(Bin b, string filename, char delim)
+        {
+      
+                StreamWriter sw = new StreamWriter(filename);
+            WriteDatabaseAdmissionHeader(sw, delim);
+            
+            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                {
+                    WriteDatabaseAdmissionLine(adm, sw, delim);
+                }
+            }
+         
+                sw.Close();
+            
+        }
+
+        private static void WriteDatabaseAdmissionHeader(StreamWriter sw, char delim)
+        {
+            List<string> header = new List<string>();
+
+            header.Add("Admission ID");
+            header.Add("Patient Name");
+            header.Add("MRN");
+            header.Add("Patient Sex");
+            header.Add("Patient Age");
+            header.Add("DOB");
+            header.Add("Admission Date");
+            header.Add("Date of Last Sample");
+            header.Add("Admission Sample Present");
+            header.Add("Status on Admission");
+            header.Add("Time to Positive (-1 if none)");
+            header.Add("Admission Outcome");
+            header.Add("Sample Count");
+            header.Add("Sample IDs");
+
+
+
+            StringBuilder sb = new StringBuilder();
+            for(int i = 0; i < header.Count; i++)
+            {
+                sb.Append(header[i]);
+                sb.Append(delim); 
+            }
+            sw.WriteLine(sb.ToString());
+        }
+
+        private static void WriteDatabaseAdmissionLine(Admission adm, StreamWriter sw, char delim)
+        {
+            List<string> parts = new List<string>();
+
+            if (adm.Points[0].AdmissionID == "ADM_000011")
+            {
+                int x = 0;
+            }
+            parts.Add(adm.Points[0].AdmissionID);
+            parts.Add('"' + adm.PatientName + '"');
+            parts.Add(adm.MRN);
+            parts.Add(Utilities.PatientSexToString(adm.Points[0].PatientSex));
+            parts.Add( ((int)((adm.AdmissionDate - adm.Points[0].DateOfBirth).Days / 365.25)).ToString());
+
+            parts.Add(adm.Points[0].DateOfBirth.ToShortDateString());
+            parts.Add(adm.AdmissionDate.ToShortDateString());
+            parts.Add(adm.Points[adm.Points.Count - 1].SampleDate.ToShortDateString());
+
+            switch(adm.AdmissionStatus)
+            {
+                case AdmissionStatus.PositiveOnAdmission:
+                    parts.Add("Yes");
+                    parts.Add("Positive");
+                    parts.Add((adm.Points[0].SampleDate - adm.AdmissionDate).Days.ToString());
+                    parts.Add("Positive on Admission");
+                    break;
+
+                case AdmissionStatus.PositiveNoAdmitSample:
+                    parts.Add("No");
+                    parts.Add("Indeterminate");
+                    parts.Add((adm.Points[0].SampleDate - adm.AdmissionDate).Days.ToString());
+                    parts.Add("Positive - no admission sample");
+                    break;
+
+                case AdmissionStatus.NegativeOnAdmission_TurnedPositive:
+                    parts.Add("Yes");
+                    parts.Add("Negative");
+                    DateTime firstPos = adm.Points[0].SampleDate;
+                    for (int i = 0; i < adm.Points.Count; i++)
+                    {
+                        if(adm.Points[i].CdiffResult == TestResult.Positive)
+                        {
+                            firstPos = adm.Points[i].SampleDate;
+                            break;
+                        }
+                    }
+                    parts.Add((firstPos - adm.AdmissionDate).Days.ToString());
+                    parts.Add("Negative on Admission - Turned Positive");
+                    break;
+
+                case AdmissionStatus.NegativeFirstSample_TurnedPositive:
+                    parts.Add("No");
+                    parts.Add("Indeterminate");
+                    DateTime firstPos2 = adm.Points[0].SampleDate;
+                    for (int i = 0; i < adm.Points.Count; i++)
+                    {
+                        if (adm.Points[i].CdiffResult == TestResult.Positive)
+                        {
+                            firstPos2 = adm.Points[i].SampleDate;
+                            break;
+                        }
+                    }
+                    parts.Add((firstPos2 - adm.AdmissionDate).Days.ToString());
+                    parts.Add("Negative first sample - Turned Positive");
+                    break;
+
+                case AdmissionStatus.NegativeOnAdmission_RemainedNegative:
+                    parts.Add("Yes");
+                    parts.Add("Negative");
+                    parts.Add("-1");
+                    parts.Add("Negative on Admission - remained Negative");
+                    break;
+
+                case AdmissionStatus.NegativeNoAdmissionSample:
+                    parts.Add("No");
+                    parts.Add("Indeterminate");
+                    parts.Add("-1");
+                    parts.Add("Negative first sample - remained Negative ");
+                    break;
+            }
+
+            parts.Add(adm.Points.Count.ToString());
+
+            for(int i = 0; i < adm.Points.Count; i++)
+            {
+                parts.Add(adm.Points[i].SampleID);
+            }
+
+
+            StringBuilder sb = new StringBuilder();
+            for(int i =0; i < parts.Count; i++)
+            {
+                sb.Append(parts[i]);
+                sb.Append(delim);
+            }
+            sw.WriteLine(sb.ToString());
         }
 
         private static void WriteLine(List<string> line, StreamWriter sw, char delim)
@@ -395,6 +546,8 @@ namespace libcdiffrecords.Data
 
             return head.ToString();
         }
+
+
 
         private static string CreateDataRow(DataPoint dp, char delim)
         {

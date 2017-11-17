@@ -259,6 +259,7 @@ namespace libcdiffrecords.Data
 
         public Bin(string binLabel)
         {
+      
             data = new List<DataPoint>();
             patients = new Dictionary<string, List<DataPoint>>();
             admissionsByPatient = new Dictionary<string, List<Admission>>();
@@ -269,6 +270,7 @@ namespace libcdiffrecords.Data
 
         public Bin(string binLabel, DataPoint[] initalPoints)
         {
+    
             data = new List<DataPoint>();
             patients = new Dictionary<string, List<DataPoint>>();
             admissionsByPatient = new Dictionary<string, List<Admission>>();

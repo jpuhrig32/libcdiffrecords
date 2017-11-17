@@ -87,7 +87,7 @@
     <Compile Include="Data\BoxLocation.cs" />
     <Compile Include="Data\BoxRack.cs" />
     <Compile Include="Data\DatabaseConversion.cs" />
-    <Compile Include="Data\DatabaseFileReader.cs" />
+    <Compile Include="Data\DatabaseFileIO.cs" />
     <Compile Include="Data\DataFlag.cs" />
     <Compile Include="Data\DataLine.cs" />
     <Compile Include="Data\DataPoint.cs" />

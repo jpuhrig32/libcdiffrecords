@@ -15,6 +15,8 @@ namespace libcdiffrecords.Data
         public List<DataPoint> Points { get; set; }
         public string PatientName { get; set; }
 
+       
+
 
         public Admission()
         {
@@ -24,6 +26,15 @@ namespace libcdiffrecords.Data
             Points = new List<DataPoint>();
             PatientName = "John Doe";
         }
+
+        public bool AdmissionSamplePresent
+        {
+            get
+            {
+                return ((Points[0].SampleDate - AdmissionDate).Days <= AdmissionWindow);
+            }
+        }
+
         public AdmissionStatus AdmissionStatus
         {
             get

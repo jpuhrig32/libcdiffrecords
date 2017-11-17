@@ -63,32 +63,9 @@ namespace C_diff_Records_Test_App
                 data.Label = "Global";
                 StorageData sd = BoxLoader.LoadStorageData(openBoxLocFileDialog.FileName);
 
-                Bin bmtOnly = DataFilter.FilterByTestType(data, TestType.Clinical_Outpatient_Culture);
-                bmtOnly.Label = "All BMT Patients";
-                DatabaseFileIO.WriteDataToFile(bmtOnly, openInputFileDialog.FileName + "_bmt_samples.csv");
+                data = DataFilter.RemoveAdmissionsWithNoAdmissionSample(data, 3);
 
-
-                Bin bmtNegs = DataFilter.FilterByCDiffResult(bmtOnly, TestResult.Negative);
-                bmtNegs.Label = "Negative BMT Patients";
-
-                Bin subsequentNegs = DataFilter.FilterForSamplesOccuringAfterGivenSet(bmtNegs, data);
-                subsequentNegs.Label = "Subsequent Samples for BMT Neg";
-
-                Bin subsequentAll = DataFilter.FilterForSamplesOccuringAfterGivenSet(bmtOnly, data);
-                subsequentAll.Label = "Subsequent Samples for all BMT";
-
-                Bin subsequentNegsAvail = DataFilter.FilterAvailableSamples(subsequentNegs, sd);
-                subsequentNegsAvail.Label = "Available subsequent samples for BMT Neg";
-
-                Bin subsequentAllAvail = DataFilter.FilterAvailableSamples(subsequentAll, sd);
-                subsequentAllAvail.Label = "Available subsequent samples for all BMT samples";
-
-                Bin[] bmtBins = new Bin[7] { data, bmtOnly, bmtNegs, subsequentNegs, subsequentNegsAvail, subsequentAll, subsequentAllAvail };
-
-                MasterReport mr = new MasterReport(bmtBins);
-
-                mr.WriteReport(openInputFileDialog.FileName + "_BMT_report.csv");
-                
+                DatabaseFileIO.WriteDatabaseAdmissions(data, openInputFileDialog.FileName + "_Admissions.csv");
 
             }
             else
