@@ -22,6 +22,7 @@ namespace C_diff_Records_Test_App
             outputPath = outputPath + "\\";
             Bin main = new Bin( "Surv", survData);
             main = DataFilter.RemovePatientsWithUnknownDOB(main);
+            main = DataFilter.FilterByTestType(main, TestType.Surveillance_Test);
 
             main.AssignAdmissionIDsToBin();
        
@@ -53,9 +54,14 @@ namespace C_diff_Records_Test_App
             
 
             CreateAndWriteReport(indexAdmissions, naats, ReportType.NAATAnalysis, false, 90, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath+ "NAAT Analysis - NAATs excluded from index picking.csv");
-            DataTap.data = new Bin("NAATs In Index");
+            DataTap.data = new Bin("No NAATs In Index");
+            CreateAndWriteReport(indexAdmissions, naats, ReportType.NAATAnalysis, false, 90, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "NAAT Analysis - NAATs Includedfrom index picking.csv");
+            TabDelimWriter.WriteBinData(outputPath + "NAAT Analysis Bin - Surv Indexing Only.txt", DataTap.data);
+
+            CreateAndWriteReport(indexAdmissions2, naats, ReportType.NAATAnalysis, false, 90, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "NAAT Analysis - NAATs excluded from index picking.csv");
+            DataTap.data = new Bin("Clin NAATs In Index");
             CreateAndWriteReport(indexAdmissions2, naats, ReportType.NAATAnalysis, false, 90, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "NAAT Analysis - NAATs Includedfrom index picking.csv");
-            TabDelimWriter.WriteBinData(outputPath + "NAAT Analysis Bin - Clin NAATs In Indexing.txt", DataTap.data);
+            TabDelimWriter.WriteBinData(outputPath + "NAAT Analysis Bin - Surv and ClinNAAT Indexing.txt", DataTap.data);
 
             //Filtering by Test Type
             Bin cultureOnlyToxPosOnly = DataFilter.FilterByTestType(main2, TestType.Surveillance_Culture_Test);
@@ -100,7 +106,7 @@ namespace C_diff_Records_Test_App
         }
         private void CreateAndWriteReport(Bin report, DataPoint[] naat, ReportType type, bool ignoreIndeterminates, int naatWindow, ComparisonType ct, NAATCountingType nt, string outputFile)
         {
-            Bin[] unitBins = DataFilter.StratifyOnCommonUnits(report);
+            Bin[] unitBins = DataFilter.StratifyOnCommonUnits(report, 50);
 
             List<Bin> bins = new List<Bin>();
             report.Label = "Global";

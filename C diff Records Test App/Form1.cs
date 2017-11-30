@@ -64,8 +64,9 @@ namespace C_diff_Records_Test_App
                 StorageData sd = BoxLoader.LoadStorageData(openBoxLocFileDialog.FileName);
 
                 data = DataFilter.RemoveAdmissionsWithNoAdmissionSample(data, 3);
-
-                DatabaseFileIO.WriteDatabaseAdmissions(data, openInputFileDialog.FileName + "_Admissions.csv");
+                TestType[] types = new TestType[3] { TestType.Clinical_Inpatient_NAAT, TestType.Surveillance_Stool_NAAT, TestType.Surveillance_Swab_NAAT };
+                data = DataFilter.FilterByTestType(data, types);
+                DatabaseFileIO.WriteDatabaseAdmissions(data, openInputFileDialog.FileName + "_admissions.csv");
 
             }
             else

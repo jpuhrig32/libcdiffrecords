@@ -366,6 +366,7 @@ namespace libcdiffrecords.Data
             header.Add("Patient Age");
             header.Add("DOB");
             header.Add("Admission Date");
+            header.Add("Unit");
             header.Add("Date of Last Sample");
             header.Add("Admission Sample Present");
             header.Add("Status on Admission");
@@ -389,10 +390,7 @@ namespace libcdiffrecords.Data
         {
             List<string> parts = new List<string>();
 
-            if (adm.Points[0].AdmissionID == "ADM_000011")
-            {
-                int x = 0;
-            }
+
             parts.Add(adm.Points[0].AdmissionID);
             parts.Add('"' + adm.PatientName + '"');
             parts.Add(adm.MRN);
@@ -401,6 +399,7 @@ namespace libcdiffrecords.Data
 
             parts.Add(adm.Points[0].DateOfBirth.ToShortDateString());
             parts.Add(adm.AdmissionDate.ToShortDateString());
+            parts.Add(adm.unit);
             parts.Add(adm.Points[adm.Points.Count - 1].SampleDate.ToShortDateString());
 
             switch(adm.AdmissionStatus)

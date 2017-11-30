@@ -600,9 +600,9 @@ namespace libcdiffrecords.Data
         }
 
         
-        public static Bin[] StratifyOnCommonUnits(Bin b)
+        public static Bin[] StratifyOnDefaultCommonUnits(Bin b)
         {
-            Dictionary<string, bool> common = CreateCommonUnitTable();
+            Dictionary<string, bool> common = CreateDefaultCommonUnitTable();
             Bin[] bins = StratifyOnUnits(b);
             Bin otherUnits = new Bin("Other Units");
 
@@ -627,6 +627,74 @@ namespace libcdiffrecords.Data
             return newBins.ToArray();
             
         }
+        
+        public static Bin[] StratifyOnCommonUnits(Bin b)
+        {
+            return StratifyOnCommonUnits(b, 50);
+        }
+        public static Bin[] StratifyOnCommonUnits(Bin b, int minAdmissions)
+        {
+            Bin[] bins = StratifyOnUnits(b);
+            Dictionary<string, bool> commonUnits = new Dictionary<string, bool>();
+
+            for(int i = 0; i < bins.Length; i++)
+            {
+                if (bins[i].DataByPatient.Count >= minAdmissions)
+                {
+                    if (!commonUnits.ContainsKey(bins[i].Label))
+                        commonUnits.Add(bins[i].Label, true);
+                }
+                else
+                {
+                    int count = 0;
+                    foreach (string key in bins[i].DataByPatientAdmissionTable.Keys)
+                    {
+                        count += bins[i].DataByPatientAdmissionTable[key].Count;
+                    }
+                    
+                    if(count >= minAdmissions)
+                    {
+                        if (!commonUnits.ContainsKey(bins[i].Label))
+                            commonUnits.Add(bins[i].Label, true);
+                    }
+                }
+            }
+
+            return ProduceCommonUnitBins(bins, commonUnits);
+        }
+        public static Bin[] StratifyOnCommonUnits(Bin b, string[] unitNames)
+        {
+            Dictionary<string, bool> commonUnits = new Dictionary<string, bool>();
+            Bin[] bins = StratifyOnUnits(b);
+
+            for(int i =0; i < unitNames.Length; i++)
+            {
+                if (!commonUnits.ContainsKey(unitNames[i]))
+                    commonUnits.Add(unitNames[i], true);
+            }
+            return ProduceCommonUnitBins(bins, commonUnits);
+        }
+
+        private static Bin[] ProduceCommonUnitBins(Bin[] units, Dictionary<string, bool> commonUnits)
+        {
+            List<Bin> bins = new List<Bin>();
+            Bin other = new Bin("Other Units");
+
+            for(int i =0; i < units.Length; i++)
+            {
+                if (commonUnits.ContainsKey(units[i].Label))
+                    bins.Add(units[i]);
+                else
+                    other = other + units[i];
+            }
+            bins.Sort((x, y) => x.Label.CompareTo(y.Label));
+            other.Label = "Other Units";
+            bins.Add(other);
+            return bins.ToArray();
+
+
+        }
+
 
         public static Bin RemoveOutpatientTests(Bin b)
         {
@@ -1105,7 +1173,7 @@ namespace libcdiffrecords.Data
             string[] flags = new string[1] { flag };
             return RemoveFlaggedData(b, flags);
         }
-        private static Dictionary<string, bool> CreateCommonUnitTable()
+        private static Dictionary<string, bool> CreateDefaultCommonUnitTable()
         {
             Dictionary<string, bool> common = new Dictionary<string, bool>();
 
@@ -1132,6 +1200,7 @@ namespace libcdiffrecords.Data
 
             return common;
         }
+
 
         public static Bin[] StratifyOnPatients(Bin b)
         {

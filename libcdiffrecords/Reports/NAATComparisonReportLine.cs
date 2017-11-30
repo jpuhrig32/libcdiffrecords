@@ -322,29 +322,32 @@ namespace libcdiffrecords.Reports
             {
                 if (naatTable.ContainsKey(np.MRN) && bin.DataByPatientAdmissionTable.ContainsKey(np.MRN))
                 {
-                   
-                        foreach (Admission dpa in bin.DataByPatientAdmissionTable[np.MRN])
+
+                    foreach (Admission dpa in bin.DataByPatientAdmissionTable[np.MRN])
+                    {
+                        if (dpa.Points[0].SampleDate < np.SampleDate)
                         {
                             foreach (DataPoint dp in dpa.Points)
                             {
                                 if ((dp.SampleDate < np.SampleDate) && ((dp.SampleDate - np.SampleDate).Days <= naatWindow))
                                 {
-                                   
-                                        //counted.Add(dp.mrn + dp.sampleDate.ToShortDateString(), 1);
-                                        DataPoint dp2 = dp;
-                                    dp2.Unit = np.SampleDate.ToShortDateString();
-                                    dp2.SampleID = (dp2.SampleID + "_" + dp2.MRN + "_" + dp2.SampleDate.ToShortDateString());
-                                        dp2.CdiffResult = np.CdiffResult;
-                                        dp2.ToxinResult = np.ToxinResult;
-                                        b.Add(dp2);
-                                     
-                                    
 
-                                   
-                                   
+                                    //counted.Add(dp.mrn + dp.sampleDate.ToShortDateString(), 1);
+                                    DataPoint dp2 = dp;
+                                    dp2.Unit = np.SampleDate.ToShortDateString();
+                                    // dp2.SampleID = (dp2.SampleID + "_" + dp2.MRN + "_" + dp2.SampleDate.ToShortDateString());
+                                    dp2.CdiffResult = np.CdiffResult;
+                                    dp2.ToxinResult = np.ToxinResult;
+                                    b.Add(dp2);
+
+
+
+
+
                                 }
                             }
                         }
+                    }
                     
                 }
             }

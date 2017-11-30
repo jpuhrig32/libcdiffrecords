@@ -41,7 +41,7 @@ namespace C_diff_Records_Test_App
             if(cont)
             {
                 TabLoader tl = new TabLoader();
-                DataPoint[] survData = tl.LoadPatientDataToPoints(survDataDialog.FileName);
+                DataPoint[] survData = DatabaseFileIO.ReadDatabaseFile(survDataDialog.FileName);
                 DataPoint[] naatData = tl.LoadNAATResults(naatDataDialog.FileName);
                 SMPSurvTableReport rep = new SMPSurvTableReport();
                 rep.GenerateReport(survData, naatData, reportSaveDialog.SelectedPath);
