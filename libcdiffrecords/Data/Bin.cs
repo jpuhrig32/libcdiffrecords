@@ -11,6 +11,7 @@ namespace libcdiffrecords.Data
     {
         string label;
         List<DataPoint> data;
+        bool dataPropertyInvalid = true;
         Dictionary<string, List<DataPoint>> patients;
         Dictionary<string, List<Admission>> admissionsByPatient;
         public Dictionary<string, DataPoint> DataBySampleID { get; set; }
@@ -159,15 +160,21 @@ namespace libcdiffrecords.Data
         {
             get
             {
-                List<DataPoint> dps = new List<DataPoint>();
-                foreach (string key in DataByPatientAdmissionTable.Keys)
+                if(dataPropertyInvalid || data == null)
                 {
-                    foreach (Admission dpa in DataByPatientAdmissionTable[key])
+                    data = new List<DataPoint>();
+                    foreach(string key in DataByPatientAdmissionTable.Keys)
                     {
-                        dps.AddRange(dpa.Points);
+                        foreach(Admission adm in DataByPatientAdmissionTable[key])
+                        {
+                            data.AddRange(adm.Points);
+                        }
                     }
+                    dataPropertyInvalid = false;
+
                 }
-                return dps;
+
+                return data;
             }
         }
 
@@ -179,7 +186,11 @@ namespace libcdiffrecords.Data
         public Dictionary<string, List<Admission>> DataByPatientAdmissionTable
         {
             get { return admissionsByPatient; }
-            set { admissionsByPatient = value; }
+            set
+            {
+                admissionsByPatient = value;
+                dataPropertyInvalid = true;
+            }
 
         }
 
@@ -350,7 +361,7 @@ namespace libcdiffrecords.Data
                     admissionsByPatient[point.MRN].Add(dpa);
                 }
             }
-
+            dataPropertyInvalid = true;
         }
 
 

@@ -234,6 +234,11 @@ namespace libcdiffrecords
 
         public static string Range(List<int> items)
         {
+            if (items.Count == 0)
+                return "";
+            if (items.Count == 1)
+                return items[0].ToString();
+
             return "'" + items.Min().ToString() + " - " + items.Max().ToString();
         }
 

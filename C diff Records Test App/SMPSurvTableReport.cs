@@ -22,6 +22,7 @@ namespace C_diff_Records_Test_App
             outputPath = outputPath + "\\";
             Bin main = new Bin( "Surv", survData);
             main = DataFilter.RemovePatientsWithUnknownDOB(main);
+            main = DataFilter.RemoveDataWithoutCDiffResult(main);
             main = DataFilter.FilterByTestType(main, TestType.Surveillance_Test);
 
             main.AssignAdmissionIDsToBin();

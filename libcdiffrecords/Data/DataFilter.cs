@@ -102,6 +102,21 @@ namespace libcdiffrecords.Data
             return binList.ToArray();
         }
 
+        public static Bin RemoveDataWithoutCDiffResult(Bin b)
+        {
+            Bin retBin = new Bin(b.Label);
+
+            for(int i =0; i < b.Data.Count; i++)
+            {
+                if (b.Data[i].CdiffResult != TestResult.NotTested)
+                    retBin.Add(b.Data[i]);
+            }
+
+            return retBin;
+        }
+
+        
+
         public static Bin RemoveAdmissionsWithOneSample(Bin b)
         {
             Bin retBin = new Bin(b.Label);
