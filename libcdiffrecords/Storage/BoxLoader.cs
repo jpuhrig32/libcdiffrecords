@@ -529,7 +529,13 @@ namespace libcdiffrecords.Storage
             int width = 9;
             int x = pos / width;
             int y = pos % width;
-            y++;
+           
+            if(y == 0)
+            {
+                y = 9;
+                x -= 1;
+            }
+
             char row = (char)(x + 65); //65 is 'A'; 
 
             return row + y.ToString();

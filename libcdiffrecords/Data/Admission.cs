@@ -58,8 +58,6 @@ namespace libcdiffrecords.Data
                             {
                                 if (admitSamplePresent)
                                     return AdmissionStatus.NegativeOnAdmission_TurnedPositive;
-                                else if(i > 0)
-                                    return AdmissionStatus.NegativeFirstSample_TurnedPositive;
                                 else
                                     return AdmissionStatus.PositiveNoAdmitSample;
                             }

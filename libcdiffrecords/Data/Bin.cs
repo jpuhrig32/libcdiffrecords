@@ -28,6 +28,18 @@ namespace libcdiffrecords.Data
         }
 
 
+        public List<string> PatientMRNList
+        {
+            get
+            {
+                List<string> mrns = new List<string>();
+                foreach(string key in DataByPatientAdmissionTable.Keys)
+                {
+                    mrns.Add(key);
+                }
+                return mrns;
+            }
+        }
 
         public int ItemsInBin
         {

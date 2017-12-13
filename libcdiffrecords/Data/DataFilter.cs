@@ -305,6 +305,24 @@ namespace libcdiffrecords.Data
             return retBin;
         }
 
+        public static Bin FilterPatientsBasedOnCohort(Bin b, List<string>mrnList)
+        {
+            Bin retBin = new Bin(b.Label);
+
+            for(int i=0; i < mrnList.Count; i++)
+            {
+                if(b.DataByPatientAdmissionTable.ContainsKey(mrnList[i]))
+                {
+                    foreach(Admission adm in b.DataByPatientAdmissionTable[mrnList[i]])
+                    {
+                        retBin.Add(adm);
+                    }
+                }
+            }
+
+            return retBin;
+        }
+
 
         /// <summary>
         /// Creates a "Super admit" for all patients - All admits are treated as if they were the
@@ -1217,6 +1235,63 @@ namespace libcdiffrecords.Data
         }
 
 
+        public static Bin RemovePatientsWithPriorPosClinTest(Bin b, DataPoint[] clinTests)
+        {
+            Bin retBin = new Bin(b.Label);
+
+            Bin firsts = FilterFirstAdmissions(b);
+
+            Dictionary<string, List<DataPoint>> posNaats = new Dictionary<string, List<DataPoint>>();
+            Dictionary<string, bool> exclusions = new Dictionary<string, bool>();
+
+            for(int i =0; i < clinTests.Length; i++)
+            {
+                if(clinTests[i].CdiffResult == TestResult.Positive)
+                {
+                    if (!posNaats.ContainsKey(clinTests[i].MRN))
+                        posNaats.Add(clinTests[i].MRN, new List<DataPoint>());
+                    posNaats[clinTests[i].MRN].Add(clinTests[i]);
+                }
+            }
+
+            foreach(string key in firsts.DataByPatientAdmissionTable.Keys)
+            {
+                if (posNaats.ContainsKey(key))
+                {
+                    bool found = false;
+                    for(int i = 0; i < posNaats[key].Count; i++)
+                    {
+                        if(posNaats[key][i].SampleDate < firsts.DataByPatientAdmissionTable[key][0].AdmissionDate)
+                        {
+                            found = true;
+                        }
+                    }
+                    if(found)
+                    {
+                        if (!exclusions.ContainsKey(key))
+                            exclusions.Add(key, true);
+                    }
+                }
+                
+            }
+
+            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                if(!exclusions.ContainsKey(key))
+                {
+                    for(int i =0; i < b.DataByPatientAdmissionTable[key].Count; i++)
+                    {
+
+                        retBin.Add(b.DataByPatientAdmissionTable[key][i]);
+                    }
+                }
+            }
+
+
+            return retBin;
+
+        }
+
         public static Bin[] StratifyOnPatients(Bin b)
         {
             List<Bin> retBins = new List<Bin>();
@@ -1232,6 +1307,49 @@ namespace libcdiffrecords.Data
                 retBins.Add(temp);
             }
             return retBins.ToArray();
+        }
+
+
+
+        public static Bin[] StratifyOnPatientFate(Bin b)
+        {
+            Bin nn = new Bin("Neg to Neg");
+            Bin pa = new Bin("Pos Adm");
+            Bin np = new Bin("Neg Adm, to Pos");
+            Bin ip = new Bin("Indeterminate Adm, to Positive");
+            Bin uc = new Bin("Uncategorized");
+
+            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                foreach(Admission a in b.DataByPatientAdmissionTable[key])
+                {
+                    switch(a.AdmissionStatus)
+                    {
+                        case AdmissionStatus.NegativeNoAdmissionSample:
+                            nn.Add(a);
+                            break;
+                        case AdmissionStatus.NegativeOnAdmission_RemainedNegative:
+                            nn.Add(a);
+                            break;
+                        case AdmissionStatus.PositiveOnAdmission:
+                            pa.Add(a);
+                            break;
+                        case AdmissionStatus.PositiveNoAdmitSample:
+                            ip.Add(a);
+                            break;
+                        case AdmissionStatus.NegativeOnAdmission_TurnedPositive:
+                            np.Add(a);
+                            break;
+                        default:
+                            uc.Add(a);
+                            break;
+                    }
+                }
+            }
+
+            return new Bin[5] { nn, pa, np, ip, uc };
+            
+
         }
     }
 

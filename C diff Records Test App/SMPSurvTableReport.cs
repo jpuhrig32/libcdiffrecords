@@ -23,17 +23,72 @@ namespace C_diff_Records_Test_App
             Bin main = new Bin( "Surv", survData);
             main = DataFilter.RemovePatientsWithUnknownDOB(main);
             main = DataFilter.RemoveDataWithoutCDiffResult(main);
-            main = DataFilter.FilterByTestType(main, TestType.Surveillance_Test);
+            //main = DataFilter.FilterFirstAdmissions(main);
+            main = DataFilter.RemovePatientsWithPriorPosClinTest(main, naats);
+            DatabaseFileIO.WriteDataToFile(main, outputPath + "MainBin.csv");
+
+            Bin indexes = DataFilter.FilterIndexAdmissions(main);
+
+
+            List<Bin> stratMain = new List<Bin>();
+            stratMain.Add(main);
+            stratMain.AddRange(DataFilter.StratifyOnCommonUnits(main));
+
+            List<Bin> stratInd = new List<Bin>();
+            stratInd.Add(indexes);
+            stratInd.AddRange(DataFilter.StratifyOnCommonUnits(indexes));
+            
+            MasterReport mrMain = new MasterReport(stratMain.ToArray());
+            MasterReport mrIndex = new MasterReport(stratInd.ToArray());
+
+            mrMain.WriteReport(outputPath + "Main bin summary.csv");
+            mrIndex.WriteReport(outputPath + "Index bin summary.csv");
+
+            Bin[] mains = DataFilter.StratifyOnPatientFate(main);
+            Bin[] indets = DataFilter.StratifyOnPatientFate(indexes);
+
+            DatabaseFileIO.WriteDataToFile(mains[2], outputPath + "Main N to P.csv");
+            DatabaseFileIO.WriteDataToFile(indets[2], outputPath + "Indexes N to P.csv");
+
+            DataTap.data = new Bin("NAATData");
+            NAATComparisonReport ncr = new NAATComparisonReport(stratInd.ToArray(), naats);
+            ncr.WriteReport(outputPath + "Index NAAT Comparison Report.csv");
+            DatabaseFileIO.WriteDataToFile(DataTap.data, outputPath + "IndexNAAT Sample Data.csv");
+
+
+            DataTap.data = new Bin("Main Bin");
+            NAATComparisonReport mainNCR = new NAATComparisonReport(stratMain.ToArray(), naats);
+            mainNCR.WriteReport(outputPath + "Main Bin NAAT Comparison Report.csv");
+            DatabaseFileIO.WriteDataToFile(DataTap.data, outputPath + "Main Bin NAAT Sample Data.csv");
+
+
+            Bin cohort = DataFilter.FilterPatientsBasedOnCohort(main, DataTap.data.PatientMRNList);
+            cohort = DataFilter.RemoveAdmissionsWithOneSample(cohort);
+
+
+           
+            
+
+            /*
+            main = DataFilter.RemovePatientsWithUnknownDOB(main);
+            main = DataFilter.RemoveDataWithoutCDiffResult(main);
+        //    main = DataFilter.FilterByTestType(main, TestType.Surveillance_Test);
 
             main.AssignAdmissionIDsToBin();
-       
-           
-           CreateAndWriteReport(main, null, ReportType.Master, false, 0, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "Table 1 - Summary Statistics.csv");
+            Bin[] mainFates = DataFilter.StratifyOnPatientFate(main);
+            DatabaseFileIO.WriteDataToFile(mainFates[2], outputPath + "Main Fates Neg to Pos.csv");
+
+
+            CreateAndWriteReport(main, null, ReportType.Master, false, 0, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "Table 1 - Summary Statistics.csv");
             Bin indetsRmvd = DataFilter.RemoveAdmissionsWithNoAdmissionSample(main, 3);
             DatabaseFileIO.WriteDataToFile(indetsRmvd, outputPath + "indeterminates_Removed.csv", ',');
 
             Bin indexAdmissions = DataFilter.FilterIndexAdmissions(main);
-             DatabaseFileIO.WriteDataToFile(indexAdmissions, outputPath + "Index admits.csv", ',');
+            CreateAndWriteReport(indexAdmissions, null, ReportType.Master, false, 0, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "Summary Stats Indexes NAATS excluded from Index Picking.csv");
+            Bin[] indexAdmitFates = DataFilter.StratifyOnPatientFate(indexAdmissions);
+            DatabaseFileIO.WriteDataToFile(mainFates[2], outputPath + "Index Fates Neg to Pos.csv");
+
+            DatabaseFileIO.WriteDataToFile(indexAdmissions, outputPath + "Index admits.csv", ',');
 
             Bin main2 = main.Clone();
 
@@ -49,7 +104,7 @@ namespace C_diff_Records_Test_App
             DatabaseFileIO.WriteDataToFile(indexAdmissions2, outputPath + "Index admits with NAATs.csv", ',');
 
 
-            CreateAndWriteReport(indexAdmissions, null, ReportType.Master, false, 0, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "Summary Stats Indexes NAATS excluded from Index Picking.csv");
+        //    CreateAndWriteReport(indexAdmissions, null, ReportType.Master, false, 0, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "Summary Stats Indexes NAATS excluded from Index Picking.csv");
             
             CreateAndWriteReport(indexAdmissions2, null, ReportType.Master, false, 0, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "Summary Stats Indexes NAATS included Index Picking.csv");
             
@@ -57,12 +112,14 @@ namespace C_diff_Records_Test_App
             CreateAndWriteReport(indexAdmissions, naats, ReportType.NAATAnalysis, false, 90, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath+ "NAAT Analysis - NAATs excluded from index picking.csv");
             DataTap.data = new Bin("No NAATs In Index");
             CreateAndWriteReport(indexAdmissions, naats, ReportType.NAATAnalysis, false, 90, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "NAAT Analysis - NAATs Includedfrom index picking.csv");
-            TabDelimWriter.WriteBinData(outputPath + "NAAT Analysis Bin - Surv Indexing Only.txt", DataTap.data);
+           // DatabaseFileIO.WriteDataToFile(DataTap.data, outputPath + "NAAT Analysis Bin - Surv Indexing Only.csv");      
+           TabDelimWriter.WriteBinData(outputPath + "NAAT Analysis Bin - Surv Indexing Only.txt", DataTap.data);
 
             CreateAndWriteReport(indexAdmissions2, naats, ReportType.NAATAnalysis, false, 90, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "NAAT Analysis - NAATs excluded from index picking.csv");
             DataTap.data = new Bin("Clin NAATs In Index");
             CreateAndWriteReport(indexAdmissions2, naats, ReportType.NAATAnalysis, false, 90, ComparisonType.ByEndResult, NAATCountingType.OncePerPatient, outputPath + "NAAT Analysis - NAATs Includedfrom index picking.csv");
             TabDelimWriter.WriteBinData(outputPath + "NAAT Analysis Bin - Surv and ClinNAAT Indexing.txt", DataTap.data);
+            //DatabaseFileIO.WriteDataToFile(DataTap.data, outputPath + "NAAT Analysis Bin - Surv and ClinNAAT Indexing.csv");
 
             //Filtering by Test Type
             Bin cultureOnlyToxPosOnly = DataFilter.FilterByTestType(main2, TestType.Surveillance_Culture_Test);
@@ -87,7 +144,7 @@ namespace C_diff_Records_Test_App
             TabDelimWriter.WriteBinData(outputPath + "NAAT Analysis Bin -NAAT Surv .txt", DataTap.data);
             DatabaseFileIO.WriteDataToFile(survNAATOnly, outputPath + "Index admits with NAATs naat-based surv only.csv", ',');
 
-
+    */
 
 
         }
@@ -105,6 +162,8 @@ namespace C_diff_Records_Test_App
             }
             return b;
         }
+
+
         private void CreateAndWriteReport(Bin report, DataPoint[] naat, ReportType type, bool ignoreIndeterminates, int naatWindow, ComparisonType ct, NAATCountingType nt, string outputFile)
         {
             Bin[] unitBins = DataFilter.StratifyOnCommonUnits(report, 50);

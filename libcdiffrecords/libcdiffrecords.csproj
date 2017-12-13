@@ -112,6 +112,7 @@
     <Compile Include="Reports\IReportLine.cs" />
     <Compile Include="Reports\MasterReport.cs" />
     <Compile Include="Reports\MasterReportLine.Cs" />
+    <Compile Include="Reports\NAATComparisonReport.cs" />
     <Compile Include="Reports\NAATComparisonReportLine.cs" />
     <Compile Include="Reports\PatientAdmissionReport.cs" />
     <Compile Include="Reports\PatientAdmissionReportLine.cs" />
