@@ -24,20 +24,34 @@ namespace C_diff_Records_Test_App
             main = DataFilter.RemovePatientsWithUnknownDOB(main);
             main = DataFilter.RemoveDataWithoutCDiffResult(main);
             //main = DataFilter.FilterFirstAdmissions(main);
-            main = DataFilter.RemovePatientsWithPriorPosClinTest(main, naats);
+            //main = DataFilter.RemovePatientsWithPriorPosClinTest(main, naats);
+            main = DataFilter.RemovePatientsWithNoSurveillanceSamples(main);
             DatabaseFileIO.WriteDataToFile(main, outputPath + "MainBin.csv");
 
             Bin indexes = DataFilter.FilterIndexAdmissions(main);
+            DatabaseFileIO.WriteDataToFile(indexes, outputPath + "IndexBin.csv");
+            DatabaseFileIO.WriteDatabaseAdmissions(indexes, outputPath + "IndexBinAdmissions.csv");
 
-
+            Bin[] mainSplit = DataFilter.SplitOnNAATDate(main, naats, new DateTime(2017, 2, 1), 90);
             List<Bin> stratMain = new List<Bin>();
             stratMain.Add(main);
-            stratMain.AddRange(DataFilter.StratifyOnCommonUnits(main));
+            stratMain.AddRange(DataFilter.StratifyOnCommonUnits(mainSplit[0]));
+            stratMain.AddRange(DataFilter.StratifyOnCommonUnits(mainSplit[1]));
+
+
+            Bin[] splitInd = DataFilter.SplitOnNAATDate(indexes, naats, new DateTime(2017, 2, 1), 90);
+
 
             List<Bin> stratInd = new List<Bin>();
             stratInd.Add(indexes);
-            stratInd.AddRange(DataFilter.StratifyOnCommonUnits(indexes));
-            
+            stratInd.AddRange(DataFilter.StratifyOnCommonUnits(splitInd[0]));
+            stratInd.AddRange(DataFilter.StratifyOnCommonUnits(splitInd[1]));
+
+            List<Bin> stratInd2 = new List<Bin>();
+            stratInd2.Add(indexes);
+            stratInd2.AddRange(DataFilter.StratifyOnCommonUnits(indexes));
+     
+
             MasterReport mrMain = new MasterReport(stratMain.ToArray());
             MasterReport mrIndex = new MasterReport(stratInd.ToArray());
 
@@ -54,6 +68,11 @@ namespace C_diff_Records_Test_App
             NAATComparisonReport ncr = new NAATComparisonReport(stratInd.ToArray(), naats);
             ncr.WriteReport(outputPath + "Index NAAT Comparison Report.csv");
             DatabaseFileIO.WriteDataToFile(DataTap.data, outputPath + "IndexNAAT Sample Data.csv");
+
+            DataTap.data = new Bin("NAATData");
+            NAATComparisonReport ncr2 = new NAATComparisonReport(stratInd2.ToArray(), naats);
+            ncr2.WriteReport(outputPath + "Index NAAT Comparison Report - no splitting.csv");
+            DatabaseFileIO.WriteDataToFile(DataTap.data, outputPath + "IndexNAAT Sample Data no splitting.csv");
 
 
             DataTap.data = new Bin("Main Bin");

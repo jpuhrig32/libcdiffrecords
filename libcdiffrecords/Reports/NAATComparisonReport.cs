@@ -38,6 +38,8 @@ namespace libcdiffrecords.Reports
             }
         }
 
+        
+
         public void WriteReport(string output)
         {
             ReportWriter.WriteReport(output, lines, ',');

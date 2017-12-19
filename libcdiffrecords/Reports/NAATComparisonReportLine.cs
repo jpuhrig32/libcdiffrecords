@@ -117,7 +117,7 @@ namespace libcdiffrecords.Reports
         {
             List<string> reportParts = new List<string>();
 
-           naatTable = BuildNAATByPatientLookupTable(naatBin);
+           naatTable = Utilities.BuildPatientLookupTable(naatBin);
             NAATAnalysis globals = new NAATAnalysis();
 
             globals.admCount = unitSurvBin.PatientAdmissionCount;
@@ -196,6 +196,7 @@ namespace libcdiffrecords.Reports
             foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
                 NAATStatus ns = NAATStatus.NotTested;
+       
                 if (naatTable.ContainsKey(key))
                 {
 
@@ -392,26 +393,11 @@ namespace libcdiffrecords.Reports
         }
         
 
-        private Dictionary<string, List<DataPoint>> BuildNAATByPatientLookupTable(DataPoint[] naats)
-        {
-            Dictionary<string, List<DataPoint>> naatlkup = new Dictionary<string, List<DataPoint>>();
-
-            for (int i = 0; i < naats.Length; i++)
-            {
-                if (!naatlkup.ContainsKey(naats[i].MRN))
-                {
-                    naatlkup.Add(naats[i].MRN, new List<DataPoint>());
-                }
-                naatlkup[naats[i].MRN].Add(naats[i]);
-            }
-
-            return naatlkup;
-        }
 
 
     }
 
-    struct NAATAnalysis
+   public struct NAATAnalysis
     {
         public int uniquePt;
         public int sampleCount;
@@ -423,7 +409,7 @@ namespace libcdiffrecords.Reports
         public int notTested;
     }
 
-    enum NAATStatus
+    public enum NAATStatus
     {
         PosPos,
         PosNeg,

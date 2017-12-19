@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using libcdiffrecords.Data;
+using libcdiffrecords.Reports;
 
 namespace libcdiffrecords
 {
@@ -254,6 +255,48 @@ namespace libcdiffrecords
 
             return count / items.Count;
            
+        }
+
+      public static Dictionary<string, List<DataPoint>> BuildPatientLookupTable(DataPoint[] dps)
+        {
+            Dictionary<string, List<DataPoint>> naatlkup = new Dictionary<string, List<DataPoint>>();
+
+            for (int i = 0; i < dps.Length; i++)
+            {
+                if (!naatlkup.ContainsKey(dps[i].MRN))
+                {
+                    naatlkup.Add(dps[i].MRN, new List<DataPoint>());
+                }
+                naatlkup[dps[i].MRN].Add(dps[i]);
+            }
+
+            return naatlkup;
+        }
+
+
+        /// <summary>
+        /// Returns the higher-rated NAATStatus
+        /// Order is PosPos > PosNeg > PosInd > Neg
+        /// </summary>
+        /// <param name="ns1"></param>
+        /// <param name="ns2"></param>
+        /// <returns></returns>
+        public static NAATStatus CompareNAATStatus(NAATStatus ns1, NAATStatus ns2)
+        {
+            if (ns1 == NAATStatus.PosPos || ns2 == NAATStatus.PosPos)
+                return NAATStatus.PosPos;
+            if (ns1 == NAATStatus.PosNeg || ns2 == NAATStatus.PosNeg)
+                return NAATStatus.PosNeg;
+            if (ns1 == NAATStatus.PosInd || ns2 == NAATStatus.PosInd)
+                return NAATStatus.PosInd;
+            if (ns1 == NAATStatus.Neg || ns2 == NAATStatus.Neg)
+                return NAATStatus.Neg;
+            return NAATStatus.NotTested;
+        }
+
+        public static bool IsSurveillanceTest(TestType tt)
+        {
+            return (tt == TestType.Surveillance_Stool_Culture || tt == TestType.Surveillance_Stool_NAAT || tt == TestType.Surveillance_Swab_Culture || tt == TestType.Surveillance_Swab_NAAT);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using libcdiffrecords;
 using libcdiffrecords.Storage;
+using libcdiffrecords.Reports;
 
 namespace libcdiffrecords.Data
 {
@@ -1351,6 +1352,139 @@ namespace libcdiffrecords.Data
             
 
         }
+
+        public static Bin[] SplitOnNAATDate(Bin b, DataPoint[] naat, DateTime splitDate, int naatWindow)
+        {
+            Bin[] retBin = new Bin[2];
+
+            retBin[0] = new Bin("Before date");
+            retBin[1] = new Bin("On or After Date");
+            Dictionary<string, List<DataPoint>> naatTable = Utilities.BuildPatientLookupTable(naat);
+
+
+            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                {
+                    /*
+                    if(adm.AdmissionDate >= splitDate) //The index admission is after the split date - goes into Bin 2.
+                    {
+                        retBin[1].Add(adm); 
+                    }
+
+                    else
+                    {
+                    */
+                        NAATStatus ns = NAATStatus.NotTested;
+                        
+                        if(naatTable.ContainsKey(key))
+                        {
+                            DataPoint selected = naatTable[key][0];
+                            
+                            foreach (DataPoint dp in naatTable[key])
+                            {
+                                NAATStatus nsOld = ns;
+                                if ((adm.AdmissionDate < dp.SampleDate) && (((dp.SampleDate - adm.AdmissionDate).Days < naatWindow) || naatWindow <= 0))
+                                {
+
+                                    if (dp.CdiffResult == TestResult.Positive)
+                                    {
+                                        switch (dp.ToxinResult)
+                                        {
+                                            case TestResult.Positive:
+                                                ns = Utilities.CompareNAATStatus(ns, NAATStatus.PosPos);
+                                                break;
+                                            case TestResult.Negative:
+                                                ns = Utilities.CompareNAATStatus(ns, NAATStatus.PosNeg);
+                                                break;
+                                            default:
+                                                ns = Utilities.CompareNAATStatus(ns, NAATStatus.PosInd);
+                                                break;
+
+                                        }
+                                    }
+                                    else
+                                    {
+                                        ns = Utilities.CompareNAATStatus(ns, NAATStatus.Neg);
+                                    }
+
+                                }
+                                if(nsOld != ns)
+                                {
+                                    selected = dp;
+                                }
+                            }
+
+                            if(ns != NAATStatus.Neg && ns != NAATStatus.NotTested) //This is a positive patient, so we need to filter based on two critera - date, and EIA being done
+                            {
+                               if(ns == NAATStatus.PosInd)
+                                {
+                                    retBin[0].Add(adm);
+                                }
+                                else
+                                {
+                                    retBin[1].Add(adm);
+                                }
+                               
+                            }
+                            else if(ns == NAATStatus.Neg) // Negative patient - we sort on NAAT date
+                            {
+                                if (selected.SampleDate >= splitDate)
+                                    retBin[1].Add(adm);
+                                else
+                                    retBin[0].Add(adm);
+                            }
+                            else
+                            {
+                                if (adm.Points[adm.Points.Count - 1].SampleDate >= splitDate)
+                                    retBin[1].Add(adm);
+                                else
+                                    retBin[0].Add(adm);
+                            }
+
+                        }
+                        else
+                        {
+                            if (adm.Points[adm.Points.Count - 1].SampleDate >= splitDate)
+                                retBin[1].Add(adm);
+                            else
+                                retBin[0].Add(adm);
+                        }
+                  //  }
+                }
+
+            }
+
+
+
+            return retBin;
+        }
+
+       public static Bin RemovePatientsWithNoSurveillanceSamples(Bin b)
+        {
+            Bin retBin = new Bin(b.Label);
+
+            foreach(string key in b.DataByPatient.Keys)
+            {
+                bool found = false;
+                int counter = 0;
+                while(!found && counter < b.DataByPatient[key].Count)
+                {
+                    if (Utilities.IsSurveillanceTest(b.DataByPatient[key][counter].Test))
+                        found = true;
+
+                    counter++;
+                }
+
+                if (found)
+                    foreach (Admission adm in b.DataByPatientAdmissionTable[key])
+                        retBin.Add(adm);
+
+            }
+
+            return retBin;
+        }
+
     }
 
    
