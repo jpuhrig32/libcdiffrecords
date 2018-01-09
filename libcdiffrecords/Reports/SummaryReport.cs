@@ -8,23 +8,23 @@ using libcdiffrecords.Data;
 
 namespace libcdiffrecords.Reports
 {
-    public class MasterReport
+    public class SummaryReport
     {
-        MasterReportLine[] lines;
+        SummaryReportLine[] lines;
 
-        public MasterReport(Bin[] lineBins)
+        public SummaryReport(Bin[] lineBins)
         {
-            lines = new MasterReportLine[lineBins.Length];
+            lines = new SummaryReportLine[lineBins.Length];
 
             for(int i = 0; i < lines.Length; i++)
             {
-                lines[i] = new MasterReportLine(lineBins[i]);
+                lines[i] = new SummaryReportLine(lineBins[i]);
             }
         }
 
-        public MasterReport(Bin b)
+        public SummaryReport(Bin b)
         {
-            lines = new MasterReportLine[1] { new MasterReportLine(b) };
+            lines = new SummaryReportLine[1] { new SummaryReportLine(b) };
         }
 
         public void WriteReport(string filename)

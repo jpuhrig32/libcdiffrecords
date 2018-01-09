@@ -10,6 +10,7 @@ namespace libcdiffrecords.Data
     {
         public int AdmissionWindow { get; set; }
         public DateTime AdmissionDate { get; set; }
+        public DateTime DischargeDate { get; set; }
         private string mrn;
         public string MRN { get => mrn; set => mrn = value.PadLeft(8, '0'); }
         public List<DataPoint> Points { get; set; }

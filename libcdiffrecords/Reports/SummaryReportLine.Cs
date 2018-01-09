@@ -8,14 +8,14 @@ using libcdiffrecords.Data;
 
 namespace libcdiffrecords.Reports
 {
-    public class MasterReportLine : IReportLine
+    public class SummaryReportLine : IReportLine
     {
         Bin repBin;
 
         public Bin ReportBin { get => repBin; set => repBin = value; }
 
 
-        public MasterReportLine(Bin b)
+        public SummaryReportLine(Bin b)
         {
             repBin = b;
         }

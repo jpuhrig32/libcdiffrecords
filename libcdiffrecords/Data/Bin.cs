@@ -340,6 +340,7 @@ namespace libcdiffrecords.Data
 
                 Admission dpa = new Admission();
                 dpa.AdmissionDate = point.AdmissionDate;
+                dpa.DischargeDate = point.DischargeDate;
                 dpa.MRN = point.MRN;
                 dpa.unit = point.Unit.Trim();
                 dpa.PatientName = point.PatientName;

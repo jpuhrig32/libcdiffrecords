@@ -110,8 +110,8 @@
     </Compile>
     <Compile Include="ErrorHandling\FileNotPatientData.cs" />
     <Compile Include="Reports\IReportLine.cs" />
-    <Compile Include="Reports\MasterReport.cs" />
-    <Compile Include="Reports\MasterReportLine.Cs" />
+    <Compile Include="Reports\SummaryReport.cs" />
+    <Compile Include="Reports\SummaryReportLine.Cs" />
     <Compile Include="Reports\NAATComparisonReport.cs" />
     <Compile Include="Reports\NAATComparisonReportLine.cs" />
     <Compile Include="Reports\PatientAdmissionReport.cs" />

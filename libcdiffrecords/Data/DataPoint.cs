@@ -26,6 +26,7 @@ namespace libcdiffrecords.Data
         public int Age { get => (int)((AdmissionDate - DateOfBirth).Days / 365.25); }
         public DateTime AdmissionDate { get; set; }
         public DateTime SampleDate { get; set; }
+        public DateTime DischargeDate { get; set; }
        
         public TestResult CdiffResult
         {
@@ -65,6 +66,7 @@ namespace libcdiffrecords.Data
             Room = "00";
             Fields = new Dictionary<string, string>();
             EarliestSample = new DateTime(2015, 1, 1);
+            DischargeDate = new DateTime(2015, 1, 1);
      
         }
 

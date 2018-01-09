@@ -1262,7 +1262,7 @@ namespace libcdiffrecords.Data
                     bool found = false;
                     for(int i = 0; i < posNaats[key].Count; i++)
                     {
-                        if(posNaats[key][i].SampleDate < firsts.DataByPatientAdmissionTable[key][0].AdmissionDate)
+                        if(posNaats[key][i].SampleDate < firsts.DataByPatientAdmissionTable[key][0].Points[0].SampleDate)
                         {
                             found = true;
                         }

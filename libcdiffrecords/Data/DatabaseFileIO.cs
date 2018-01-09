@@ -117,7 +117,15 @@ namespace libcdiffrecords.Data
                 point.Flags.Add("Missing Admission Date");
             }
 
-            if(point.DateOfBirth >= point.AdmissionDate)
+            if (headerTable.ContainsKey("Discharge_Date") && TryParseDate(line[headerTable["Discharge_Date"]], out temp))
+                point.DischargeDate = temp;
+            else
+            {
+                point.DischargeDate = DateTime.MaxValue;
+                point.Flags.Add("Missing Discharge Date");
+            }
+
+            if (point.DateOfBirth >= point.AdmissionDate)
             {
                 point.DateOfBirth = new DateTime(point.DateOfBirth.Year - 100, point.DateOfBirth.Month, point.DateOfBirth.Day);
                 point.Flags.Add("DOB likely 100 years off");
@@ -278,7 +286,7 @@ namespace libcdiffrecords.Data
             List<string> admit = new List<string>();
             admit.Add(id.ToString());
             admit.Add(adm.MRN);
-            admit.Add(adm.AdmissionDate.ToShortDateString());
+            admit.Add(adm.AdmissionDate.ToLongDateString());
             admit.Add(adm.Points[0].Unit);
             admit.Add(adm.Points[0].Room);
             admit.Add("1");
@@ -293,7 +301,7 @@ namespace libcdiffrecords.Data
                 List<string> data = new List<string>();
                 data.Add(id.ToString());
                 data.Add(adm.MRN);
-                data.Add(adm.Points[i].SampleDate.ToShortDateString());
+                data.Add(adm.Points[i].SampleDate.ToLongDateString());
                 data.Add(adm.Points[0].Unit);
                 data.Add(adm.Points[0].Room);
                 data.Add("");
@@ -366,6 +374,7 @@ namespace libcdiffrecords.Data
             header.Add("Patient Age");
             header.Add("DOB");
             header.Add("Admission Date");
+            header.Add("Discharge Date");
             header.Add("Unit");
             header.Add("Date of Last Sample");
             header.Add("Admission Sample Present");
@@ -397,10 +406,17 @@ namespace libcdiffrecords.Data
             parts.Add(Utilities.PatientSexToString(adm.Points[0].PatientSex));
             parts.Add( ((int)((adm.AdmissionDate - adm.Points[0].DateOfBirth).Days / 365.25)).ToString());
 
-            parts.Add(adm.Points[0].DateOfBirth.ToShortDateString());
-            parts.Add(adm.AdmissionDate.ToShortDateString());
+            parts.Add(adm.Points[0].DateOfBirth.ToLongDateString());
+            parts.Add(adm.AdmissionDate.ToLongDateString());
+
+            if (adm.DischargeDate != DateTime.MaxValue)
+                parts.Add(adm.DischargeDate.ToLongDateString());
+            else
+                parts.Add("");
+
+            
             parts.Add(adm.unit);
-            parts.Add(adm.Points[adm.Points.Count - 1].SampleDate.ToShortDateString());
+            parts.Add(adm.Points[adm.Points.Count - 1].SampleDate.ToLongDateString());
 
             switch(adm.AdmissionStatus)
             {
@@ -530,6 +546,7 @@ namespace libcdiffrecords.Data
             fields.Add("Admission_ID");         
             fields.Add("Legacy_ID");         
             fields.Add("Notes");
+            fields.Add("Discharge_Date");
             
             foreach (string key in dp.Fields.Keys)
             {
@@ -568,9 +585,9 @@ namespace libcdiffrecords.Data
                     fields.Add("");
                     break;
             }
-            fields.Add(dp.DateOfBirth.ToShortDateString());
-            fields.Add(dp.AdmissionDate.ToShortDateString());
-            fields.Add(dp.SampleDate.ToShortDateString());
+            fields.Add(dp.DateOfBirth.ToLongDateString());
+            fields.Add(dp.AdmissionDate.ToLongDateString());
+            fields.Add(dp.SampleDate.ToLongDateString());
             fields.Add(Utilities.TestResultToString(dp.CdiffResult));
             fields.Add(Utilities.TestResultToString(dp.ToxinResult));
             fields.Add(Utilities.TestTypeToString(dp.Test));
@@ -579,6 +596,10 @@ namespace libcdiffrecords.Data
             fields.Add(dp.AdmissionID);
             fields.Add(dp.LegacyID);
             fields.Add(dp.Notes);
+            if (dp.DischargeDate != DateTime.MaxValue)
+                fields.Add(dp.DischargeDate.ToLongDateString());
+            else
+                fields.Add("");
 
             foreach(string key in dp.Fields.Keys)
             {
@@ -612,6 +633,7 @@ namespace libcdiffrecords.Data
             fields.Add("Admission_ID", true);
             fields.Add("Legacy_ID", true);
             fields.Add("Notes", true);
+            fields.Add("Discharge_Date", true);
 
             return fields;
         }

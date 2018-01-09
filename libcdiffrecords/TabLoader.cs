@@ -193,6 +193,7 @@ namespace libcdiffrecords
             if (parts.Length >= 7)
             {
                 point.PatientName = parts[0].Trim();
+                point.PatientName = point.PatientName.Trim('\"');
                 point.DateOfBirth = DateTime.Parse(parts[1].Trim());
                 point.MRN = parts[2].Trim().PadLeft(8, '0');
                 point.Unit = parts[4].Trim();

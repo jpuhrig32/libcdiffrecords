@@ -23,6 +23,47 @@ namespace C_diff_Records_Test_App
             Bin main = new Bin( "Surv", survData);
             main = DataFilter.RemovePatientsWithUnknownDOB(main);
             main = DataFilter.RemoveDataWithoutCDiffResult(main);
+            DatabaseFileIO.WriteDataToFile(main, outputPath + "mainBin prior to exclusions.csv");
+            main = DataFilter.RemovePatientsWithNoSurveillanceSamples(main);
+            
+            Bin main2 = main.Clone();
+
+            main = DataFilter.RemovePatientsWithPriorPosClinTest(main, naats);
+            DatabaseFileIO.WriteDataToFile(main, outputPath + "mainBin after exclusions.csv");
+            Bin excludedPatients = main2 - main;
+            DatabaseFileIO.WriteDataToFile(excludedPatients, outputPath + "excluded_patients.csv");
+
+
+            DatabaseFileIO.WriteDataToFile(main, outputPath + "MainBin.csv");
+
+            Bin indexes = DataFilter.FilterIndexAdmissions(main);
+            DatabaseFileIO.WriteDataToFile(indexes, outputPath + "IndexBin.csv");
+            DatabaseFileIO.WriteDatabaseAdmissions(indexes, outputPath + "IndexBinAdmissions.csv");
+
+            Bin[] splitInd = DataFilter.SplitOnNAATDate(indexes, naats, new DateTime(2017, 2, 1), 90);
+
+
+            List<Bin> stratInd = new List<Bin>();
+            stratInd.Add(splitInd[0]);
+            stratInd.AddRange(DataFilter.StratifyOnCommonUnits(splitInd[0]));
+            stratInd.Add(splitInd[1]);
+            stratInd.AddRange(DataFilter.StratifyOnCommonUnits(splitInd[1]));
+
+            List<Bin> stratInd2 = new List<Bin>();
+            stratInd2.Add(indexes);
+            stratInd2.AddRange(DataFilter.StratifyOnCommonUnits(indexes));
+
+            DataTap.data = new Bin("NAATData");
+            NAATComparisonReport ncr = new NAATComparisonReport(stratInd.ToArray(), naats);
+            ncr.WriteReport(outputPath + "Index NAAT Comparison Report.csv");
+            DatabaseFileIO.WriteDataToFile(DataTap.data, outputPath + "IndexNAAT Sample Data.csv");
+
+            DataTap.data = new Bin("NAATData");
+            NAATComparisonReport ncr2 = new NAATComparisonReport(stratInd2.ToArray(), naats);
+            ncr2.WriteReport(outputPath + "Index NAAT Comparison Report - no splitting.csv");
+            DatabaseFileIO.WriteDataToFile(DataTap.data, outputPath + "IndexNAAT Sample Data no splitting.csv");
+
+            /*
             //main = DataFilter.FilterFirstAdmissions(main);
             //main = DataFilter.RemovePatientsWithPriorPosClinTest(main, naats);
             main = DataFilter.RemovePatientsWithNoSurveillanceSamples(main);
@@ -83,10 +124,11 @@ namespace C_diff_Records_Test_App
 
             Bin cohort = DataFilter.FilterPatientsBasedOnCohort(main, DataTap.data.PatientMRNList);
             cohort = DataFilter.RemoveAdmissionsWithOneSample(cohort);
+            */
 
 
-           
-            
+
+
 
             /*
             main = DataFilter.RemovePatientsWithUnknownDOB(main);
@@ -201,7 +243,7 @@ namespace C_diff_Records_Test_App
                 switch(type)
                 {
                     case ReportType.Master:
-                        lines[i] = new MasterReportLine(unitBins[i]);
+                        lines[i] = new SummaryReportLine(unitBins[i]);
                         break;
                     case ReportType.NAATAnalysis:
                         lines[i] = new NAATComparisonReportLine(unitBins[i], naat, naatWindow, ct, ignoreIndeterminates, nt);
