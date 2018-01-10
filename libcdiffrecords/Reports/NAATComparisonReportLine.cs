@@ -28,11 +28,12 @@ namespace libcdiffrecords.Reports
         ComparisonType compType;
         int blockCount;
         NAATCountingType naatType;
+        NAATComparisonReportType ReportType;
      
 
         private Dictionary<string, List<DataPoint>> naatTable;
 
-        public NAATComparisonReportLine(Bin unit, DataPoint[] naat, int naatDistInDays, ComparisonType ct, bool ignoreIndeterminedAdm, NAATCountingType nt)
+        public NAATComparisonReportLine(Bin unit, DataPoint[] naat, int naatDistInDays, NAATComparisonReportType rt, ComparisonType ct, bool ignoreIndeterminedAdm, NAATCountingType nt)
         {
             unitSurvBin = unit;
             naatBin = naat;
@@ -40,6 +41,7 @@ namespace libcdiffrecords.Reports
             ignoreIndeterminates = ignoreIndeterminedAdm;
             naatType = nt;
             compType = ct;
+            ReportType = rt;
             if (ct == ComparisonType.ByEndResult)
                 blockCount = 5;
             else
@@ -159,10 +161,17 @@ namespace libcdiffrecords.Reports
 
             for(int i =0; i < splitBins.Length; i++)
             {
-                if(naatType == NAATCountingType.OncePerPatient)
-                    na[i] = AnalyzeNAATPerPatient(splitBins[i], na[i]);
-                if (naatType == NAATCountingType.PerSample)
-                    na[i] = AnalyzeNAATPerSample(splitBins[i], na[i]);
+                if (ReportType == NAATComparisonReportType.ByAdmission)
+                {
+                        na[i] = AnalyzeNAATPerPatientPerAdmission(splitBins[i], na[i]);
+                }
+                else
+                {
+                    if (naatType == NAATCountingType.OncePerPatient)
+                        na[i] = AnalyzeNAATPerPatient(splitBins[i], na[i]);
+                    if (naatType == NAATCountingType.PerSample)
+                        na[i] = AnalyzeNAATPerSample(splitBins[i], na[i]);
+                }
 
 
                 //Here's where we start printing the line stats
@@ -187,6 +196,70 @@ namespace libcdiffrecords.Reports
         }
 
         Dictionary<string, int> ntTable = new Dictionary<string, int>();
+
+        private NAATAnalysis AnalyzeNAATPerPatientPerAdmission(Bin b, NAATAnalysis na)
+        {
+            na.admCount = b.PatientAdmissionCount;
+            na.uniquePt = b.PatientCount;
+            na.sampleCount = b.ItemsInBin;
+
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                NAATStatus ns = NAATStatus.NotTested;
+
+                if (naatTable.ContainsKey(key))
+                {
+
+                    foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
+                    {
+
+                        foreach (DataPoint dp in naatTable[key])
+                        {
+                            if ((dpa.AdmissionDate < dp.SampleDate) && dp.SampleDate <= dpa.DischargeDate)
+                            {
+
+                                if (dp.CdiffResult == TestResult.Positive)
+                                {
+                                    if (!ntTable.ContainsKey(dpa.MRN + dpa.AdmissionDate.ToShortDateString()))
+                                    {
+                                        //DataTap.data.Add(dp);
+                                        DataPoint dp2 = dpa.Points[0];
+                                        dp2.Notes = dpa.AdmissionStatus.ToString() + " Result:" + dp.CdiffResult.ToString() + " / " + dp.ToxinResult.ToString();
+                                        DataTap.data.Add(dp2);
+                                        DataTap.data.Add(dp);
+                                        ntTable.Add(dpa.MRN + dpa.AdmissionDate.ToShortDateString(), 1);
+                                    }
+
+                                    switch (dp.ToxinResult)
+                                    {
+                                        case TestResult.Positive:
+                                            ns = CompareNAATStatus(ns, NAATStatus.PosPos);
+                                            break;
+                                        case TestResult.Negative:
+                                            ns = CompareNAATStatus(ns, NAATStatus.PosNeg);
+                                            break;
+                                        default:
+                                            ns = CompareNAATStatus(ns, NAATStatus.PosInd);
+                                            break;
+
+                                    }
+                                }
+                                else
+                                {
+                                    ns = CompareNAATStatus(ns, NAATStatus.Neg);
+                                }
+
+                            }
+
+                        }
+                    }
+
+                }
+                na = AddNAATPatient(na, ns);
+
+            }
+            return na;
+        }
         private NAATAnalysis AnalyzeNAATPerPatient(Bin b, NAATAnalysis na)
         {
             na.admCount = b.PatientAdmissionCount;

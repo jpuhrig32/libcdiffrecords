@@ -41,6 +41,14 @@
             this.pickIndexAdmissionButton = new System.Windows.Forms.Button();
             this.summaryReportButton = new System.Windows.Forms.Button();
             this.surveillanceReportButton = new System.Windows.Forms.Button();
+            this.filterSelectedButton = new System.Windows.Forms.Button();
+            this.filterStoredButton = new System.Windows.Forms.Button();
+            this.exportCurrentDatasetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveCurrentDatabaseDialog = new System.Windows.Forms.SaveFileDialog();
+            this.resetDatasetToOriginalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sampleFinderAllButton = new System.Windows.Forms.Button();
+            this.sampleFinderByIDButton = new System.Windows.Forms.Button();
+            this.saveStorageDialog = new System.Windows.Forms.SaveFileDialog();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -58,7 +66,9 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.loadDatabaseFileToolStripMenuItem,
-            this.loadStorageDataToolStripMenuItem});
+            this.loadStorageDataToolStripMenuItem,
+            this.exportCurrentDatasetToolStripMenuItem,
+            this.resetDatasetToOriginalToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -66,14 +76,14 @@
             // loadDatabaseFileToolStripMenuItem
             // 
             this.loadDatabaseFileToolStripMenuItem.Name = "loadDatabaseFileToolStripMenuItem";
-            this.loadDatabaseFileToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.loadDatabaseFileToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.loadDatabaseFileToolStripMenuItem.Text = "Load Database File...";
             this.loadDatabaseFileToolStripMenuItem.Click += new System.EventHandler(this.loadDatabaseFileToolStripMenuItem_Click);
             // 
             // loadStorageDataToolStripMenuItem
             // 
             this.loadStorageDataToolStripMenuItem.Name = "loadStorageDataToolStripMenuItem";
-            this.loadStorageDataToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.loadStorageDataToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.loadStorageDataToolStripMenuItem.Text = "Load Storage Data...";
             this.loadStorageDataToolStripMenuItem.Click += new System.EventHandler(this.loadStorageDataToolStripMenuItem_Click);
             // 
@@ -155,11 +165,81 @@
             this.surveillanceReportButton.UseVisualStyleBackColor = true;
             this.surveillanceReportButton.Click += new System.EventHandler(this.surveillanceReportButton_Click);
             // 
+            // filterSelectedButton
+            // 
+            this.filterSelectedButton.Location = new System.Drawing.Point(172, 92);
+            this.filterSelectedButton.Name = "filterSelectedButton";
+            this.filterSelectedButton.Size = new System.Drawing.Size(154, 46);
+            this.filterSelectedButton.TabIndex = 7;
+            this.filterSelectedButton.Text = "Filter By Selected Samples";
+            this.filterSelectedButton.UseVisualStyleBackColor = true;
+            this.filterSelectedButton.Click += new System.EventHandler(this.filterSelectedButton_Click);
+            // 
+            // filterStoredButton
+            // 
+            this.filterStoredButton.Location = new System.Drawing.Point(332, 92);
+            this.filterStoredButton.Name = "filterStoredButton";
+            this.filterStoredButton.Size = new System.Drawing.Size(154, 46);
+            this.filterStoredButton.TabIndex = 8;
+            this.filterStoredButton.Text = "Filter By Stored Samples";
+            this.filterStoredButton.UseVisualStyleBackColor = true;
+            this.filterStoredButton.Click += new System.EventHandler(this.filterStoredButton_Click);
+            // 
+            // exportCurrentDatasetToolStripMenuItem
+            // 
+            this.exportCurrentDatasetToolStripMenuItem.Name = "exportCurrentDatasetToolStripMenuItem";
+            this.exportCurrentDatasetToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.exportCurrentDatasetToolStripMenuItem.Text = "Export Current Dataset...";
+            this.exportCurrentDatasetToolStripMenuItem.Click += new System.EventHandler(this.exportCurrentDatasetToolStripMenuItem_Click);
+            // 
+            // saveCurrentDatabaseDialog
+            // 
+            this.saveCurrentDatabaseDialog.DefaultExt = "csv";
+            this.saveCurrentDatabaseDialog.Filter = "CSV Files|*.csv";
+            this.saveCurrentDatabaseDialog.Title = "Save Current Dataset As...";
+            // 
+            // resetDatasetToOriginalToolStripMenuItem
+            // 
+            this.resetDatasetToOriginalToolStripMenuItem.Name = "resetDatasetToOriginalToolStripMenuItem";
+            this.resetDatasetToOriginalToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.resetDatasetToOriginalToolStripMenuItem.Text = "Reset Dataset to Original";
+            this.resetDatasetToOriginalToolStripMenuItem.Click += new System.EventHandler(this.resetDatasetToOriginalToolStripMenuItem_Click);
+            // 
+            // sampleFinderAllButton
+            // 
+            this.sampleFinderAllButton.Location = new System.Drawing.Point(12, 144);
+            this.sampleFinderAllButton.Name = "sampleFinderAllButton";
+            this.sampleFinderAllButton.Size = new System.Drawing.Size(154, 46);
+            this.sampleFinderAllButton.TabIndex = 9;
+            this.sampleFinderAllButton.Text = "Find Samples in Dataset";
+            this.sampleFinderAllButton.UseVisualStyleBackColor = true;
+            this.sampleFinderAllButton.Click += new System.EventHandler(this.sampleFinderAllButton_Click);
+            // 
+            // sampleFinderByIDButton
+            // 
+            this.sampleFinderByIDButton.Location = new System.Drawing.Point(172, 144);
+            this.sampleFinderByIDButton.Name = "sampleFinderByIDButton";
+            this.sampleFinderByIDButton.Size = new System.Drawing.Size(154, 46);
+            this.sampleFinderByIDButton.TabIndex = 10;
+            this.sampleFinderByIDButton.Text = "Find Samples by SampleID";
+            this.sampleFinderByIDButton.UseVisualStyleBackColor = true;
+            this.sampleFinderByIDButton.Click += new System.EventHandler(this.sampleFinderByIDButton_Click);
+            // 
+            // saveStorageDialog
+            // 
+            this.saveStorageDialog.DefaultExt = "csv";
+            this.saveStorageDialog.Filter = "CSV Files|*.csv";
+            this.saveStorageDialog.Title = "Save Selected Tube Data As...";
+            // 
             // CDSDM_MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(496, 429);
+            this.Controls.Add(this.sampleFinderByIDButton);
+            this.Controls.Add(this.sampleFinderAllButton);
+            this.Controls.Add(this.filterStoredButton);
+            this.Controls.Add(this.filterSelectedButton);
             this.Controls.Add(this.surveillanceReportButton);
             this.Controls.Add(this.summaryReportButton);
             this.Controls.Add(this.pickIndexAdmissionButton);
@@ -192,6 +272,14 @@
         private System.Windows.Forms.Button pickIndexAdmissionButton;
         private System.Windows.Forms.Button summaryReportButton;
         private System.Windows.Forms.Button surveillanceReportButton;
+        private System.Windows.Forms.Button filterSelectedButton;
+        private System.Windows.Forms.Button filterStoredButton;
+        private System.Windows.Forms.ToolStripMenuItem exportCurrentDatasetToolStripMenuItem;
+        private System.Windows.Forms.SaveFileDialog saveCurrentDatabaseDialog;
+        private System.Windows.Forms.ToolStripMenuItem resetDatasetToOriginalToolStripMenuItem;
+        private System.Windows.Forms.Button sampleFinderAllButton;
+        private System.Windows.Forms.Button sampleFinderByIDButton;
+        private System.Windows.Forms.SaveFileDialog saveStorageDialog;
     }
 }
 

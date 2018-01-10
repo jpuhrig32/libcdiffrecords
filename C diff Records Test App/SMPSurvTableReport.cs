@@ -225,7 +225,7 @@ namespace C_diff_Records_Test_App
         }
 
 
-        private void CreateAndWriteReport(Bin report, DataPoint[] naat, ReportType type, bool ignoreIndeterminates, int naatWindow, ComparisonType ct, NAATCountingType nt, string outputFile)
+        private void CreateAndWriteReport(Bin report, DataPoint[] naat, ReportType type, NAATComparisonReportType ncrtype, bool ignoreIndeterminates, int naatWindow, ComparisonType ct, NAATCountingType nt, string outputFile)
         {
             Bin[] unitBins = DataFilter.StratifyOnCommonUnits(report, 50);
 
@@ -246,7 +246,7 @@ namespace C_diff_Records_Test_App
                         lines[i] = new SummaryReportLine(unitBins[i]);
                         break;
                     case ReportType.NAATAnalysis:
-                        lines[i] = new NAATComparisonReportLine(unitBins[i], naat, naatWindow, ct, ignoreIndeterminates, nt);
+                        lines[i] = new NAATComparisonReportLine(unitBins[i], naat, naatWindow, ncrtype, ct, ignoreIndeterminates, nt);
                         break;
 
                 }

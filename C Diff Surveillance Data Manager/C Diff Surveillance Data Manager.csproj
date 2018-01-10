@@ -45,17 +45,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CDSDM_IndexAdmitForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="CDSDM_IndexAdmitForm.Designer.cs">
-      <DependentUpon>CDSDM_IndexAdmitForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="CDSDM_MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="CDSDM_MainForm.Designer.cs">
       <DependentUpon>CDSDM_MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CDSDM_SamplePickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CDSDM_SamplePickerForm.Designer.cs">
+      <DependentUpon>CDSDM_SamplePickerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="CDSDM_SummaryReportForm.cs">
       <SubType>Form</SubType>
@@ -69,13 +69,14 @@
     <Compile Include="CDSDM_SurveillanceReportForm.Designer.cs">
       <DependentUpon>CDSDM_SurveillanceReportForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="DataManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="CDSDM_IndexAdmitForm.resx">
-      <DependentUpon>CDSDM_IndexAdmitForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="CDSDM_MainForm.resx">
       <DependentUpon>CDSDM_MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CDSDM_SamplePickerForm.resx">
+      <DependentUpon>CDSDM_SamplePickerForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CDSDM_SummaryReportForm.resx">
       <DependentUpon>CDSDM_SummaryReportForm.cs</DependentUpon>

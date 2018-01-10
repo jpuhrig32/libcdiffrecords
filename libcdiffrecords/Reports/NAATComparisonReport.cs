@@ -7,12 +7,21 @@ using libcdiffrecords.Data;
 
 namespace libcdiffrecords.Reports
 {
+    public enum NAATComparisonReportType
+    {
+        DayRange,
+        All,
+        ByAdmission,
+    };
+
     public class NAATComparisonReport
     {
 
         Bin[] reportBins;
         DataPoint[] naat;
         NAATComparisonReportLine[] lines;
+        public NAATComparisonReportType ReportType { get; set; }
+        public int DayRange { get; set; } //Defaults to 90
 
         public NAATComparisonReport(Bin reportBin, DataPoint[] naats)
         {
@@ -31,10 +40,21 @@ namespace libcdiffrecords.Reports
         private void SetupReportLines()
         {
             lines = new NAATComparisonReportLine[reportBins.Length];
-
+            if((DayRange == -1) || ReportType == NAATComparisonReportType.All)
+            {
+                DayRange = -1;
+                ReportType = NAATComparisonReportType.All;
+            }
             for(int i = 0; i < lines.Length; i++)
             {
-                lines[i] = new NAATComparisonReportLine(reportBins[i], naat, 90, ComparisonType.ByEndResult, true, NAATCountingType.OncePerPatient);
+                if (ReportType == NAATComparisonReportType.ByAdmission)
+                {
+                    lines[i] = new NAATComparisonReportLine(reportBins[i], naat, DayRange, ReportType, ComparisonType.ByEndResult, true, NAATCountingType.OncePerPatient);
+                }
+                else
+                {
+                    lines[i] = new NAATComparisonReportLine(reportBins[i], naat, DayRange, ReportType, ComparisonType.ByEndResult, true, NAATCountingType.OncePerPatient);
+                }
             }
         }
 

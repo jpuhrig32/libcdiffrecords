@@ -21,7 +21,7 @@ namespace libcdiffrecords.Data
 
     public class DataFilter
     {
-      
+
 
         /// <summary>
         /// Stratifies patients into age-based groups, based on first admission
@@ -31,7 +31,7 @@ namespace libcdiffrecords.Data
         /// <returns>A list of bins for each age group</returns>
         public static Bin[] StratifyOnAge(Bin bin, int yearsPerBin)
         {
-            if(yearsPerBin < 1)
+            if (yearsPerBin < 1)
             {
                 yearsPerBin = 1;
             }
@@ -39,12 +39,12 @@ namespace libcdiffrecords.Data
 
             foreach (string key in bin.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission dpa in bin.DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in bin.DataByPatientAdmissionTable[key])
                 {
-                   int age =  dpa.Points[0].Age;
+                    int age = dpa.Points[0].Age;
                     int binIndex = age / yearsPerBin;
 
-                    for(int i = ageBins.Count; i <= binIndex; i++)
+                    for (int i = ageBins.Count; i <= binIndex; i++)
                     {
                         if (i == 0)
                             ageBins.Add(new Bin("0 -" + yearsPerBin.ToString()));
@@ -61,7 +61,7 @@ namespace libcdiffrecords.Data
             }
 
             List<Bin> retBins = new List<Bin>();
-            for(int i = 0; i < ageBins.Count; i++)
+            for (int i = 0; i < ageBins.Count; i++)
             {
                 if (ageBins[i].ItemsInBin > 0)
                     retBins.Add(ageBins[i]);
@@ -107,25 +107,25 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(b.Label);
 
-            for(int i =0; i < b.Data.Count; i++)
+            for (int i = 0; i < b.Data.Count; i++)
             {
-                if (b.Data[i].CdiffResult != TestResult.NotTested)
+                if (b.Data[i].CdiffResult == TestResult.Positive || b.Data[i].CdiffResult == TestResult.Negative)
                     retBin.Add(b.Data[i]);
             }
 
             return retBin;
         }
 
-        
+
 
         public static Bin RemoveAdmissionsWithOneSample(Bin b)
         {
             Bin retBin = new Bin(b.Label);
             foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission dpa in b.DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                 {
-                    if(dpa.Points.Count > 1)
+                    if (dpa.Points.Count > 1)
                     {
                         retBin.Add(dpa);
                     }
@@ -139,7 +139,7 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(b.Label + "_Single_cdiff_result");
 
-            for(int i =0; i < b.Data.Count; i++)
+            for (int i = 0; i < b.Data.Count; i++)
             {
                 if (b.Data[i].CdiffResult == tr)
                     retBin.Add(b.Data[i]);
@@ -162,13 +162,13 @@ namespace libcdiffrecords.Data
                 foreach (Admission dpa in bin.DataByPatientAdmissionTable[patient])
                 {
                     dpa.AdmissionWindow = admWindow;
-                    if(dpa.AdmissionStatus != AdmissionStatus.NegativeNoAdmissionSample && dpa.AdmissionStatus != AdmissionStatus.PositiveNoAdmitSample && dpa.AdmissionStatus != AdmissionStatus.NegativeFirstSample_TurnedPositive)
+                    if (dpa.AdmissionStatus != AdmissionStatus.NegativeNoAdmissionSample && dpa.AdmissionStatus != AdmissionStatus.PositiveNoAdmitSample && dpa.AdmissionStatus != AdmissionStatus.NegativeFirstSample_TurnedPositive)
                     {
                         retBin.Add(dpa);
                     }
                 }
             }
-            return retBin;          
+            return retBin;
         }
 
         /// <summary>
@@ -180,13 +180,13 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(b.Label);
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                if(b.DataByPatientAdmissionTable[key].Count > 0)
+                if (b.DataByPatientAdmissionTable[key].Count > 0)
                 {
-                    if(b.DataByPatientAdmissionTable[key][0].AdmissionStatus != AdmissionStatus.PositiveOnAdmission)
+                    if (b.DataByPatientAdmissionTable[key][0].AdmissionStatus != AdmissionStatus.PositiveOnAdmission)
                     {
-                        for(int i = 0; i < b.DataByPatientAdmissionTable[key].Count; i++)
+                        for (int i = 0; i < b.DataByPatientAdmissionTable[key].Count; i++)
                         {
                             retBin.Add(b.DataByPatientAdmissionTable[key][i]);
                         }
@@ -213,11 +213,11 @@ namespace libcdiffrecords.Data
 
             b.SortBinData();
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
                 Admission index = PickIndexAdmission(b.DataByPatientAdmissionTable[key]);
-                if(index != null)
-                     retBin.Add(index);
+                if (index != null)
+                    retBin.Add(index);
             }
 
             return retBin;
@@ -231,9 +231,9 @@ namespace libcdiffrecords.Data
             if (dpa.Count > 0)
             {
                 // Here is where we deal with the samples that were indeterminate on admission
-                while(IndeterminateAdmission(dpa[0].AdmissionStatus))
+                while (IndeterminateAdmission(dpa[0].AdmissionStatus))
                 {
-                    if(dpa.Count <= 1)
+                    if (dpa.Count <= 1)
                     {
                         return null;
                     }
@@ -243,9 +243,9 @@ namespace libcdiffrecords.Data
 
                 if (status == AdmissionStatus.PositiveOnAdmission || status == AdmissionStatus.NegativeOnAdmission_RemainedNegative || status == AdmissionStatus.NegativeNoAdmissionSample)
                     return dpa[0];
-                if(status == AdmissionStatus.NegativeOnAdmission_TurnedPositive || status == AdmissionStatus.NegativeFirstSample_TurnedPositive || status == AdmissionStatus.PositiveNoAdmitSample)
+                if (status == AdmissionStatus.NegativeOnAdmission_TurnedPositive || status == AdmissionStatus.NegativeFirstSample_TurnedPositive || status == AdmissionStatus.PositiveNoAdmitSample)
                 {
-                    for(int i = 0; i < dpa.Count; i++)
+                    for (int i = 0; i < dpa.Count; i++)
                     {
                         if (dpa[i].AdmissionStatus == AdmissionStatus.PositiveOnAdmission || dpa[i].AdmissionStatus == AdmissionStatus.NegativeOnAdmission_TurnedPositive)
                             return dpa[i];
@@ -262,7 +262,7 @@ namespace libcdiffrecords.Data
             return (status == AdmissionStatus.NegativeNoAdmissionSample || status == AdmissionStatus.PositiveNoAdmitSample || status == AdmissionStatus.NegativeFirstSample_TurnedPositive);
         }
 
-       
+
 
         /// <summary>
         /// Removes patients with empty DOB fields, or unknown ages
@@ -272,9 +272,9 @@ namespace libcdiffrecords.Data
         public static Bin RemovePatientsWithUnknownDOB(Bin b)
         {
             Bin retBin = new Bin(b.Label);
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-               foreach(Admission dpa in b.DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                 {
                     if (dpa.Points[0].DateOfBirth != new DateTime(1901, 1, 1))
                         retBin.Add(dpa);
@@ -292,11 +292,11 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(b.Label);
             b.SortBinData();
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                if(b.DataByPatientAdmissionTable[key][0].AdmissionStatus != AdmissionStatus.PositiveOnAdmission)
+                if (b.DataByPatientAdmissionTable[key][0].AdmissionStatus != AdmissionStatus.PositiveOnAdmission)
                 {
-                    for(int i = 0; i < b.DataByPatientAdmissionTable[key].Count; i++)
+                    for (int i = 0; i < b.DataByPatientAdmissionTable[key].Count; i++)
                     {
                         retBin.Add(b.DataByPatientAdmissionTable[key][i]);
                     }
@@ -306,15 +306,15 @@ namespace libcdiffrecords.Data
             return retBin;
         }
 
-        public static Bin FilterPatientsBasedOnCohort(Bin b, List<string>mrnList)
+        public static Bin FilterPatientsBasedOnCohort(Bin b, List<string> mrnList)
         {
             Bin retBin = new Bin(b.Label);
 
-            for(int i=0; i < mrnList.Count; i++)
+            for (int i = 0; i < mrnList.Count; i++)
             {
-                if(b.DataByPatientAdmissionTable.ContainsKey(mrnList[i]))
+                if (b.DataByPatientAdmissionTable.ContainsKey(mrnList[i]))
                 {
-                    foreach(Admission adm in b.DataByPatientAdmissionTable[mrnList[i]])
+                    foreach (Admission adm in b.DataByPatientAdmissionTable[mrnList[i]])
                     {
                         retBin.Add(adm);
                     }
@@ -340,13 +340,13 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(b.Label);
             b.SortBinData();
-            if(ignoreIndeterminateStartAdmissions)
+            if (ignoreIndeterminateStartAdmissions)
             {
                 b = DataFilter.RemoveAdmissionsWithNoAdmissionSample(b, admWindow);
             }
             foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                if(b.DataByPatientAdmissionTable[key].Count > 0)
+                if (b.DataByPatientAdmissionTable[key].Count > 0)
                 {
                     DateTime adm = b.DataByPatientAdmissionTable[key][0].AdmissionDate;
                     string unit = b.DataByPatientAdmissionTable[key][0].unit;
@@ -378,15 +378,15 @@ namespace libcdiffrecords.Data
             {
                 foreach (Admission dpa in bin.DataByPatientAdmissionTable[key])
                 {
-                   
-                    switch(status)
+
+                    switch (status)
                     {
                         case AdmissionStatus.EmptyAdmit:
                             if (dpa.Points.Count == 0)
                                 ret.Add(dpa);
                             break;
                         case AdmissionStatus.NegativeOnAdmission:
-                            if (dpa.AdmissionStatus == AdmissionStatus.NegativeOnAdmission  || dpa.AdmissionStatus == AdmissionStatus.NegativeOnAdmission_RemainedNegative || dpa.AdmissionStatus == AdmissionStatus.NegativeOnAdmission_TurnedPositive)
+                            if (dpa.AdmissionStatus == AdmissionStatus.NegativeOnAdmission || dpa.AdmissionStatus == AdmissionStatus.NegativeOnAdmission_RemainedNegative || dpa.AdmissionStatus == AdmissionStatus.NegativeOnAdmission_TurnedPositive)
                                 ret.Add(dpa);
                             break;
                         case AdmissionStatus.PositiveAdmission:
@@ -410,15 +410,15 @@ namespace libcdiffrecords.Data
                                 ret.Add(dpa);
                             break;
                         case AdmissionStatus.PositiveNoAdmitSample:
-                            if(dpa.AdmissionStatus == AdmissionStatus.PositiveNoAdmitSample)
+                            if (dpa.AdmissionStatus == AdmissionStatus.PositiveNoAdmitSample)
                                 ret.Add(dpa);
                             break;
                         case AdmissionStatus.PositiveOnAdmission:
-                            if(dpa.AdmissionStatus == AdmissionStatus.PositiveOnAdmission)
+                            if (dpa.AdmissionStatus == AdmissionStatus.PositiveOnAdmission)
                                 ret.Add(dpa);
                             break;
                         case AdmissionStatus.IndeterminateAdmission:
-                            if(dpa.AdmissionStatus == AdmissionStatus.NegativeNoAdmissionSample || dpa.AdmissionStatus == AdmissionStatus.PositiveNoAdmitSample)
+                            if (dpa.AdmissionStatus == AdmissionStatus.NegativeNoAdmissionSample || dpa.AdmissionStatus == AdmissionStatus.PositiveNoAdmitSample)
                                 ret.Add(dpa);
                             break;
 
@@ -429,7 +429,7 @@ namespace libcdiffrecords.Data
                         default:
                             break;
                     }
-                    
+
 
 
 
@@ -476,7 +476,7 @@ namespace libcdiffrecords.Data
         {
             bin.SortBinData();
             Bin retBin = new Bin(bin.Label);
-            foreach(string pat in bin.DataByPatientAdmissionTable.Keys)
+            foreach (string pat in bin.DataByPatientAdmissionTable.Keys)
             {
                 if (bin.DataByPatientAdmissionTable[pat].Count > 0)
                     retBin.Add(bin.DataByPatientAdmissionTable[pat][0]);
@@ -504,7 +504,7 @@ namespace libcdiffrecords.Data
 
         }
 
-     
+
 
         /// <summary>
         /// Removes samples marked as "Not Saved" according to the spreadsheet
@@ -517,7 +517,7 @@ namespace libcdiffrecords.Data
 
             for (int i = 0; i < bin.Data.Count; i++)
             {
-                if(bin.Data[i].Notes == null || !bin.Data[i].Notes.Contains("Not Saved"))
+                if (bin.Data[i].Notes == null || !bin.Data[i].Notes.Contains("Not Saved"))
                 {
                     ret.Add(bin.Data[i]);
                 }
@@ -539,9 +539,9 @@ namespace libcdiffrecords.Data
 
             foreach (string key in bin.DataByPatientAdmissionTable.Keys)
             {
-                if(bin.DataByPatientAdmissionTable[key].Count > 0)
+                if (bin.DataByPatientAdmissionTable[key].Count > 0)
                 {
-                    if(bin.DataByPatientAdmissionTable[key][0].AdmissionStatus != AdmissionStatus.PositiveOnAdmission && bin.DataByPatientAdmissionTable[key][0].AdmissionStatus != AdmissionStatus.PositiveNoAdmitSample)
+                    if (bin.DataByPatientAdmissionTable[key][0].AdmissionStatus != AdmissionStatus.PositiveOnAdmission && bin.DataByPatientAdmissionTable[key][0].AdmissionStatus != AdmissionStatus.PositiveNoAdmitSample)
                     {
                         foreach (Admission dpa in bin.DataByPatientAdmissionTable[key])
                             retBin.Add(dpa);
@@ -556,7 +556,7 @@ namespace libcdiffrecords.Data
         private static int PositiveCount(Bin bin)
         {
             int pc = 0;
-            for(int i =0; i < bin.ItemsInBin; i++)
+            for (int i = 0; i < bin.ItemsInBin; i++)
             {
                 if (bin.Data[i].CdiffResult == TestResult.Positive)
                     pc++;
@@ -570,9 +570,9 @@ namespace libcdiffrecords.Data
         {
             int pc = 0;
 
-            foreach(string key in bin.DataByPatientAdmissionTable.Keys)
+            foreach (string key in bin.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission dpa in bin.DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in bin.DataByPatientAdmissionTable[key])
                 {
                     if (dpa.Points.Count > 0)
                         pc++;
@@ -583,11 +583,11 @@ namespace libcdiffrecords.Data
 
         private static int PositiveOnAdmissionCount(Bin bin, int admWindow)
         {
-            int ct = 0; 
+            int ct = 0;
 
-            foreach(string key in bin.DataByPatientAdmissionTable.Keys)
+            foreach (string key in bin.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission dpa in bin.DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in bin.DataByPatientAdmissionTable[key])
                 {
                     if (dpa.Points.Count >= 1 && (dpa.Points[0].SampleDate - dpa.AdmissionDate).Days <= admWindow)
                         ct++;
@@ -598,7 +598,7 @@ namespace libcdiffrecords.Data
 
         }
 
-     
+
 
 
 
@@ -609,7 +609,7 @@ namespace libcdiffrecords.Data
 
         private static bool IsPositiveAdmission(Admission dpa)
         {
-            for(int i =0; i < dpa.Points.Count; i++)
+            for (int i = 0; i < dpa.Points.Count; i++)
             {
                 if (dpa.Points[i].CdiffResult == TestResult.Positive)
                     return true;
@@ -623,9 +623,9 @@ namespace libcdiffrecords.Data
         {
             List<DataPoint> dps = new List<DataPoint>();
 
-            foreach(Bin bin in bins)
+            foreach (Bin bin in bins)
             {
-                foreach(DataPoint dp in bin.Data)
+                foreach (DataPoint dp in bin.Data)
                 {
                     dps.Add(dp);
                 }
@@ -633,7 +633,7 @@ namespace libcdiffrecords.Data
             return dps.ToArray();
         }
 
-        
+
         public static Bin[] StratifyOnDefaultCommonUnits(Bin b)
         {
             Dictionary<string, bool> common = CreateDefaultCommonUnitTable();
@@ -642,12 +642,12 @@ namespace libcdiffrecords.Data
 
             List<Bin> newBins = new List<Bin>();
 
-            for(int i =0; i < bins.Length; i++)
+            for (int i = 0; i < bins.Length; i++)
             {
-              
-                if(common.ContainsKey(bins[i].Label))
+
+                if (common.ContainsKey(bins[i].Label))
                 {
-  
+
                     newBins.Add(bins[i]);
                 }
                 else
@@ -659,9 +659,9 @@ namespace libcdiffrecords.Data
             newBins.Add(otherUnits);
 
             return newBins.ToArray();
-            
+
         }
-        
+
         public static Bin[] StratifyOnCommonUnits(Bin b)
         {
             return StratifyOnCommonUnits(b, 50);
@@ -671,7 +671,7 @@ namespace libcdiffrecords.Data
             Bin[] bins = StratifyOnUnits(b);
             Dictionary<string, bool> commonUnits = new Dictionary<string, bool>();
 
-            for(int i = 0; i < bins.Length; i++)
+            for (int i = 0; i < bins.Length; i++)
             {
                 if (bins[i].DataByPatient.Count >= minAdmissions)
                 {
@@ -685,8 +685,8 @@ namespace libcdiffrecords.Data
                     {
                         count += bins[i].DataByPatientAdmissionTable[key].Count;
                     }
-                    
-                    if(count >= minAdmissions)
+
+                    if (count >= minAdmissions)
                     {
                         if (!commonUnits.ContainsKey(bins[i].Label))
                             commonUnits.Add(bins[i].Label, true);
@@ -701,7 +701,7 @@ namespace libcdiffrecords.Data
             Dictionary<string, bool> commonUnits = new Dictionary<string, bool>();
             Bin[] bins = StratifyOnUnits(b);
 
-            for(int i =0; i < unitNames.Length; i++)
+            for (int i = 0; i < unitNames.Length; i++)
             {
                 if (!commonUnits.ContainsKey(unitNames[i]))
                     commonUnits.Add(unitNames[i], true);
@@ -714,7 +714,7 @@ namespace libcdiffrecords.Data
             List<Bin> bins = new List<Bin>();
             Bin other = new Bin("Other Units");
 
-            for(int i =0; i < units.Length; i++)
+            for (int i = 0; i < units.Length; i++)
             {
                 if (commonUnits.ContainsKey(units[i].Label))
                     bins.Add(units[i]);
@@ -734,11 +734,11 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(b.Label);
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission dpa in b.DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                 {
-                    for(int i =0; i < dpa.Points.Count; i++)
+                    for (int i = 0; i < dpa.Points.Count; i++)
                     {
                         if (dpa.Points[i].Test != TestType.Clinical_Outpatient_Culture && dpa.Points[i].Test != TestType.Clinical_Outpatient_NAAT)
                             retBin.Add(dpa.Points[i]);
@@ -750,7 +750,7 @@ namespace libcdiffrecords.Data
         }
 
         public static Bin FilterByTestType(Bin b, TestType[] test)
-        {   
+        {
 
             Bin retBin = new Bin(b.Label);
 
@@ -761,9 +761,9 @@ namespace libcdiffrecords.Data
                 {
                     for (int i = 0; i < dpa.Points.Count; i++)
                     {
-                        for(int j = 0; j < test.Length; j++)
+                        for (int j = 0; j < test.Length; j++)
                         {
-                            if(dpa.Points[i].Test == test[j])
+                            if (dpa.Points[i].Test == test[j])
                             {
                                 retBin.Add(dpa.Points[i]);
                                 break;
@@ -788,13 +788,13 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(b.Label);
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission dpa in b.DataByPatientAdmissionTable[key])
+                foreach (Admission dpa in b.DataByPatientAdmissionTable[key])
                 {
-                    for(int i = 0; i < dpa.Points.Count; i++)
+                    for (int i = 0; i < dpa.Points.Count; i++)
                     {
-                        if(dpa.Points[i].SampleDate >= start && dpa.Points[i].SampleDate <= end)
+                        if (dpa.Points[i].SampleDate >= start && dpa.Points[i].SampleDate <= end)
                         {
                             retBin.Add(dpa);
                             break;
@@ -813,9 +813,9 @@ namespace libcdiffrecords.Data
 
             foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                foreach (Admission adm in b.DataByPatientAdmissionTable[key])
                 {
-                    if(adm.Points.Count >= minSamples)
+                    if (adm.Points.Count >= minSamples)
                     {
                         retBin.Add(adm);
                     }
@@ -871,14 +871,14 @@ namespace libcdiffrecords.Data
                                 if (maxDaysAway != -1)
                                 {
                                     DateTime max = after.AddDays(maxDaysAway);
-                                    if(filterFrom.DataByPatient[key][k].SampleDate <= max)
+                                    if (filterFrom.DataByPatient[key][k].SampleDate <= max)
                                         retBin.Add(filterFrom.DataByPatient[key][k]);
                                 }
                                 else
                                     retBin.Add(filterFrom.DataByPatient[key][k]);
                             }
-                           
-                                
+
+
                         }
                     }
                 }
@@ -917,15 +917,15 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(filterFrom.Label + "_Filtered_By_Date_criteria");
 
-            foreach(string key in criteria.Keys)
+            foreach (string key in criteria.Keys)
             {
-                if(filterFrom.DataByPatient.ContainsKey(key))
+                if (filterFrom.DataByPatient.ContainsKey(key))
                 {
-                    for(int i = 0; i < filterFrom.DataByPatient[key].Count; i++)
+                    for (int i = 0; i < filterFrom.DataByPatient[key].Count; i++)
                     {
-                        if(filterFrom.DataByPatient[key][i].SampleDate > criteria[key])
+                        if (filterFrom.DataByPatient[key][i].SampleDate > criteria[key])
                         {
-                            if(maxDaysAway != -1)
+                            if (maxDaysAway != -1)
                             {
                                 DateTime max = criteria[key].AddDays(maxDaysAway);
 
@@ -952,7 +952,7 @@ namespace libcdiffrecords.Data
         public static Bin FilterForSamplesInDateRange(Bin b, DateTime start, DateTime end)
         {
             Bin retBin = new Bin(b.Label + "_in range: " + start.ToShortDateString() + " - " + end.ToShortDateString());
-            for(int i = 0; i < b.Data.Count; i++)
+            for (int i = 0; i < b.Data.Count; i++)
             {
                 if (b.Data[i].SampleDate >= start && b.Data[i].SampleDate <= end)
                     retBin.Add(b.Data[i]);
@@ -965,10 +965,10 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(b.Label);
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
                 int ct = 0;
-                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                foreach (Admission adm in b.DataByPatientAdmissionTable[key])
                 {
                     ct += adm.Points.Count;
                 }
@@ -987,15 +987,15 @@ namespace libcdiffrecords.Data
         public static Bin FilterPatientsWhoOnlyHaveNegativeSamples(Bin b)
         {
             Bin retBin = new Bin(b.Label);
-            foreach(string key in b.DataByPatient.Keys)
+            foreach (string key in b.DataByPatient.Keys)
             {
                 bool onlyNeg = true;
-                for(int i = 0; i < b.DataByPatient[key].Count; i++)
+                for (int i = 0; i < b.DataByPatient[key].Count; i++)
                 {
                     if (b.DataByPatient[key][i].CdiffResult == TestResult.Positive)
                         onlyNeg = false;
                 }
-                if(onlyNeg)
+                if (onlyNeg)
                 {
                     for (int i = 0; i < b.DataByPatient[key].Count; i++)
                     {
@@ -1010,13 +1010,13 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(b.Label);
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                foreach (Admission adm in b.DataByPatientAdmissionTable[key])
                 {
-                    for(int i = 0; i < adm.Points.Count; i++)
+                    for (int i = 0; i < adm.Points.Count; i++)
                     {
-                        if(!adm.Points[i].Notes.Contains(noteCriteria))
+                        if (!adm.Points[i].Notes.Contains(noteCriteria))
                         {
                             retBin.Add(adm.Points[i]);
                         }
@@ -1030,11 +1030,11 @@ namespace libcdiffrecords.Data
         {
             List<Tube> tubes = new List<Tube>();
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                foreach (Admission adm in b.DataByPatientAdmissionTable[key])
                 {
-                    for(int i =0; i< adm.Points.Count; i++)
+                    for (int i = 0; i < adm.Points.Count; i++)
                     {
                         if (sd.TubesBySampleID.ContainsKey(adm.Points[i].SampleID))
                             tubes.AddRange(sd.TubesBySampleID[adm.Points[i].SampleID]);
@@ -1067,12 +1067,12 @@ namespace libcdiffrecords.Data
 
 
 
-      
+
         public static Bin FilterPositivesByToxinResult(Bin b, TestResult toxResult)
         {
             Bin retBin = new Bin(b.Label);
 
-            for(int i =0; i < b.Data.Count; i++)
+            for (int i = 0; i < b.Data.Count; i++)
             {
                 if (b.Data[i].CdiffResult != TestResult.Positive)
                     retBin.Add(b.Data[i]);
@@ -1094,7 +1094,7 @@ namespace libcdiffrecords.Data
         {
             List<TestType> tts = new List<TestType>();
 
-            for(int i =0; i < complex.Length; i++)
+            for (int i = 0; i < complex.Length; i++)
             {
                 tts.AddRange(ExpandTestTypes(complex[i]));
             }
@@ -1123,11 +1123,11 @@ namespace libcdiffrecords.Data
             {
                 tests = new TestType[3] { TestType.Surveillance_Stool_Culture, TestType.Surveillance_Stool_NAAT, TestType.Clinical_Inpatient_NAAT };
             }
-            if(tt == TestType.Inpatient_Test)
+            if (tt == TestType.Inpatient_Test)
             {
                 tests = new TestType[5] { TestType.Clinical_Inpatient_NAAT, TestType.Surveillance_Stool_Culture, TestType.Surveillance_Stool_NAAT, TestType.Surveillance_Swab_Culture, TestType.Surveillance_Swab_NAAT };
             }
-            if(tt == TestType.Surveillance_Stool)
+            if (tt == TestType.Surveillance_Stool)
             {
                 tests = new TestType[2] { TestType.Surveillance_Stool_Culture, TestType.Surveillance_Stool_NAAT };
             }
@@ -1142,7 +1142,7 @@ namespace libcdiffrecords.Data
 
         public static Bin MergeBins(Bin bin1, Bin bin2)
         {
-            for(int i = 0; i < bin2.Data.Count; i++)
+            for (int i = 0; i < bin2.Data.Count; i++)
             {
                 bin1.Add(bin2.Data[i]);
             }
@@ -1154,9 +1154,9 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(b.Label + "_Flagged");
 
-            for(int i =0; i < b.Data.Count; i++)
+            for (int i = 0; i < b.Data.Count; i++)
             {
-                for(int j = 0; j < flags.Length; j++)
+                for (int j = 0; j < flags.Length; j++)
                 {
                     if (b.Data[i].Flags.Contains(flags[j]))
                     {
@@ -1191,7 +1191,7 @@ namespace libcdiffrecords.Data
                         break;
                     }
                 }
-                if(!flagged)
+                if (!flagged)
                 {
                     retBin.Add(b.Data[i]);
                 }
@@ -1245,9 +1245,9 @@ namespace libcdiffrecords.Data
             Dictionary<string, List<DataPoint>> posNaats = new Dictionary<string, List<DataPoint>>();
             Dictionary<string, bool> exclusions = new Dictionary<string, bool>();
 
-            for(int i =0; i < clinTests.Length; i++)
+            for (int i = 0; i < clinTests.Length; i++)
             {
-                if(clinTests[i].CdiffResult == TestResult.Positive)
+                if (clinTests[i].CdiffResult == TestResult.Positive)
                 {
                     if (!posNaats.ContainsKey(clinTests[i].MRN))
                         posNaats.Add(clinTests[i].MRN, new List<DataPoint>());
@@ -1255,32 +1255,32 @@ namespace libcdiffrecords.Data
                 }
             }
 
-            foreach(string key in firsts.DataByPatientAdmissionTable.Keys)
+            foreach (string key in firsts.DataByPatientAdmissionTable.Keys)
             {
                 if (posNaats.ContainsKey(key))
                 {
                     bool found = false;
-                    for(int i = 0; i < posNaats[key].Count; i++)
+                    for (int i = 0; i < posNaats[key].Count; i++)
                     {
-                        if(posNaats[key][i].SampleDate < firsts.DataByPatientAdmissionTable[key][0].Points[0].SampleDate)
+                        if (posNaats[key][i].SampleDate < firsts.DataByPatientAdmissionTable[key][0].Points[0].SampleDate)
                         {
                             found = true;
                         }
                     }
-                    if(found)
+                    if (found)
                     {
                         if (!exclusions.ContainsKey(key))
                             exclusions.Add(key, true);
                     }
                 }
-                
+
             }
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                if(!exclusions.ContainsKey(key))
+                if (!exclusions.ContainsKey(key))
                 {
-                    for(int i =0; i < b.DataByPatientAdmissionTable[key].Count; i++)
+                    for (int i = 0; i < b.DataByPatientAdmissionTable[key].Count; i++)
                     {
 
                         retBin.Add(b.DataByPatientAdmissionTable[key][i]);
@@ -1297,11 +1297,11 @@ namespace libcdiffrecords.Data
         {
             List<Bin> retBins = new List<Bin>();
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
                 Bin temp = new Bin(key);
 
-                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                foreach (Admission adm in b.DataByPatientAdmissionTable[key])
                 {
                     temp.Add(adm);
                 }
@@ -1320,11 +1320,11 @@ namespace libcdiffrecords.Data
             Bin ip = new Bin("Indeterminate Adm, to Positive");
             Bin uc = new Bin("Uncategorized");
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission a in b.DataByPatientAdmissionTable[key])
+                foreach (Admission a in b.DataByPatientAdmissionTable[key])
                 {
-                    switch(a.AdmissionStatus)
+                    switch (a.AdmissionStatus)
                     {
                         case AdmissionStatus.NegativeNoAdmissionSample:
                             nn.Add(a);
@@ -1349,7 +1349,7 @@ namespace libcdiffrecords.Data
             }
 
             return new Bin[5] { nn, pa, np, ip, uc };
-            
+
 
         }
 
@@ -1362,9 +1362,9 @@ namespace libcdiffrecords.Data
             Dictionary<string, List<DataPoint>> naatTable = Utilities.BuildPatientLookupTable(naat);
 
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                foreach (Admission adm in b.DataByPatientAdmissionTable[key])
                 {
                     /*
                     if(adm.AdmissionDate >= splitDate) //The index admission is after the split date - goes into Bin 2.
@@ -1375,73 +1375,64 @@ namespace libcdiffrecords.Data
                     else
                     {
                     */
-                        NAATStatus ns = NAATStatus.NotTested;
-                        
-                        if(naatTable.ContainsKey(key))
+                    NAATStatus ns = NAATStatus.NotTested;
+
+                    if (naatTable.ContainsKey(key))
+                    {
+                        DataPoint selected = naatTable[key][0];
+
+                        foreach (DataPoint dp in naatTable[key])
                         {
-                            DataPoint selected = naatTable[key][0];
-                            
-                            foreach (DataPoint dp in naatTable[key])
+                            NAATStatus nsOld = ns;
+                            if ((adm.AdmissionDate < dp.SampleDate) && (((dp.SampleDate - adm.AdmissionDate).Days < naatWindow) || naatWindow <= 0))
                             {
-                                NAATStatus nsOld = ns;
-                                if ((adm.AdmissionDate < dp.SampleDate) && (((dp.SampleDate - adm.AdmissionDate).Days < naatWindow) || naatWindow <= 0))
-                                {
 
-                                    if (dp.CdiffResult == TestResult.Positive)
+                                if (dp.CdiffResult == TestResult.Positive)
+                                {
+                                    switch (dp.ToxinResult)
                                     {
-                                        switch (dp.ToxinResult)
-                                        {
-                                            case TestResult.Positive:
-                                                ns = Utilities.CompareNAATStatus(ns, NAATStatus.PosPos);
-                                                break;
-                                            case TestResult.Negative:
-                                                ns = Utilities.CompareNAATStatus(ns, NAATStatus.PosNeg);
-                                                break;
-                                            default:
-                                                ns = Utilities.CompareNAATStatus(ns, NAATStatus.PosInd);
-                                                break;
+                                        case TestResult.Positive:
+                                            ns = Utilities.CompareNAATStatus(ns, NAATStatus.PosPos);
+                                            break;
+                                        case TestResult.Negative:
+                                            ns = Utilities.CompareNAATStatus(ns, NAATStatus.PosNeg);
+                                            break;
+                                        default:
+                                            ns = Utilities.CompareNAATStatus(ns, NAATStatus.PosInd);
+                                            break;
 
-                                        }
                                     }
-                                    else
-                                    {
-                                        ns = Utilities.CompareNAATStatus(ns, NAATStatus.Neg);
-                                    }
-
-                                }
-                                if(nsOld != ns)
-                                {
-                                    selected = dp;
-                                }
-                            }
-
-                            if(ns != NAATStatus.Neg && ns != NAATStatus.NotTested) //This is a positive patient, so we need to filter based on two critera - date, and EIA being done
-                            {
-                               if(ns == NAATStatus.PosInd)
-                                {
-                                    retBin[0].Add(adm);
                                 }
                                 else
                                 {
-                                    retBin[1].Add(adm);
+                                    ns = Utilities.CompareNAATStatus(ns, NAATStatus.Neg);
                                 }
-                               
+
                             }
-                            else if(ns == NAATStatus.Neg) // Negative patient - we sort on NAAT date
+                            if (nsOld != ns)
                             {
-                                if (selected.SampleDate >= splitDate)
-                                    retBin[1].Add(adm);
-                                else
-                                    retBin[0].Add(adm);
+                                selected = dp;
+                            }
+                        }
+
+                        if (ns != NAATStatus.Neg && ns != NAATStatus.NotTested) //This is a positive patient, so we need to filter based on two critera - date, and EIA being done
+                        {
+                            if (ns == NAATStatus.PosInd)
+                            {
+                                retBin[0].Add(adm);
                             }
                             else
                             {
-                                if (adm.Points[adm.Points.Count - 1].SampleDate >= splitDate)
-                                    retBin[1].Add(adm);
-                                else
-                                    retBin[0].Add(adm);
+                                retBin[1].Add(adm);
                             }
 
+                        }
+                        else if (ns == NAATStatus.Neg) // Negative patient - we sort on NAAT date
+                        {
+                            if (selected.SampleDate >= splitDate)
+                                retBin[1].Add(adm);
+                            else
+                                retBin[0].Add(adm);
                         }
                         else
                         {
@@ -1450,7 +1441,16 @@ namespace libcdiffrecords.Data
                             else
                                 retBin[0].Add(adm);
                         }
-                  //  }
+
+                    }
+                    else
+                    {
+                        if (adm.Points[adm.Points.Count - 1].SampleDate >= splitDate)
+                            retBin[1].Add(adm);
+                        else
+                            retBin[0].Add(adm);
+                    }
+                    //  }
                 }
 
             }
@@ -1460,15 +1460,15 @@ namespace libcdiffrecords.Data
             return retBin;
         }
 
-       public static Bin RemovePatientsWithNoSurveillanceSamples(Bin b)
+        public static Bin RemovePatientsWithNoSurveillanceSamples(Bin b)
         {
             Bin retBin = new Bin(b.Label);
 
-            foreach(string key in b.DataByPatient.Keys)
+            foreach (string key in b.DataByPatient.Keys)
             {
                 bool found = false;
                 int counter = 0;
-                while(!found && counter < b.DataByPatient[key].Count)
+                while (!found && counter < b.DataByPatient[key].Count)
                 {
                     if (Utilities.IsSurveillanceTest(b.DataByPatient[key][counter].Test))
                         found = true;
@@ -1496,20 +1496,20 @@ namespace libcdiffrecords.Data
         {
             Bin retBin = new Bin(b.Label);
 
-            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            foreach (string key in b.DataByPatientAdmissionTable.Keys)
             {
-                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                foreach (Admission adm in b.DataByPatientAdmissionTable[key])
                 {
                     bool inRange = false;
-                    for(int i =0; i < adm.Points.Count; i++)
+                    for (int i = 0; i < adm.Points.Count; i++)
                     {
-                        if(adm.Points[i].SampleDate >= start && adm.Points[i].SampleDate <= end)
+                        if (adm.Points[i].SampleDate >= start && adm.Points[i].SampleDate <= end)
                         {
                             inRange = true;
                             break;
                         }
                     }
-                    if(inRange)
+                    if (inRange)
                     {
                         retBin.Add(adm);
                     }
@@ -1517,6 +1517,40 @@ namespace libcdiffrecords.Data
             }
 
             return retBin;
+        }
+
+        public static Bin FilterBySampleID(Bin b, string[] sampleIDs)
+        {
+            Bin retBin = new Bin(b.Label);
+
+            for (int i = 0; i < sampleIDs.Length; i++)
+            {
+                if (b.DataBySampleID.ContainsKey(sampleIDs[i]))
+                {
+                    retBin.Add(b.DataBySampleID[sampleIDs[i]]);
+                }
+            }
+
+
+            return retBin;
+        }
+
+        public static Tube[] FilterSampleTubesOnAccessionList(StorageData sd, string[] accession)
+        {
+            List<Tube> tubes = new List<Tube>();
+
+            for(int i = 0; i < accession.Length; i++)
+            {
+                if(sd.TubesBySampleID.ContainsKey(accession[i]))
+                {
+                    foreach(Tube t in sd.TubesBySampleID[accession[i]])
+                    {
+                        tubes.Add(t);
+                    }
+                }
+            }
+
+            return tubes.ToArray();
         }
 
     }

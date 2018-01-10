@@ -10,6 +10,8 @@ namespace libcdiffrecords.Reports
     public class SurveillanceReportLine : IReportLine
     {
         public Bin ReportBin { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
 
         public string[] GenerateReportHeaderLine()
         {
@@ -35,15 +37,53 @@ namespace libcdiffrecords.Reports
             List<string> fields = new List<string>();
             fields.Add(ReportBin.Label);
             fields.Add(ReportBin.PatientAdmissionCount.ToString());
-            BinSummaryStatistics bss = ReportBin.GenerateBinSummaryStatistics();
-            fields.Add(bss.Positive_RegardlessOfTiming.ToString());
-            fields.Add(((double)bss.Positive_RegardlessOfTiming / (double)ReportBin.PatientAdmissionCount * 100).ToString("N2"));
-            fields.Add(bss.PositiveOnAdmission.ToString());
-            fields.Add(((double)bss.PositiveOnAdmission / (double)ReportBin.PatientAdmissionCount * 100).ToString("N2"));
-            fields.Add(bss.Negative_TurnedPositive.ToString());
-            fields.Add(((double)bss.Negative_TurnedPositive / (double)ReportBin.PatientAdmissionCount * 100).ToString("N2"));
-            fields.Add(bss.Positive_NoAdmissionSample.ToString());
-            fields.Add(((double)bss.Positive_NoAdmissionSample / (double)ReportBin.PatientAdmissionCount * 100).ToString("N2"));
+            int posTotal = 0;
+            int posOnAdm = 0;
+            int posTurned = 0;
+            int posIndeterminate = 0;
+
+            foreach(string key in ReportBin.DataByPatientAdmissionTable.Keys)
+            {
+                foreach(Admission adm in ReportBin.DataByPatientAdmissionTable[key])
+                {
+                    for(int i =0; i < adm.Points.Count; i++)
+                    {
+                        if(adm.Points[i].SampleDate >= StartDate && adm.Points[i].SampleDate <= EndDate)
+                        {
+                            if(adm.Points[i].CdiffResult == TestResult.Positive)
+                            {
+                                posTotal++;
+                                switch(adm.AdmissionStatus)
+                                {
+                                    case AdmissionStatus.PositiveOnAdmission:
+                                        posOnAdm++;
+                                        break;
+                                    case AdmissionStatus.NegativeOnAdmission_TurnedPositive:
+                                        posTurned++;
+                                        break;
+                                    case AdmissionStatus.PositiveNoAdmitSample:
+                                        posIndeterminate++;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    
+                }
+            }
+
+
+            fields.Add(posTotal.ToString());
+            fields.Add(((double)posTotal / (double)ReportBin.PatientAdmissionCount * 100).ToString("N2"));
+            fields.Add(posOnAdm.ToString());
+            fields.Add(((double)posOnAdm / (double)ReportBin.PatientAdmissionCount * 100).ToString("N2"));
+            fields.Add(posTurned.ToString());
+            fields.Add(((double)posTurned / (double)ReportBin.PatientAdmissionCount * 100).ToString("N2"));
+            fields.Add(posIndeterminate.ToString());
+            fields.Add(((double)posIndeterminate / (double)ReportBin.PatientAdmissionCount * 100).ToString("N2"));
 
             return fields.ToArray();
         }

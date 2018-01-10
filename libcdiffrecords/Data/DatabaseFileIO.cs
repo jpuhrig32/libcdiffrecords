@@ -286,7 +286,7 @@ namespace libcdiffrecords.Data
             List<string> admit = new List<string>();
             admit.Add(id.ToString());
             admit.Add(adm.MRN);
-            admit.Add(adm.AdmissionDate.ToLongDateString());
+            admit.Add(adm.AdmissionDate.ToString("g"));
             admit.Add(adm.Points[0].Unit);
             admit.Add(adm.Points[0].Room);
             admit.Add("1");
@@ -301,7 +301,7 @@ namespace libcdiffrecords.Data
                 List<string> data = new List<string>();
                 data.Add(id.ToString());
                 data.Add(adm.MRN);
-                data.Add(adm.Points[i].SampleDate.ToLongDateString());
+                data.Add(adm.Points[i].SampleDate.ToString("g"));
                 data.Add(adm.Points[0].Unit);
                 data.Add(adm.Points[0].Room);
                 data.Add("");
@@ -376,6 +376,7 @@ namespace libcdiffrecords.Data
             header.Add("Admission Date");
             header.Add("Discharge Date");
             header.Add("Unit");
+            header.Add("Room");
             header.Add("Date of Last Sample");
             header.Add("Admission Sample Present");
             header.Add("Status on Admission");
@@ -397,107 +398,125 @@ namespace libcdiffrecords.Data
 
         private static void WriteDatabaseAdmissionLine(Admission adm, StreamWriter sw, char delim)
         {
-            List<string> parts = new List<string>();
-
-
-            parts.Add(adm.Points[0].AdmissionID);
-            parts.Add('"' + adm.PatientName + '"');
-            parts.Add(adm.MRN);
-            parts.Add(Utilities.PatientSexToString(adm.Points[0].PatientSex));
-            parts.Add( ((int)((adm.AdmissionDate - adm.Points[0].DateOfBirth).Days / 365.25)).ToString());
-
-            parts.Add(adm.Points[0].DateOfBirth.ToLongDateString());
-            parts.Add(adm.AdmissionDate.ToLongDateString());
-
-            if (adm.DischargeDate != DateTime.MaxValue)
-                parts.Add(adm.DischargeDate.ToLongDateString());
-            else
-                parts.Add("");
-
-            
-            parts.Add(adm.unit);
-            parts.Add(adm.Points[adm.Points.Count - 1].SampleDate.ToLongDateString());
-
-            switch(adm.AdmissionStatus)
+            if (ValidateAdmission(adm))
             {
-                case AdmissionStatus.PositiveOnAdmission:
-                    parts.Add("Yes");
-                    parts.Add("Positive");
-                    parts.Add((adm.Points[0].SampleDate - adm.AdmissionDate).Days.ToString());
-                    parts.Add("Positive on Admission");
-                    break;
+                List<string> parts = new List<string>();
 
-                case AdmissionStatus.PositiveNoAdmitSample:
-                    parts.Add("No");
-                    parts.Add("Indeterminate");
-                    parts.Add((adm.Points[0].SampleDate - adm.AdmissionDate).Days.ToString());
-                    parts.Add("Positive - no admission sample");
-                    break;
 
-                case AdmissionStatus.NegativeOnAdmission_TurnedPositive:
-                    parts.Add("Yes");
-                    parts.Add("Negative");
-                    DateTime firstPos = adm.Points[0].SampleDate;
-                    for (int i = 0; i < adm.Points.Count; i++)
-                    {
-                        if(adm.Points[i].CdiffResult == TestResult.Positive)
+                parts.Add(adm.Points[0].AdmissionID);
+                parts.Add('"' + adm.PatientName + '"');
+                parts.Add(adm.MRN);
+                parts.Add(Utilities.PatientSexToString(adm.Points[0].PatientSex));
+                parts.Add(((int)((adm.AdmissionDate - adm.Points[0].DateOfBirth).Days / 365.25)).ToString());
+
+                parts.Add(adm.Points[0].DateOfBirth.ToString("g"));
+                parts.Add(adm.AdmissionDate.ToString("g"));
+
+                if (adm.DischargeDate != DateTime.MaxValue && adm.DischargeDate <= DateTime.Now && adm.DischargeDate >= new DateTime(2015, 1, 1))
+                    parts.Add(adm.DischargeDate.ToString("g"));
+                else
+                    parts.Add("");
+
+
+                parts.Add(adm.unit);
+                parts.Add(adm.Points[0].Room);
+                parts.Add(adm.Points[adm.Points.Count - 1].SampleDate.ToString("g"));
+
+                switch (adm.AdmissionStatus)
+                {
+                    case AdmissionStatus.PositiveOnAdmission:
+                        parts.Add("Yes");
+                        parts.Add("Positive");
+                        parts.Add((adm.Points[0].SampleDate - adm.AdmissionDate).Days.ToString());
+                        parts.Add("Positive on Admission");
+                        break;
+
+                    case AdmissionStatus.PositiveNoAdmitSample:
+                        parts.Add("No");
+                        parts.Add("Indeterminate");
+                        parts.Add((adm.Points[0].SampleDate - adm.AdmissionDate).Days.ToString());
+                        parts.Add("Positive - no admission sample");
+                        break;
+
+                    case AdmissionStatus.NegativeOnAdmission_TurnedPositive:
+                        parts.Add("Yes");
+                        parts.Add("Negative");
+                        DateTime firstPos = adm.Points[0].SampleDate;
+                        for (int i = 0; i < adm.Points.Count; i++)
                         {
-                            firstPos = adm.Points[i].SampleDate;
-                            break;
+                            if (adm.Points[i].CdiffResult == TestResult.Positive)
+                            {
+                                firstPos = adm.Points[i].SampleDate;
+                                break;
+                            }
                         }
-                    }
-                    parts.Add((firstPos - adm.AdmissionDate).Days.ToString());
-                    parts.Add("Negative on Admission - Turned Positive");
-                    break;
+                        parts.Add((firstPos - adm.AdmissionDate).Days.ToString());
+                        parts.Add("Negative on Admission - Turned Positive");
+                        break;
 
-                case AdmissionStatus.NegativeFirstSample_TurnedPositive:
-                    parts.Add("No");
-                    parts.Add("Indeterminate");
-                    DateTime firstPos2 = adm.Points[0].SampleDate;
-                    for (int i = 0; i < adm.Points.Count; i++)
-                    {
-                        if (adm.Points[i].CdiffResult == TestResult.Positive)
+                    case AdmissionStatus.NegativeFirstSample_TurnedPositive:
+                        parts.Add("No");
+                        parts.Add("Indeterminate");
+                        DateTime firstPos2 = adm.Points[0].SampleDate;
+                        for (int i = 0; i < adm.Points.Count; i++)
                         {
-                            firstPos2 = adm.Points[i].SampleDate;
-                            break;
+                            if (adm.Points[i].CdiffResult == TestResult.Positive)
+                            {
+                                firstPos2 = adm.Points[i].SampleDate;
+                                break;
+                            }
                         }
-                    }
-                    parts.Add((firstPos2 - adm.AdmissionDate).Days.ToString());
-                    parts.Add("Negative first sample - Turned Positive");
-                    break;
+                        parts.Add((firstPos2 - adm.AdmissionDate).Days.ToString());
+                        parts.Add("Negative first sample - Turned Positive");
+                        break;
 
-                case AdmissionStatus.NegativeOnAdmission_RemainedNegative:
-                    parts.Add("Yes");
-                    parts.Add("Negative");
-                    parts.Add("-1");
-                    parts.Add("Negative on Admission - remained Negative");
-                    break;
+                    case AdmissionStatus.NegativeOnAdmission_RemainedNegative:
+                        parts.Add("Yes");
+                        parts.Add("Negative");
+                        parts.Add("-1");
+                        parts.Add("Negative on Admission - remained Negative");
+                        break;
 
-                case AdmissionStatus.NegativeNoAdmissionSample:
-                    parts.Add("No");
-                    parts.Add("Indeterminate");
-                    parts.Add("-1");
-                    parts.Add("Negative first sample - remained Negative ");
-                    break;
+                    case AdmissionStatus.NegativeNoAdmissionSample:
+                        parts.Add("No");
+                        parts.Add("Indeterminate");
+                        parts.Add("-1");
+                        parts.Add("Negative first sample - remained Negative ");
+                        break;
+                }
+
+                parts.Add(adm.Points.Count.ToString());
+
+                for (int i = 0; i < adm.Points.Count; i++)
+                {
+                    parts.Add(adm.Points[i].SampleID);
+                }
+
+
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < parts.Count; i++)
+                {
+                    sb.Append(parts[i]);
+                    sb.Append(delim);
+                }
+                sw.WriteLine(sb.ToString());
             }
-
-            parts.Add(adm.Points.Count.ToString());
-
-            for(int i = 0; i < adm.Points.Count; i++)
-            {
-                parts.Add(adm.Points[i].SampleID);
-            }
-
-
-            StringBuilder sb = new StringBuilder();
-            for(int i =0; i < parts.Count; i++)
-            {
-                sb.Append(parts[i]);
-                sb.Append(delim);
-            }
-            sw.WriteLine(sb.ToString());
         }
 
+
+        private static bool ValidateAdmission(Admission adm)
+        {
+            bool hasSamIDs = false;
+            for(int i =0; i < adm.Points.Count; i++)
+            {
+                if (adm.Points[i].SampleID != "")
+                    hasSamIDs = true;
+            }
+            if (hasSamIDs)
+                return true;
+            return false;
+
+        }
         private static void WriteLine(List<string> line, StreamWriter sw, char delim)
         {
             StringBuilder sb = new StringBuilder();
@@ -508,6 +527,8 @@ namespace libcdiffrecords.Data
             }
             sw.WriteLine(sb.ToString());
         }
+
+
 
         private static void WriteEventBasedHeaderRow(StreamWriter sw, char delim)
         {
@@ -585,9 +606,9 @@ namespace libcdiffrecords.Data
                     fields.Add("");
                     break;
             }
-            fields.Add(dp.DateOfBirth.ToLongDateString());
-            fields.Add(dp.AdmissionDate.ToLongDateString());
-            fields.Add(dp.SampleDate.ToLongDateString());
+            fields.Add(dp.DateOfBirth.ToString("g"));
+            fields.Add(dp.AdmissionDate.ToString("g"));
+            fields.Add(dp.SampleDate.ToString("g"));
             fields.Add(Utilities.TestResultToString(dp.CdiffResult));
             fields.Add(Utilities.TestResultToString(dp.ToxinResult));
             fields.Add(Utilities.TestTypeToString(dp.Test));
@@ -597,7 +618,7 @@ namespace libcdiffrecords.Data
             fields.Add(dp.LegacyID);
             fields.Add(dp.Notes);
             if (dp.DischargeDate != DateTime.MaxValue)
-                fields.Add(dp.DischargeDate.ToLongDateString());
+                fields.Add(dp.DischargeDate.ToString("g"));
             else
                 fields.Add("");
 

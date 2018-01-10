@@ -39,6 +39,7 @@ namespace C_Diff_Surveillance_Data_Manager
                 repData = DataFilter.FilterByTestType(repData, TestType.Surveillance_Test);
                 if (saveReportDialog.ShowDialog() == DialogResult.OK)
                 {
+                    SurveillanceReport sr;
                     if (!ignoreDateRangeCB.Checked)
                     {
                         int sy = startDatePicker.Value.Year;
@@ -51,9 +52,12 @@ namespace C_Diff_Surveillance_Data_Manager
                         DateTime end = new DateTime(ey, em, ed);
                         repData = DataFilter.FilterAdmissionsWithASampleInDateRange(repData, start, end);
 
+                        sr = new SurveillanceReport(repData, start, end);
                     }
-
-                    SurveillanceReport sr = new SurveillanceReport(repData);
+                    else
+                    {
+                         sr = new SurveillanceReport(repData);
+                    }
                     sr.WriteReport(saveReportDialog.FileName);
                 }
             }
