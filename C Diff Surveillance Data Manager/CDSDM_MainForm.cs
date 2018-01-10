@@ -77,17 +77,18 @@ namespace C_Diff_Surveillance_Data_Manager
         {
             if(openDatabaseDialog.ShowDialog() == DialogResult.OK)
             {
-                try
-                {
+               
                     DataPoint[] dps = DatabaseFileIO.ReadDatabaseFile(openDatabaseDialog.FileName);
                     mainBin = new Bin("Data", dps);
                     binInit = true;
                     UpdateLabels();
-                }
+               
+                /*
                 catch (Exception exe)
                 {
                     MessageBox.Show("An error occurred while loading sample data\n " + exe.Message);
                 }
+                */
             }
         }
 
@@ -139,6 +140,16 @@ namespace C_Diff_Surveillance_Data_Manager
                 MessageBox.Show("No Sample Storage Data has been loaded yet");
             }
             return storageInit;
+        }
+
+        private void surveillanceReportButton_Click(object sender, EventArgs e)
+        {
+            if(CheckBin())
+            {
+                CDSDM_SurveillanceReportForm survForm = new CDSDM_SurveillanceReportForm();
+                survForm.SetBin(mainBin);
+                survForm.Show();
+            }
         }
     }
 }

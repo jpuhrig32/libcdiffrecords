@@ -117,6 +117,7 @@
     <Compile Include="Reports\PatientAdmissionReport.cs" />
     <Compile Include="Reports\PatientAdmissionReportLine.cs" />
     <Compile Include="Reports\ReportWriter.cs" />
+    <Compile Include="Reports\SurveillanceReport.cs" />
     <Compile Include="Reports\SurveillanceReportLine.cs" />
     <Compile Include="Storage\BoxLoader.cs" />
     <Compile Include="Storage\SampleDatabase.cs" />

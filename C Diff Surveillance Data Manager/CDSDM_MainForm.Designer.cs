@@ -39,7 +39,8 @@
             this.exportAdmDataButton = new System.Windows.Forms.Button();
             this.saveAdmissionsDataFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.pickIndexAdmissionButton = new System.Windows.Forms.Button();
-            this.masterReportButton = new System.Windows.Forms.Button();
+            this.summaryReportButton = new System.Windows.Forms.Button();
+            this.surveillanceReportButton = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -134,22 +135,33 @@
             this.pickIndexAdmissionButton.UseVisualStyleBackColor = true;
             this.pickIndexAdmissionButton.Click += new System.EventHandler(this.pickIndexAdmissionButton_Click);
             // 
-            // masterReportButton
+            // summaryReportButton
             // 
-            this.masterReportButton.Location = new System.Drawing.Point(332, 40);
-            this.masterReportButton.Name = "masterReportButton";
-            this.masterReportButton.Size = new System.Drawing.Size(154, 46);
-            this.masterReportButton.TabIndex = 5;
-            this.masterReportButton.Text = "Produce Summary Report";
-            this.masterReportButton.UseVisualStyleBackColor = true;
-            this.masterReportButton.Click += new System.EventHandler(this.masterReportButton_Click);
+            this.summaryReportButton.Location = new System.Drawing.Point(332, 40);
+            this.summaryReportButton.Name = "summaryReportButton";
+            this.summaryReportButton.Size = new System.Drawing.Size(154, 46);
+            this.summaryReportButton.TabIndex = 5;
+            this.summaryReportButton.Text = "Summary Stats Report";
+            this.summaryReportButton.UseVisualStyleBackColor = true;
+            this.summaryReportButton.Click += new System.EventHandler(this.masterReportButton_Click);
+            // 
+            // surveillanceReportButton
+            // 
+            this.surveillanceReportButton.Location = new System.Drawing.Point(12, 92);
+            this.surveillanceReportButton.Name = "surveillanceReportButton";
+            this.surveillanceReportButton.Size = new System.Drawing.Size(154, 46);
+            this.surveillanceReportButton.TabIndex = 6;
+            this.surveillanceReportButton.Text = "Surveillance Report";
+            this.surveillanceReportButton.UseVisualStyleBackColor = true;
+            this.surveillanceReportButton.Click += new System.EventHandler(this.surveillanceReportButton_Click);
             // 
             // CDSDM_MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(496, 429);
-            this.Controls.Add(this.masterReportButton);
+            this.Controls.Add(this.surveillanceReportButton);
+            this.Controls.Add(this.summaryReportButton);
             this.Controls.Add(this.pickIndexAdmissionButton);
             this.Controls.Add(this.exportAdmDataButton);
             this.Controls.Add(this.storageStatusLabel);
@@ -178,7 +190,8 @@
         private System.Windows.Forms.Button exportAdmDataButton;
         private System.Windows.Forms.SaveFileDialog saveAdmissionsDataFileDialog;
         private System.Windows.Forms.Button pickIndexAdmissionButton;
-        private System.Windows.Forms.Button masterReportButton;
+        private System.Windows.Forms.Button summaryReportButton;
+        private System.Windows.Forms.Button surveillanceReportButton;
     }
 }
 

@@ -1485,6 +1485,40 @@ namespace libcdiffrecords.Data
             return retBin;
         }
 
+        /// <summary>
+        /// Returns all admissions with at least one sample in a given date range, start - end, inclusive on both sides
+        /// </summary>
+        /// <param name="b"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public static Bin FilterAdmissionsWithASampleInDateRange(Bin b, DateTime start, DateTime end)
+        {
+            Bin retBin = new Bin(b.Label);
+
+            foreach(string key in b.DataByPatientAdmissionTable.Keys)
+            {
+                foreach(Admission adm in b.DataByPatientAdmissionTable[key])
+                {
+                    bool inRange = false;
+                    for(int i =0; i < adm.Points.Count; i++)
+                    {
+                        if(adm.Points[i].SampleDate >= start && adm.Points[i].SampleDate <= end)
+                        {
+                            inRange = true;
+                            break;
+                        }
+                    }
+                    if(inRange)
+                    {
+                        retBin.Add(adm);
+                    }
+                }
+            }
+
+            return retBin;
+        }
+
     }
 
    

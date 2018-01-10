@@ -61,13 +61,13 @@ namespace libcdiffrecords.Reports
             line.Add(repBin.ItemsInBin.ToString());
             BinSummaryStatistics ats = repBin.GenerateBinSummaryStatistics();
             line.Add(ats.Positive_RegardlessOfTiming.ToString());
-            line.Add(((double)ats.Positive_RegardlessOfTiming / repBin.PatientAdmissionCount * 100.0).ToString());
+            line.Add(((double)ats.Positive_RegardlessOfTiming / repBin.PatientAdmissionCount * 100.0).ToString("N2"));
             line.Add(ats.PositiveOnAdmission.ToString());
-            line.Add(((double)ats.PositiveOnAdmission / repBin.PatientAdmissionCount * 100.0).ToString());
+            line.Add(((double)ats.PositiveOnAdmission / repBin.PatientAdmissionCount * 100.0).ToString("N2"));
             line.Add(ats.Negative_TurnedPositive.ToString());
-            line.Add(((double)ats.Negative_TurnedPositive / repBin.PatientAdmissionCount * 100.0).ToString());
+            line.Add(((double)ats.Negative_TurnedPositive / repBin.PatientAdmissionCount * 100.0).ToString("N2"));
             line.Add(ats.Positive_NoAdmissionSample.ToString());
-            line.Add(((double)ats.Positive_NoAdmissionSample/ repBin.PatientAdmissionCount * 100.0).ToString());
+            line.Add(((double)ats.Positive_NoAdmissionSample/ repBin.PatientAdmissionCount * 100.0).ToString("N2"));
             line.Add(repBin.MeanSampleCountPerPatient.ToString());
             line.Add(repBin.MedianSampleCountPerPatient.ToString());
             line.Add(repBin.SampleCountRange);
