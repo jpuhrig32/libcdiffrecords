@@ -36,11 +36,12 @@ namespace libcdiffrecords.Reports
         {
             List<string> fields = new List<string>();
             fields.Add(ReportBin.Label);
-            fields.Add(ReportBin.PatientAdmissionCount.ToString());
+            
             int posTotal = 0;
             int posOnAdm = 0;
             int posTurned = 0;
             int posIndeterminate = 0;
+            int stoolCt = 0;
 
             foreach(string key in ReportBin.DataByPatientAdmissionTable.Keys)
             {
@@ -48,34 +49,40 @@ namespace libcdiffrecords.Reports
                 {
                     for(int i =0; i < adm.Points.Count; i++)
                     {
+                        bool found = false;
                         if(adm.Points[i].SampleDate >= StartDate && adm.Points[i].SampleDate <= EndDate)
                         {
-                            if(adm.Points[i].CdiffResult == TestResult.Positive)
+                            stoolCt++;
+                            if (!found)
                             {
-                                posTotal++;
-                                switch(adm.AdmissionStatus)
+                                if (adm.Points[i].CdiffResult == TestResult.Positive)
                                 {
-                                    case AdmissionStatus.PositiveOnAdmission:
-                                        posOnAdm++;
-                                        break;
-                                    case AdmissionStatus.NegativeOnAdmission_TurnedPositive:
-                                        posTurned++;
-                                        break;
-                                    case AdmissionStatus.PositiveNoAdmitSample:
-                                        posIndeterminate++;
-                                        break;
-                                    default:
-                                        break;
+                                    posTotal++;
+                                    switch (adm.AdmissionStatus)
+                                    {
+                                        case AdmissionStatus.PositiveOnAdmission:
+                                            posOnAdm++;
+                                            break;
+                                        case AdmissionStatus.NegativeOnAdmission_TurnedPositive:
+                                            posTurned++;
+                                            break;
+                                        case AdmissionStatus.PositiveNoAdmitSample:
+                                            posIndeterminate++;
+                                            break;
+                                        default:
+                                            break;
+                                    }
+
                                 }
-                                break;
                             }
+                            found = true;
                         }
                     }
                     
                 }
             }
 
-
+            fields.Add(stoolCt.ToString());
             fields.Add(posTotal.ToString());
             fields.Add(((double)posTotal / (double)ReportBin.PatientAdmissionCount * 100).ToString("N2"));
             fields.Add(posOnAdm.ToString());

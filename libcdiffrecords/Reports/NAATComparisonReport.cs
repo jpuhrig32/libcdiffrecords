@@ -23,17 +23,21 @@ namespace libcdiffrecords.Reports
         public NAATComparisonReportType ReportType { get; set; }
         public int DayRange { get; set; } //Defaults to 90
 
-        public NAATComparisonReport(Bin reportBin, DataPoint[] naats)
+        public NAATComparisonReport(Bin reportBin, DataPoint[] naats, NAATComparisonReportType ncrtype)
         {
             reportBins = new Bin[1] { reportBin };
             naat = naats;
+            ReportType = ncrtype;
+            DayRange = 90;
             SetupReportLines();
         }
 
-        public NAATComparisonReport(Bin[] reportBin, DataPoint[] naats)
+        public NAATComparisonReport(Bin[] reportBin, DataPoint[] naats, NAATComparisonReportType ncrtype)
         {
             reportBins = reportBin;
             naat = naats;
+            ReportType = ncrtype;
+            DayRange = 90;
             SetupReportLines();
         }
 
