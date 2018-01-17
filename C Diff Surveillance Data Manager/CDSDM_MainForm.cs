@@ -227,11 +227,7 @@ namespace C_Diff_Surveillance_Data_Manager
                         }
                     }
                 }
-                if (saveStorageDialog.ShowDialog() == DialogResult.OK)
-                {
-                    Tube[] selected = DataFilter.FilterAllAvailableSampleTubesFromBin(DataManager.WorkingBin, DataManager.Storage);
-                    BoxLoader.WriteTubeDataToFile(selected, saveStorageDialog.FileName, ',');
-                }
+              
             }
         }
     }
