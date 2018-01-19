@@ -230,5 +230,67 @@ namespace C_Diff_Surveillance_Data_Manager
               
             }
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (openDatabaseDialog.ShowDialog() == DialogResult.OK)
+            {
+
+                DataPoint[] dps = DatabaseFileIO.ReadDatabaseFile(openDatabaseDialog.FileName);
+                DataManager.StartingBin = new Bin("Data", dps);
+                DataManager.WorkingBin = new Bin("Data", dps);
+                DataManager.BinInit = true;
+                UpdateLabels();
+
+                /*
+                catch (Exception exe)
+                {
+                    MessageBox.Show("An error occurred while loading sample data\n " + exe.Message);
+                }
+                */
+            }
+        }
+
+        private void fileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (openStorageFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    DataManager.Storage = BoxLoader.LoadStorageData(openStorageFileDialog.FileName);
+                    DataManager.StorageInit = true;
+                    UpdateLabels();
+                }
+                catch (Exception exe)
+                {
+                    MessageBox.Show("An error occurred while loading storage data\n " + exe.Message);
+                }
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (CheckBin())
+            {
+                if (saveCurrentDatabaseDialog.ShowDialog() == DialogResult.OK)
+                {
+                    DatabaseFileIO.WriteDataToFile(DataManager.WorkingBin, saveCurrentDatabaseDialog.FileName);
+                }
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            if (CheckBin())
+            {
+                DataManager.WorkingBin = DataManager.StartingBin;
+                UpdateLabels();
+            }
+        }
     }
 }

@@ -359,6 +359,10 @@ namespace libcdiffrecords.Data
                     if (admissionsByPatient[point.MRN][i].AdmissionDate == point.AdmissionDate && admissionsByPatient[point.MRN][i].unit == point.Unit)
                     {
                         found = true;
+                        //If one sample's discharge date is set, then we set it for the whole admission.
+                        if (admissionsByPatient[point.MRN][i].DischargeDate == DateTime.MaxValue && point.DischargeDate != DateTime.MaxValue)
+                            admissionsByPatient[point.MRN][i].DischargeDate = point.DischargeDate;
+
                         admissionsByPatient[point.MRN][i].Points.Add(point);
                     }
 
@@ -401,6 +405,7 @@ namespace libcdiffrecords.Data
                 for (int i = 0; i < admissionsByPatient[key].Count; i++)
                 {
                     admissionsByPatient[key][i].SortData();
+                
                 }
 
             }
